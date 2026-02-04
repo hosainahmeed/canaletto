@@ -1,0 +1,23 @@
+{
+  "action": {
+    "skip": "Skip",
+    "next": "Next",
+    "login": "Log In",
+    "send_verification_code": "Send Verification Code",
+    "verify_code": "Verify Code",
+    "resend": "Resend",
+    "update_password": "Update Password",
+    "view_property": "View Property",
+    "message": "Message",
+    "call_now": "Call now",
+    "pending": "Pending",
+    "paid": "Paid",
+    "submit_interest": "Submit Interest"
+  },
+  "welcome": "Welcome!",
+  "change_language": "Change Language",
+  "example": "This app includes example code to help you get started.",
+  "select_language": "select language",
+  "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
+  "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!"
+}
