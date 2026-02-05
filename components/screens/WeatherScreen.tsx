@@ -12,11 +12,11 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Card from '../cards/Card'
+import Button, { ButtonType } from '../ui/button'
 
 const { width } = Dimensions.get('window')
 
@@ -60,87 +60,133 @@ export default function WeatherScreen() {
   // Permission Request Screen
   if (!hasPermission) {
     return (
-      <View style={styles.container}>
-        <View style={styles.permissionContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: '#fff' }}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="location-outline" size={40} color="#FFF" />
+      <LinearGradient
+        colors={['#D4B785', '#B08D59']}
+        style={[{
+          padding: 12, borderRadius: 16, borderWidth: 1, borderColor: "#dadada", overflow: "hidden", width: width - 24, marginHorizontal: "auto"
+        }]}
+      >
+        <View style={styles.container}>
+          <View style={styles.permissionContainer}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <View style={styles.iconContainer}>
+                <Ionicons name="location-outline" size={16} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.permissionTitle}>Location Permission Required</Text>
+                <Text style={styles.permissionDescription}>
+                  We need access to your location to show you accurate weather information for your area.
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Location Permission Required</Text>
-              <Text style={styles.permissionDescription}>
-                We need access to your location to show you accurate weather information for your area.
-              </Text>
-            </View>
+            <Button type={ButtonType.SECONDARY} style={{
+              flex: 1, width: width - 48, borderRadius: 12, backgroundColor: "rgba(255, 255, 255, 0.2)", backgroundBlendMode: "darken", borderWidth: 0.5, borderColor: "#E5E7EB"
+            }} icon={<Ionicons name="locate" size={20} color="#fff" style={styles.buttonIcon} />} title='Grant Location Access' onPress={handleRequestLocation} />
+            {locationError && (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={20} color="#FFF" />
+                <Text style={styles.errorText}>{locationError}</Text>
+              </View>
+            )}
           </View>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={handleRequestLocation}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="locate" size={20} color="#667EEA" style={styles.buttonIcon} />
-            <Text style={styles.permissionButtonText}>Grant Location Access</Text>
-          </TouchableOpacity>
-
-          {locationError && (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={20} color="#FFF" />
-              <Text style={styles.errorText}>{locationError}</Text>
-            </View>
-          )}
         </View>
-      </View>
+      </LinearGradient>
     )
   }
 
   // Loading Screen
   if (locationLoading || (weatherLoading && !weather)) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFF" />
-            <Text style={styles.loadingText}>
-              {locationLoading ? 'Getting your location...' : 'Fetching weather data...'}
-            </Text>
-          </View>
-        </SafeAreaView>
-      </View>
+      <LinearGradient
+        colors={['#D4B785', '#B08D59']}
+        style={[{
+          padding: 12, borderRadius: 16, borderWidth: 1, borderColor: "#dadada", overflow: "hidden", width: width - 24, marginHorizontal: "auto"
+        }]}
+      >
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content" />
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#FFF" />
+              <Text style={styles.loadingText}>
+                {locationLoading ? 'Getting your location...' : 'Fetching weather data...'}
+              </Text>
+            </View>
+          </SafeAreaView>
+        </View>
+      </LinearGradient>
     )
   }
 
   // Error Screen
   if (locationError || weatherError) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['#D4B785', '#B08D59']}
+        style={[{
+          padding: 12, borderRadius: 16, borderWidth: 1, borderColor: "#dadada", overflow: "hidden", width: width - 24, marginHorizontal: "auto"
+        }]}
+      >
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content" />
           <View style={styles.errorScreenContainer}>
-            <Ionicons name="cloud-offline-outline" size={80} color="#FFF" />
-            <Text style={styles.errorTitle}>Oops!</Text>
-            <Text style={styles.errorDescription}>
-              {locationError || weatherError}
-            </Text>
-            <TouchableOpacity style={styles.retryButton} onPress={refetch} activeOpacity={0.8}>
-              <Ionicons name="refresh" size={20} color="#FFF" />
-              <Text style={styles.retryButtonText}>Try Again</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={styles.iconContainer}>
+                <Ionicons name="cloud-offline-outline" size={16} color="#FFF" />
+              </View>
+              <View>
+                <Text style={styles.errorTitle}>Oops!</Text>
+                <Text style={styles.errorDescription}>
+                  {locationError || weatherError}
+                </Text>
+              </View>
+            </View>
+            <Button type={ButtonType.SECONDARY} style={{
+              flex: 1, width: width - 48, borderRadius: 12, backgroundColor: "rgba(255, 255, 255, 0.2)", backgroundBlendMode: "darken", borderWidth: 0.5, borderColor: "#E5E7EB"
+            }} icon={<Ionicons name="refresh" size={20} color="#fff" style={styles.buttonIcon} />} title='Try Again' onPress={refetch} />
           </View>
-        </SafeAreaView>
-      </View>
+        </View>
+      </LinearGradient>
     )
   }
 
+
   const getWeatherIconKey = (condition: string): keyof typeof weatherIcon => {
     const cond = condition.toLowerCase()
-    if (cond.includes('clear')) return 'sunny'
-    if (cond.includes('cloud')) return 'cloudy'
-    if (cond.includes('rain')) return 'rainy'
-    if (cond.includes('thunder')) return 'thunderstorm'
-    if (cond.includes('snow')) return 'snow'
-    if (cond.includes('mist') || cond.includes('fog')) return 'cloudy'
-    return 'sunny'
+    const includesAny = (...phrases: string[]) => phrases.some((phrase) => cond.includes(phrase))
+
+    if (includesAny('blizzard')) return 'blizzerd'
+    if (includesAny('blowing snow')) return 'blowingSnow'
+
+    if (includesAny('clear') && includesAny('night')) return 'clearNight'
+    if (includesAny('cloud') && includesAny('clear') && includesAny('night')) return 'cloudyClearNight'
+    if (includesAny('cloud') && includesAny('clear')) return 'cloudyClear'
+
+    if (includesAny('partly') && includesAny('cloud') && includesAny('night')) return 'partlyCloudyNight'
+    if (includesAny('partly') && includesAny('cloud')) return 'partlyCloudy'
+    if (includesAny('cloud')) return 'cloudy'
+
+    if (includesAny('drizzle') && includesAny('night')) return 'drizzleNight'
+    if (includesAny('drizzle') && includesAny('sun', 'day')) return 'drizzleSun'
+    if (includesAny('drizzle')) return 'drizzle'
+
+    if (includesAny('heavy rain')) return 'heavyRain'
+    if (includesAny('rain') && includesAny('night')) return 'rainNight'
+    if (includesAny('rain') && includesAny('sun', 'day')) return 'rainSun'
+    if (includesAny('rain') && includesAny('thunder')) return 'rainThunderstorm'
+    if (includesAny('shower') && includesAny('night')) return 'scatteradShowersNight'
+    if (includesAny('shower')) return 'scatterdShowers'
+    if (includesAny('thunderstorm') && includesAny('severe')) return 'severThunderstorm'
+    if (includesAny('thunderstorm')) return 'scatterdThunderstorm'
+    if (includesAny('rain')) return 'rain'
+
+    if (includesAny('sleet')) return 'sleet'
+    if (includesAny('hail')) return 'hail'
+    if (includesAny('snow')) return 'snow'
+    if (includesAny('fog', 'mist')) return 'fog'
+    if (includesAny('wind')) return 'wind'
+
+    return includesAny('clear') ? 'sunny' : 'sunny'
   }
   return (
     <Card
@@ -236,7 +282,6 @@ export default function WeatherScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -330,10 +375,10 @@ const styles = StyleSheet.create({
   errorDescription: {
     fontSize: 12,
     color: '#FFF',
-    textAlign: 'center',
+    textAlign: 'left',
     opacity: 0.9,
     marginBottom: 30,
-    lineHeight: 24,
+    // lineHeight: 24,
   },
   retryButton: {
     flexDirection: 'row',
@@ -341,8 +386,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 30,
     paddingVertical: 14,
-    borderRadius: 25,
-    borderWidth: 2,
+    borderRadius: 12,
+    width: "100%",
+    borderWidth: 0.5,
     borderColor: '#FFF',
   },
   retryButtonText: {

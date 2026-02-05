@@ -5,6 +5,7 @@ import { IMAGE } from '@/assets/images/image.index';
 import GradientCard from '@/components/cards/GradientCard';
 import PropertyCard from '@/components/cards/PropertyCard';
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing';
+import WeatherScreen from '@/components/screens/WeatherScreen';
 import HelpSection from '@/components/share/HelpSection';
 import SectionHeader from '@/components/share/SectionHeader';
 import UserProfileHeader from '@/components/share/UserProfileHeader';
@@ -39,7 +40,7 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <>
             <UserProfileHeader />
-            {/* <WeatherScreen /> */}
+            <WeatherScreen />
             <SectionHeader
               title="MY Properties"
               icon={IMAGE.property_icon}

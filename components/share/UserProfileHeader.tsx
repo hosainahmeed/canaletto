@@ -1,9 +1,11 @@
 import { IMAGE } from '@/assets/images/image.index'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 import React from 'react'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 const { width: screenWidth } = Dimensions.get("window")
 export default function UserProfileHeader() {
+  const router = useRouter()
   const Userdata = {
     img: "https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png",
     name: "Roberts Junior",
@@ -24,7 +26,7 @@ export default function UserProfileHeader() {
       <Pressable
         style={styles.notificationButton}
         onPress={() => {
-          // Handle notification press
+          router.push("/notifications")
         }}
       >
         <Image style={styles.notificationIcon} source={IMAGE.notification_bing} />
