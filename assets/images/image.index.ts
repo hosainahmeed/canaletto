@@ -32,6 +32,14 @@ export const IMAGE = {
   lock: require("./lock.png"),
   en: require("./en-l.png"),
   gr: require("./gr-l.png"),
+  market_icon: require("./market-icon.png"),
+  legal_icon: require("./legal-icon.png"),
+  thumb: require("./thumb.png"),
+  express_icon: require("./express_icon.png"),
+  newProject: require("./new-project.png"),
+  lifestyle_icon: require("./lifestyle.png"),
+  check: require("./check.png"),
+  share_icon: require("./share-icon.png")
 } as const
 
 export const InsightsIcons = {
@@ -69,3 +77,7 @@ export const propertyDetailsIcon = {
   type_of_use: require("./property-details-icons/type-of-use.png"),
   units: require("./property-details-icons/units.png"),
 } as const
+
+export const modalIcon = {
+  success: require("./modal-icons/success-icon.png")
+}

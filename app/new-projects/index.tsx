@@ -33,6 +33,7 @@ export default function NewProjects() {
       color={['#A855F780', '#FAFAFA', '#FAFAFA']}
       title={item.title}
       subTitle={item.subTitle}
+      onPress={() => router.push(`/new-projects/new-project-detail/${item.id}`)}
     />
   )
 

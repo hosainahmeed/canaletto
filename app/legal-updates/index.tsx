@@ -64,9 +64,10 @@ export default function LegalUpdates() {
   const renderItem = ({ item }: any) => (
     <GradientCard
       iconType='green'
-      color={['#4ADE8080', '#FAFAFA', '#FAFAFA']}
+      // color={['#4ADE8080', '#FAFAFA', '#FAFAFA']}
       title={item.title}
       subTitle={item.subTitle}
+      onPress={() => router.push(`/legal-updates/legal-update-detail/${item.id}` as any)}
     />
   )
 

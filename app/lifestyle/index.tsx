@@ -7,7 +7,18 @@ import { useRouter } from 'expo-router'
 import React from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 
-const DATA: any[] = []
+const DATA: any[] = [
+  {
+    id: '1',
+    title: 'Dubai Housing Market Rebounds to Q1 Growth',
+    subTitle: 'Latest Insights',
+  },
+  {
+    id: '2',
+    title: 'UAE Property Market Expects Strong Q2 Growth',
+    subTitle: 'Latest Insights',
+  },
+]
 
 export default function Lifestyle() {
   const router = useRouter()
@@ -18,6 +29,7 @@ export default function Lifestyle() {
       color={['#B08D5980', '#FAFAFA', '#FAFAFA']}
       title={item.title}
       subTitle={item.subTitle}
+      onPress={() => router.push(`/lifestyle/lifestyle-detail/${item.id}` as any)}
     />
   )
 

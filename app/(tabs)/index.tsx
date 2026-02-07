@@ -60,7 +60,7 @@ export default function HomeScreen() {
             iconType='green'
             title="Dubai Property Market Shows Strong Q1 Growth"
             subTitle="Latest Insights"
-            onPress={() => router.push("/individual-insights/1")}
+            onPress={() => router.push("/legal-updates/legal-update-detail/1")}
           />
           <HelpSection />
         </>}

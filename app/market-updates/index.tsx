@@ -68,6 +68,7 @@ export default function MarketUpdates() {
       color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
       title={item.title}
       subTitle={item.subTitle}
+      onPress={() => router.push(`/market-updates/market-update-detail/${item.id}`)}
     />
   )
 

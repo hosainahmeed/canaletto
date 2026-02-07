@@ -1,8 +1,9 @@
-import { propertyDetailsIcon } from '@/assets/images/image.index'
+import { IMAGE, propertyDetailsIcon } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
-import HelpSection from '@/components/share/HelpSection'
+import InsightsDownSection from '@/components/share/InsightsDownSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
@@ -11,19 +12,21 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
-export default function PropertyByID({ id }: { id: string }) {
+export default function NewProjectDetail({ id }: { id: string }) {
   const router = useRouter()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showLargerMap, setShowLargerMap] = useState(false)
   const flatListRef = useRef<FlatList>(null)
 
   const propertyData = {
+    id: '1',
     name: 'The Wilds Project',
     size: '1000 sqft',
     rooms: 3,
     type_of_use: 'Residential',
     property_type: 'Villa',
     total_units: 5,
+    status: 'New Launch',
     payment_plan: '10 Years',
     location: 'Abu Dhabi, Yas Island',
     image: [
@@ -40,14 +43,13 @@ export default function PropertyByID({ id }: { id: string }) {
     { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: propertyData.type_of_use },
     { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: propertyData.property_type },
     { icon: propertyDetailsIcon.units, label: 'Total Units', value: propertyData.total_units },
-    { icon: propertyDetailsIcon.payment_plan, label: 'Payment Plan', value: propertyData.payment_plan },
   ]
 
   const PROPERTY_INFO = [
-    { icon: propertyDetailsIcon.property_files, label: 'Property Files', styles: { color: '#3b82f680', backgroundColor: "rgba(59, 130, 246, 0.2)" }, route: "/properties/files" },
-    { icon: propertyDetailsIcon.payment_status, label: 'Payment Status', styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
-    { icon: propertyDetailsIcon.construction, label: 'Construction Progress', styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
-    { icon: propertyDetailsIcon.assigned_agent, label: 'Assigned Agent', styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
+    { label: 'Starting Price', value: 'AED 2,500,000' },
+    { label: 'Payment Plan', value: '65 / 35' },
+    { label: 'Investment Options', value: 'Installments' },
+    { label: 'Handover Year', value: 'Jan 2028' },
   ]
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -74,7 +76,7 @@ export default function PropertyByID({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="Property Details"
+          title="New Projects"
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}
@@ -114,17 +116,10 @@ export default function PropertyByID({ id }: { id: string }) {
               ))}
             </View>
           )}
-
-          {/* Image Counter */}
-          {/* {propertyData.image.length > 1 && (
-            <View style={styles.imageCounter}>
-              <Text style={styles.imageCounterText}>
-                {activeImageIndex + 1} / {propertyData.image.length}
-              </Text>
-            </View>
-          )} */}
         </View>
-
+        <View style={{ backgroundColor: "rgba(168, 85, 247, 0.4)", padding: 8, borderRadius: 8, marginBottom: 16, width: "30%", justifyContent: "center", alignContent: "center", marginTop: 12, marginLeft: 12 }}>
+          <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{propertyData.status}</Text>
+        </View>
         {/* Title */}
         <View style={styles.titleWrapper}>
           <Text numberOfLines={2} style={styles.propertyName}>{propertyData.name}</Text>
@@ -140,7 +135,25 @@ export default function PropertyByID({ id }: { id: string }) {
             />
           ))}
         </Card>
-
+        <View style={styles.titleWrapper}>
+          <Text numberOfLines={2} style={styles.propertyName}>Property Info</Text>
+        </View>
+        <View style={styles.propertyInfoGrid}>
+          {PROPERTY_INFO.map((item) => (
+            <Pressable
+              key={item.label}
+              style={styles.propertyInfoPressable}
+            >
+              <Card style={[
+                styles.propertyInfoCard
+              ]}
+              >
+                <Text numberOfLines={1} style={[styles.propertyInfoLabel]}>{item.label}</Text>
+                <Text numberOfLines={1} style={[styles.propertyInfoValue]}>{item.value}</Text>
+              </Card>
+            </Pressable>
+          ))}
+        </View>
         {/* Location Card */}
         <Card style={[styles.card, { width: width - 20 }]}>
           <DetailRow
@@ -185,31 +198,21 @@ export default function PropertyByID({ id }: { id: string }) {
             </TouchableOpacity>
           </View>
         </Card>
-        <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>Property Info</Text>
-        </View>
-        <View style={styles.propertyInfoGrid}>
-          {PROPERTY_INFO.map((item) => (
-            <Pressable
-              key={item.label}
-              style={styles.propertyInfoPressable}
-              onPress={() => router.push(item?.route as any)}
-            >
-              <Card style={[
-                styles.propertyInfoCard,
-                {
-                  backgroundColor: item?.styles?.backgroundColor,
-                  borderColor: item?.styles?.color,
-                },
-              ]}
-              >
-                <Image source={item?.icon} style={styles.propertyInfoIcon} />
-                <Text numberOfLines={1} style={[styles.propertyInfoLabel, { color: item?.styles?.color }]}>{item.label}</Text>
-              </Card>
-            </Pressable>
-          ))}
-        </View>
-        <HelpSection />
+        <Button
+          title="Get Insights"
+          style={{
+            width: width - 20,
+            marginHorizontal: 10,
+            borderRadius: 12,
+            marginTop: 12
+          }}
+          icon={<Image source={IMAGE.thumb} style={{ width: 16, height: 16 }} />}
+          iconPosition='right'
+          onPress={() => {
+            router.push(`/new-projects/express-interest/${propertyData.id}` as any)
+          }}
+        />
+        <InsightsDownSection titleColor='#A855F7' icon={IMAGE.newProject} title="New Projects" description="Posted on 14 January 2026" />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -325,7 +328,7 @@ const styles = StyleSheet.create({
 
   titleWrapper: {
     paddingHorizontal: 12,
-    marginTop: 16,
+    marginTop: 4,
   },
 
   propertyName: {
@@ -403,8 +406,10 @@ const styles = StyleSheet.create({
   },
 
   propertyInfoCard: {
+    borderColor: '#B08D5980',
+    backgroundColor: 'rgba(176, 141, 89, 0.2)',
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     alignItems: 'flex-start',
     gap: 12,
@@ -416,8 +421,15 @@ const styles = StyleSheet.create({
   },
 
   propertyInfoLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666666',
+  },
+
+  propertyInfoValue: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#B08D59',
   },
 
   bottomSpacing: {
