@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: '#374151',
     marginBottom: 8,
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    fontSize: 16,
+    fontSize: 14,
     color: '#1F2937',
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
   },
   errorText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#EF4444',
     marginTop: 4,
   },

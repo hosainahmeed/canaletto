@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   Platform,
@@ -19,6 +20,7 @@ export default function LogoutModal({
   onClose,
   onConfirm,
 }: LogoutModalProps) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -35,10 +37,10 @@ export default function LogoutModal({
             color="#D4B785"
           />
 
-          <Text style={styles.title}>Log out</Text>
+          <Text style={styles.title}>{t('action.logout')}</Text>
 
           <Text style={styles.message}>
-            Are you sure you want to log out?
+            {t('message.confirm_logout')}
           </Text>
 
           <Pressable
@@ -49,7 +51,7 @@ export default function LogoutModal({
               pressed && Platform.OS === 'ios' && styles.pressed,
             ]}
           >
-            <Text style={styles.confirmText}>Yes, log out</Text>
+            <Text style={styles.confirmText}>{t('action.logout')}</Text>
           </Pressable>
 
           <Pressable
@@ -60,7 +62,7 @@ export default function LogoutModal({
             }
           >
             <Text style={styles.cancelText}>
-              Nah, just kidding
+              {t('action.cancel')}
             </Text>
           </Pressable>
         </Pressable>

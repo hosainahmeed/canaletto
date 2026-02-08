@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   Platform,
@@ -20,6 +21,7 @@ export default function ({
   setSelectedValue,
   filterOptions
 }: Props & { selectedValue: string; setSelectedValue: (value: string) => void; filterOptions: { label: string; value: string }[] }) {
+  const { t } = useTranslation()
   return (
     <Modal
       visible={visible}
@@ -46,7 +48,7 @@ export default function ({
               pressed && Platform.OS === 'ios' && styles.pressed,
             ]}
           >
-            <Text style={styles.cancelText}>Close</Text>
+            <Text style={styles.cancelText}>{t("action.close")}</Text>
           </Pressable>
         </Pressable>
       </Pressable>
@@ -124,8 +126,10 @@ const styles = StyleSheet.create({
   },
 
   actionText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#111827',
+    fontFamily: 'Nunito-SemiBoldItalic',
   },
   borderBottom: {
     borderBottomWidth: 1,

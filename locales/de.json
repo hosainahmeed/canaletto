@@ -1,6 +1,137 @@
 {
   "welcome": "Willkommen!",
   "change_language": "Sprache ändern",
-  "example":"Dieses App beinhaltet Beispielcode, um Ihnen zu helfen, loszulegen.",
-  "select_language":"Sprache auswählen"
+  "example": "Dieses App beinhaltet Beispielcode, um Ihnen zu helfen, loszulegen.",
+  "select_language": "Sprache auswählen",
+  "action": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "send_verification_code": "Verifizierungscode senden",
+    "verify_code": "Code verifizieren",
+    "resend": "Erneut senden",
+    "update_password": "Passwort aktualisieren",
+    "view_property": "Immobilie ansehen",
+    "message": "Nachricht",
+    "call_now": "Jetzt anrufen",
+    "pending": "Ausstehend",
+    "paid": "Bezahlt",
+    "submit_interest": "Interesse anmelden",
+    "switch_language": "Sprache wechseln",
+    "cancel": "Ach, nur ein Scherz.",
+    "update_profile": "Profil aktualisieren",
+    "save_change": "Änderung speichern",
+    "close": "Schließen",
+    "view_all": "Alle anzeigen"
+  },
+  "login_screen": {
+    "welcome_back": "Willkommen zurück",
+    "access_your_property_details": "Greifen Sie sicher auf Ihre Immobilienangaben, Updates und Investitionseinblicke zu.",
+    "email_address": "E-Mail-Adresse",
+    "password": "Passwort",
+    "remember_me": "Erinnere dich an mich",
+    "forgot_password": "Passwort vergessen?"
+  },
+  "forgot_password": {
+    "title": "Passwort vergessen",
+    "subtitle": "Geben Sie Ihre registrierte E-Mail-Adresse ein und wir senden Ihnen einen Verifizierungscode zum Zurücksetzen Ihres Passworts."
+  },
+  "page_title": {
+    "language_preferences": "Sprachpräferenzen",
+    "account_settings": "Kontoeinstellungen",
+    "profile": "Profil",
+    "my_profile": "Mein Profil",
+    "update_profile": "Profil aktualisieren",
+    "my_properties": "Meine Immobilien",
+    "insights": "Einblicke",
+    "market_updates": "Marktaktualisierungen",
+    "legal_updates": "Rechtliche Aktualisierungen",
+    "lifestyle": "Lifestyle",
+    "new_projects": "Neue Projekte",
+    "latest_insights": "Neueste Einblicke",
+    "property_details": "Immobilienangaben"
+  },
+  "account_settings": {
+    "change_password": "Passwort ändern",
+    "push_notification": "Push-Benachrichtigungen"
+  },
+  "change_password": {
+    "old_password": "Altes Passwort",
+    "new_password": "Neues Passwort",
+    "confirm_password": "Passwort bestätigen"
+  },
+  "push_notification": {
+    "title": "Push-Benachrichtigungs-Einstellungen",
+    "description": "Erhalten Sie wichtige Updates zu Ihren Immobilien, Zahlungen, Projekten und Kontoverwaltung."
+  },
+  "my_profile": {
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon / WhatsApp"
+  },
+  "profile": {
+    "my_profile": "Mein Profil",
+    "term": "Kontoinformation",
+    "terms_condition": "Allgemeine Geschäftsbedingungen",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "legal_company_info": "Rechtliche & Unternehmensinformation",
+    "more": "Mehr"
+  },
+  "message": {
+    "confirm_logout": "Möchten Sie sich wirklich abmelden?",
+    "no_data_found": "Keine Daten gefunden",
+    "welcome_to_csw": "Willkommen bei CSW",
+    "no_paid_payment_invoice_available": "Keine bezahlten Zahlungsrechnungen verfügbar",
+    "no_pending_payment_invoice_available": "Keine ausstehenden Zahlungsrechnungen verfügbar"
+  },
+  "insights": {
+    "market_updates": "Marktaktualisierungen",
+    "legal_updates": "Rechtliche Aktualisierungen",
+    "lifestyle": "Lifestyle",
+    "new_projects": "Neue Projekte"
+  },
+  "placeholder": {
+    "search": "Suche nach Wort"
+  },
+  "filter": {
+    "last_24_hours": "Letzte 24 Stunden",
+    "last_3_days": "Letzte 3 Tage",
+    "last_week": "Letzte Woche",
+    "last_month": "Letzter Monat",
+    "hotels": "Hotels",
+    "resorts": "Resorts",
+    "beach_waterfront": "Strand & Wasserfront",
+    "dining_cafes": "Essen & Cafés",
+    "shopping_entertainment": "Einkaufen & Unterhaltung",
+    "city_guides": "Stadtführer"
+  },
+  "help_section": {
+    "title": "Benötigen Sie Hilfe oder haben Sie eine Frage?",
+    "description": "Unser Support-Team ist 24/7 für Sie da"
+  },
+  "property_details": {
+    "size": "Größe",
+    "rooms": "Räume",
+    "type_of_use": "Nutzungszweck",
+    "property_type": "Immobilientyp",
+    "total_units": "Gesamtanzahl der Einheiten",
+    "payment_plan": "Zahlungsplan",
+    "location": "Standort",
+    "payment_info": "Zahlungsinformationen",
+    "property_file": "Immobilienunterlagen",
+    "payment_status": "Zahlungsstatus",
+    "construction_progress": "Baufortschritt",
+    "assigned_agent": "Zugewiesener Makler",
+    "express_interest": "Interesse äußern",
+    "property_info": "Immobilieninformationen",
+    "view_larger_map": "Größere Karte anzeigen"
+  },
+  "tabs": {
+    "home": "Startseite",
+    "insights": "Einblicke",
+    "properties": "Immobilien",
+    "support": "Support",
+    "profile": "Profil"
+  }
 }

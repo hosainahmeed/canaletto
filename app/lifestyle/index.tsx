@@ -5,6 +5,7 @@ import FilterHeader from '@/components/share/FilterHeader'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
 
 const DATA: any[] = [
@@ -22,7 +23,7 @@ const DATA: any[] = [
 
 export default function Lifestyle() {
   const router = useRouter()
-
+  const { t } = useTranslation()
   const renderItem = ({ item }: any) => (
     <GradientCard
       iconType='brand'
@@ -35,19 +36,19 @@ export default function Lifestyle() {
 
   const renderHeader = () => (
     <FilterHeader filterOptions={[
-      { label: 'Hotels', value: 'hotels' },
-      { label: 'Resorts', value: 'resorts' },
-      { label: 'Beach & Waterfront', value: 'beach' },
-      { label: 'Dining & Cafés', value: 'dining' },
-      { label: 'Shopping & Entertainment', value: 'shopping' },
-      { label: 'City Guides', value: 'guides' },
+      { label: t('filter.hotels'), value: 'hotels' },
+      { label: t('filter.resorts'), value: 'resorts' },
+      { label: t('filter.beach_waterfront'), value: 'beach' },
+      { label: t('filter.dining_cafes'), value: 'dining' },
+      { label: t('filter.shopping_entertainment'), value: 'shopping' },
+      { label: t('filter.city_guides'), value: 'guides' },
     ]} />
   )
 
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM, SafeAreaEdge.TOP, SafeAreaEdge.LEFT, SafeAreaEdge.RIGHT]}>
       <BackHeaderButton
-        title="Lifestyle"
+        title={t('page_title.lifestyle')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -65,7 +66,7 @@ export default function Lifestyle() {
         bounces
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={<EmptyCard color='#B08D5980' title="No item's Found" />}
+        ListEmptyComponent={<EmptyCard color='#B08D5980' title={t('message.no_data_found')} />}
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         windowSize={7}

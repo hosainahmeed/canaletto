@@ -6,6 +6,7 @@ import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
@@ -17,6 +18,7 @@ type MenuItem = {
 
 export default function MyProfile() {
   const router = useRouter()
+  const { t } = useTranslation()
   const userData = {
     name: 'Roberts Junior',
     profile_image:
@@ -25,19 +27,19 @@ export default function MyProfile() {
   const MenuItemData = [
     {
       icon: ProfileIcons.user,
-      title: 'Name',
+      title: t('my_profile.name'),
       value: "Roberts Junior ",
       onPress: () => console.log('Name pressed'),
     },
     {
       icon: ProfileIcons.mail,
-      title: 'Email',
+      title: t('my_profile.email'),
       value: "robert @canaletto.com ",
       onPress: () => console.log('Email pressed'),
     },
     {
       icon: ProfileIcons.phone,
-      title: 'Phone / WhatsApp',
+      title: t('my_profile.phone'),
       value: "+ 971 50 XXX XXXX",
       onPress: () => console.log('Phone pressed'),
     },
@@ -46,7 +48,7 @@ export default function MyProfile() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="My Profile"
+        title={t('page_title.my_profile')}
         onPress={() =>
           router.canGoBack() ? router.back() : router.replace('/')
         }
@@ -66,7 +68,7 @@ export default function MyProfile() {
           />
         ))
       }
-      <Button style={styles.updateButton} iconPosition='right' icon={<Image source={ProfileIcons.edit} style={{ width: 16, height: 16 }} />} onPress={() => router.push('/my-profile/update-profile')} title='Update profile ' />
+      <Button style={styles.updateButton} iconPosition='right' icon={<Image source={ProfileIcons.edit} style={{ width: 16, height: 16 }} />} onPress={() => router.push('/my-profile/update-profile')} title={t('action.update_profile')} />
     </SafeAreaViewWithSpacing>
   )
 }
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   menuValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     fontFamily: 'Montserrat-SemiBoldItalic',
   },
@@ -188,3 +190,4 @@ const styles = StyleSheet.create({
     height: 12,
   },
 })
+

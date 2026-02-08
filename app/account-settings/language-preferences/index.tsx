@@ -1,3 +1,4 @@
+import { Language, useGlobalContext } from '@/app/providers/GlobalContextProvider'
 import { IMAGE } from '@/assets/images/image.index'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
@@ -5,6 +6,7 @@ import Button, { ButtonType } from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 import Animated, {
   useAnimatedStyle,
@@ -14,17 +16,35 @@ import Animated, {
 
 const { width } = Dimensions.get('window')
 
-type Language = 'English' | 'German'
-
 export default function LanguagePreferences() {
   const router = useRouter()
-  const [selectedLanguage, setSelectedLanguage] =
-    React.useState<Language>('English')
+  const { selectedLanguage, setSelectedLanguage, isLanguageLoaded } = useGlobalContext()
+  const { t } = useTranslation()
+
+  const handleLanguageSelect = (lang: Language) => {
+    setSelectedLanguage(lang)
+  }
+
+  const applyLanguageChange = () => {
+    // Language is already updated in the context when selected
+    // Just navigate back
+    router.back()
+  }
+
+  if (!isLanguageLoaded) {
+    return (
+      <SafeAreaViewWithSpacing>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaViewWithSpacing>
+    )
+  }
 
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Language Preferences"
+        title={t('page_title.language_preferences')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -32,28 +52,25 @@ export default function LanguagePreferences() {
           router.canGoBack() ? router.back() : router.replace('/')
         }
       />
-
       <LanguageItem
         title="English"
         icon={IMAGE.en}
-        active={selectedLanguage === 'English'}
-        onPress={() => setSelectedLanguage('English')}
+        active={selectedLanguage === 'en'}
+        onPress={() => handleLanguageSelect('en')}
       />
 
       <LanguageItem
         title="German"
         icon={IMAGE.gr}
-        active={selectedLanguage === 'German'}
-        onPress={() => setSelectedLanguage('German')}
+        active={selectedLanguage === 'de'}
+        onPress={() => handleLanguageSelect('de')}
       />
 
       <Button
         style={styles.button}
         type={ButtonType.PRIMARY}
-        title="Switch Language"
-        onPress={() => {
-          // persist language here
-        }}
+        title={t('action.switch_language')}
+        onPress={applyLanguageChange}
       />
     </SafeAreaViewWithSpacing>
   )
@@ -105,6 +122,15 @@ function LanguageItem({
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
   cardWrapper: {
     marginHorizontal: 12,
     marginTop: 12,
@@ -128,9 +154,9 @@ const styles = StyleSheet.create({
     height: 40,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: '500',
     fontFamily: 'Montserrat-SemiBoldItalic',
-    color: '#111827',
   },
   radioOuter: {
     width: 18,

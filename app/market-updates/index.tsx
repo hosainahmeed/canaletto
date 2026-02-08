@@ -4,6 +4,7 @@ import FilterHeader from '@/components/share/FilterHeader'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 
 const DATA = [
@@ -61,7 +62,7 @@ const DATA = [
 
 export default function MarketUpdates() {
   const router = useRouter()
-
+  const { t } = useTranslation()
   const renderItem = ({ item }: any) => (
     <GradientCard
       iconType='blue'
@@ -74,16 +75,16 @@ export default function MarketUpdates() {
 
   const renderHeader = () => (
     <FilterHeader filterOptions={[
-      { label: 'Last 24 Hours', value: '1d' },
-      { label: 'Last 3 Days', value: '3d' },
-      { label: 'Last Week', value: '1w' },
-      { label: 'Last Month', value: '1m' },
+      { label: t('filter.last_24_hours'), value: '1d' },
+      { label: t('filter.last_3_days'), value: '3d' },
+      { label: t('filter.last_week'), value: '1w' },
+      { label: t('filter.last_month'), value: '1m' },
     ]} />
   )
 
   const renderEmpty = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>No data found</Text>
+      <Text>{t('message.no_data_found')}</Text>
     </View>
   )
 
@@ -91,7 +92,7 @@ export default function MarketUpdates() {
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM, SafeAreaEdge.TOP, SafeAreaEdge.LEFT, SafeAreaEdge.RIGHT]}>
       <BackHeaderButton
-        title="Market Updates"
+        title={t('page_title.market_updates')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}

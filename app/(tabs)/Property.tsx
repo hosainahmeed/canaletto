@@ -3,10 +3,12 @@ import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpac
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet } from 'react-native'
 
 export default function PropertyScreen() {
   const router = useRouter()
+  const { t } = useTranslation()
   const properties: Property[] = [
     {
       id: '1',
@@ -43,7 +45,7 @@ export default function PropertyScreen() {
         titleFontWeight={800}
         titleFontFamily='Montserrat-Italic'
         titleStyle={{ fontStyle: 'italic', fontFamily: 'Montserrat-Italic' }}
-        title="My Properties"
+        title={t('page_title.my_properties')}
       />
       <FlatList
         data={properties}

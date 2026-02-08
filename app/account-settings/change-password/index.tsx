@@ -4,10 +4,12 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
 
 export default function ChangePassword() {
   const router = useRouter()
+  const { t } = useTranslation()
   const { width } = useWindowDimensions()
 
   const [oldPassword, setOldPassword] = useState('')
@@ -53,7 +55,7 @@ export default function ChangePassword() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Change Password"
+        title={t('account_settings.change_password')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -64,7 +66,7 @@ export default function ChangePassword() {
 
       <View style={[styles.container, { width: width - 20 }]}>
         <PasswordInput
-          label="Old Password"
+          label={t('change_password.old_password')}
           placeholder="••••••••"
           value={oldPassword}
           onChangeText={setOldPassword}
@@ -73,7 +75,7 @@ export default function ChangePassword() {
         />
 
         <PasswordInput
-          label="New Password"
+          label={t('change_password.new_password')}
           placeholder="••••••••"
           value={newPassword}
           onChangeText={setNewPassword}
@@ -82,7 +84,7 @@ export default function ChangePassword() {
         />
 
         <PasswordInput
-          label="Confirm New Password"
+          label={t('change_password.confirm_password')}
           placeholder="••••••••"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -92,7 +94,7 @@ export default function ChangePassword() {
         />
 
         <Button
-          title="Update Password"
+          title={t('action.update_password')}
           onPress={handleUpdatePassword}
           disabled={!oldPassword || !newPassword || !confirmPassword}
         />
@@ -106,3 +108,4 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 })
+

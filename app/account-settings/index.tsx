@@ -5,6 +5,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
@@ -14,6 +15,7 @@ type MenuItem = {
 }
 
 export default function AccountSettings() {
+  const { t } = useTranslation()
   const router = useRouter()
   const pushRouting = (path: any) => {
     if (router) {
@@ -23,9 +25,9 @@ export default function AccountSettings() {
 
 
   const items: MenuItem[] = [
-    { icon: IMAGE.lock, title: 'Change Password', onPress: () => pushRouting('/account-settings/change-password') },
-    { icon: IMAGE.bell, title: 'Push Notification', onPress: () => pushRouting('/account-settings/push-notification') },
-    { icon: IMAGE.language, title: 'Language preferences', onPress: () => pushRouting('/account-settings/language-preferences') },
+    { icon: IMAGE.lock, title: t('account_settings.change_password'), onPress: () => pushRouting('/account-settings/change-password') },
+    { icon: IMAGE.bell, title: t('account_settings.push_notification'), onPress: () => pushRouting('/account-settings/push-notification') },
+    { icon: IMAGE.language, title: t('page_title.language_preferences'), onPress: () => pushRouting('/account-settings/language-preferences') },
   ]
 
   return (
@@ -41,7 +43,7 @@ export default function AccountSettings() {
         titleFontWeight={800}
         titleFontFamily='Montserrat-Italic'
         titleStyle={{ fontStyle: 'italic', fontFamily: 'Montserrat-Italic' }}
-        title="Account Settings"
+        title={t('page_title.account_settings')}
       />
       <FlatList
         data={items}
@@ -108,7 +110,7 @@ const styles = StyleSheet.create({
   },
 
   menuText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Montserrat-SemiBoldItalic',
   },

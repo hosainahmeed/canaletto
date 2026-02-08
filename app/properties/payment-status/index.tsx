@@ -7,6 +7,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import { t } from 'i18next'
 import React from 'react'
 import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 import Animated, {
@@ -153,7 +154,7 @@ export default function PaymentStaus() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Payment Status"
+        title={t('property_details.payment_status')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -194,7 +195,7 @@ export default function PaymentStaus() {
           data={pendingInvoices}
           emptyIcon={IMAGE.emptyGreen}
           emptyColor="#22C55E"
-          emptyTitle="No pending payment invoice available"
+          emptyTitle={t('message.no_pending_payment_invoice_available')}
           onViewInvoice={handleViewInvoice}
           onDownloadInvoice={handleDownloadInvoice}
           downloadingKey={downloadingKey}
@@ -204,7 +205,7 @@ export default function PaymentStaus() {
           data={paidInvoices}
           emptyIcon={IMAGE.emptyPurple}
           emptyColor="#A855F7"
-          emptyTitle="No paid payment invoice available"
+          emptyTitle={t('message.no_paid_payment_invoice_available')}
           onViewInvoice={handleViewInvoice}
           onDownloadInvoice={handleDownloadInvoice}
           downloadingKey={downloadingKey}

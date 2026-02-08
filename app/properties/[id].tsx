@@ -6,6 +6,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
@@ -13,6 +14,7 @@ const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
 export default function PropertyByID({ id }: { id: string }) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showLargerMap, setShowLargerMap] = useState(false)
   const flatListRef = useRef<FlatList>(null)
@@ -35,19 +37,19 @@ export default function PropertyByID({ id }: { id: string }) {
   }
 
   const DETAILS = [
-    { icon: propertyDetailsIcon.size, label: 'Size', value: propertyData.size },
-    { icon: propertyDetailsIcon.rooms, label: 'Rooms', value: propertyData.rooms },
-    { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: propertyData.type_of_use },
-    { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: propertyData.property_type },
-    { icon: propertyDetailsIcon.units, label: 'Total Units', value: propertyData.total_units },
-    { icon: propertyDetailsIcon.payment_plan, label: 'Payment Plan', value: propertyData.payment_plan },
+    { icon: propertyDetailsIcon.size, label: t('property_details.size'), value: propertyData.size },
+    { icon: propertyDetailsIcon.rooms, label: t('property_details.rooms'), value: propertyData.rooms },
+    { icon: propertyDetailsIcon.type_of_use, label: t('property_details.type_of_use'), value: propertyData.type_of_use },
+    { icon: propertyDetailsIcon.property_type, label: t('property_details.property_type'), value: propertyData.property_type },
+    { icon: propertyDetailsIcon.units, label: t('property_details.total_units'), value: propertyData.total_units },
+    { icon: propertyDetailsIcon.payment_plan, label: t('property_details.payment_plan'), value: propertyData.payment_plan },
   ]
 
   const PROPERTY_INFO = [
-    { icon: propertyDetailsIcon.property_files, label: 'Property Files', styles: { color: '#3b82f680', backgroundColor: "rgba(59, 130, 246, 0.2)" }, route: "/properties/files" },
-    { icon: propertyDetailsIcon.payment_status, label: 'Payment Status', styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
-    { icon: propertyDetailsIcon.construction, label: 'Construction Progress', styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
-    { icon: propertyDetailsIcon.assigned_agent, label: 'Assigned Agent', styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
+    { icon: propertyDetailsIcon.property_files, label: t('property_details.property_file'), styles: { color: '#3b82f680', backgroundColor: "rgba(59, 130, 246, 0.2)" }, route: "/properties/files" },
+    { icon: propertyDetailsIcon.payment_status, label: t('property_details.payment_status'), styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
+    { icon: propertyDetailsIcon.construction, label: t('property_details.construction_progress'), styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
+    { icon: propertyDetailsIcon.assigned_agent, label: t('property_details.assigned_agent'), styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
   ]
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -74,7 +76,7 @@ export default function PropertyByID({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="Property Details"
+          title={t('page_title.property_details')}
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}
@@ -114,15 +116,6 @@ export default function PropertyByID({ id }: { id: string }) {
               ))}
             </View>
           )}
-
-          {/* Image Counter */}
-          {/* {propertyData.image.length > 1 && (
-            <View style={styles.imageCounter}>
-              <Text style={styles.imageCounterText}>
-                {activeImageIndex + 1} / {propertyData.image.length}
-              </Text>
-            </View>
-          )} */}
         </View>
 
         {/* Title */}
@@ -146,7 +139,7 @@ export default function PropertyByID({ id }: { id: string }) {
           <DetailRow
             item={{
               icon: propertyDetailsIcon.location,
-              label: 'Location',
+              label: t('property_details.location'),
               value: propertyData.location,
             }}
             isLast
@@ -181,12 +174,12 @@ export default function PropertyByID({ id }: { id: string }) {
               style={styles.viewLargerMapButton}
               onPress={() => setShowLargerMap(true)}
             >
-              <Text style={styles.viewLargerMapText}>View Larger Map</Text>
+              <Text numberOfLines={1} style={styles.viewLargerMapText}>{t('property_details.view_larger_map')}</Text>
             </TouchableOpacity>
           </View>
         </Card>
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>Property Info</Text>
+          <Text numberOfLines={2} style={styles.propertyName}>{t('property_details.property_info')}</Text>
         </View>
         <View style={styles.propertyInfoGrid}>
           {PROPERTY_INFO.map((item) => (
@@ -329,7 +322,7 @@ const styles = StyleSheet.create({
   },
 
   propertyName: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
     color: '#111',
     fontFamily: 'Montserrat-SemiBoldItalic',

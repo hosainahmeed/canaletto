@@ -6,6 +6,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
@@ -16,6 +17,7 @@ type MenuItem = {
 
 export default function Profile() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [isShowModal, setIsShowModal] = useState(false)
 
   const userData = {
@@ -37,17 +39,17 @@ export default function Profile() {
   const sections: { title?: string; data: MenuItem[] }[] = [
     {
       data: [
-        { icon: ProfileIcons.profile, title: 'My Profile', onPress: () => pushRouting("/my-profile") },
-        { icon: ProfileIcons.settings, title: 'Account Setting', onPress: () => pushRouting("/account-settings") },
+        { icon: ProfileIcons.profile, title: t('profile.my_profile'), onPress: () => pushRouting("/my-profile") },
+        { icon: ProfileIcons.settings, title: t('profile.term'), onPress: () => pushRouting("/account-settings") },
       ],
     },
     {
-      title: 'More',
+      title: t('profile.more'),
       data: [
-        { icon: ProfileIcons.terms, title: 'Terms & Condition', onPress: () => pushRouting("/terms-condition") },
-        { icon: ProfileIcons.privacy, title: 'Privacy Policy', onPress: () => pushRouting("/privacy-policy") },
-        { icon: ProfileIcons.legal, title: 'Legal & Company Info', onPress: () => pushRouting("/legal-company-info") },
-        { icon: ProfileIcons.logout, title: 'Log Out', onPress: () => logOutAction() },
+        { icon: ProfileIcons.terms, title: t('profile.terms_condition'), onPress: () => pushRouting("/terms-condition") },
+        { icon: ProfileIcons.privacy, title: t('profile.privacy_policy'), onPress: () => pushRouting("/privacy-policy") },
+        { icon: ProfileIcons.legal, title: t('profile.legal_company_info'), onPress: () => pushRouting("/legal-company-info") },
+        { icon: ProfileIcons.logout, title: t('action.logout'), onPress: () => logOutAction() },
       ],
     },
   ]
@@ -55,7 +57,7 @@ export default function Profile() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Profile"
+        title={t('page_title.profile')}
         onPress={() =>
           router.canGoBack() ? router.back() : router.replace('/')
         }
@@ -120,9 +122,10 @@ const MenuItemRow = ({ icon, title, onPress }: MenuItem) => {
       <Card style={styles.menuCard}>
         <View style={styles.menuLeft}>
           <Image source={icon} style={styles.menuIcon} />
-          <Text style={styles.menuText}>{title}</Text>
+          <Text numberOfLines={1} style={styles.menuText}>
+            {title}
+          </Text>
         </View>
-
         <Image source={IMAGE.next} style={styles.arrow} />
       </Card>
     </Pressable>
@@ -203,13 +206,14 @@ const styles = StyleSheet.create({
   },
 
   menuText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Montserrat-SemiBoldItalic',
   },
 
   arrow: {
-    width: 12,
-    height: 12,
+    width: 16,
+    height: 16,
   },
 })
+

@@ -18,11 +18,11 @@ export default function SectionHeader({ title, icon, action, actionText = 'View 
         {icon && <View style={styles.iconWrapper}>
           <Image source={icon} style={styles.icon} />
         </View>}
-        <Text style={styles.title}>{title}</Text>
+        <Text numberOfLines={1} style={styles.title}>{title}</Text>
       </View>
       {action && (
         <Pressable onPress={action}>
-          <Text style={styles.action}>{actionText}</Text>
+          <Text numberOfLines={1} style={styles.action}>{actionText}</Text>
         </Pressable>
       )}
     </View>
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     height: 24,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     color: "#333333",
     fontFamily: 'Nunito-Italic',
     fontStyle: 'italic',

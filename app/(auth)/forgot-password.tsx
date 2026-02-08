@@ -6,6 +6,7 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Keyboard, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
 
 export default function ForgotPasswordScreen() {
@@ -14,6 +15,7 @@ export default function ForgotPasswordScreen() {
   const router = useRouter()
   const [email, setEmail] = useState('hosaindev96@gmail.com');
   const [emailError, setEmailError] = useState('');
+  const { t } = useTranslation()
   const handleBackToLogin = () => {
     router.push('/(auth)/login')
   }
@@ -50,16 +52,16 @@ export default function ForgotPasswordScreen() {
           >
             {/* Header Section */}
             <View style={styles.headerSection}>
-              <Text style={styles.welcomeTitle}>Forgot Password</Text>
-              <Text style={styles.subtitle}>Enter your registered email address and we’ll send you a verification code to reset your password.</Text>
+              <Text style={styles.welcomeTitle}>{t("forgot_password.title")}</Text>
+              <Text style={styles.subtitle}>{t("forgot_password.subtitle")}</Text>
             </View>
 
             {/* Form Section */}
             <View style={styles.formSection}>
               {/* Email Input */}
               <CustomInput
-                label="Email Address"
-                placeholder="Enter your email address"
+                label={t("login_screen.email_address")}
+                placeholder={t("placeholder.enter_your_email_address")}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -127,14 +129,14 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   welcomeTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 12,
     fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     lineHeight: 24,
     marginTop: 8,
@@ -154,12 +156,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rememberMeText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#374151',
     marginLeft: 8,
   },
   forgotPasswordText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#3B82F6',
     fontWeight: '500',
   },

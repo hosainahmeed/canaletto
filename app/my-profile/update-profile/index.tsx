@@ -15,9 +15,11 @@ import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpac
 import ImagePickerModal from '@/components/share/ImagePickerModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 export default function UpdateProfile() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [imageModalVisible, setImageModalVisible] = useState(false)
 
   const userData = {
@@ -94,7 +96,7 @@ export default function UpdateProfile() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Update Profile"
+        title={t('page_title.update_profile')}
         onPress={() =>
           router.canGoBack() ? router.back() : router.replace('/')
         }
@@ -117,23 +119,23 @@ export default function UpdateProfile() {
 
         {/* INPUTS */}
         <CustomInput
-          label="Full Name"
-          placeholder="Enter your full name"
+          label={t('my_profile.name')}
+          placeholder={t('my_profile.name')}
           value={fullName}
           onChangeText={setFullName}
           autoCapitalize="words"
         />
 
         <CustomInput
-          label="Phone / WhatsApp"
-          placeholder="Enter your phone number"
+          label={t('my_profile.phone')}
+          placeholder={t('my_profile.phone')}
           value={phone}
           onChangeText={setPhone}
         />
 
         <Button
           style={styles.saveButton}
-          title="Save Change"
+          title={t('action.save_change')}
           onPress={onSave}
         />
       </ScrollView>
@@ -196,3 +198,4 @@ const styles = StyleSheet.create({
     height: 16,
   },
 })
+

@@ -3,6 +3,7 @@ import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpac
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native'
 import {
   useSharedValue,
@@ -12,6 +13,7 @@ import {
 export default function PushNotificationSettings() {
   const router = useRouter()
   const [enabled, setEnabled] = useState(true)
+  const { t } = useTranslation()
 
   const progress = useSharedValue(1)
 
@@ -23,7 +25,7 @@ export default function PushNotificationSettings() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title="Push Notification"
+        title={t('account_settings.push_notification')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -39,14 +41,13 @@ export default function PushNotificationSettings() {
         >
           <View style={styles.textContainer}>
             <Text style={styles.cardTitle}>
-              Push Notification Preferences
+              {t('push_notification.title')}
             </Text>
 
             <Text
               style={[styles.cardDescription]}
             >
-              Receive important updates about your properties, payments,
-              projects, and account activity.
+              {t('push_notification.description')}
             </Text>
           </View>
 
@@ -75,10 +76,10 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    paddingRight: 12,
+    // paddingRight: 12,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Montserrat-SemiBoldItalic',
     color: '#111827',
     marginBottom: 4,

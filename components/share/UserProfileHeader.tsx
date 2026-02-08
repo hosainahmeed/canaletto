@@ -2,10 +2,12 @@ import { IMAGE } from '@/assets/images/image.index'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 const { width: screenWidth } = Dimensions.get("window")
 export default function UserProfileHeader() {
   const router = useRouter()
+  const { t } = useTranslation()
   const Userdata = {
     img: "https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png",
     name: "Roberts Junior",
@@ -20,7 +22,7 @@ export default function UserProfileHeader() {
         </View>
         <View>
           <Text style={styles.userName}>{Userdata.name}</Text>
-          <Text style={styles.welcomeText}>Welcome to CSW </Text>
+          <Text style={styles.welcomeText}>{t("message.welcome_to_csw")}</Text>
         </View>
       </View>
       <Pressable

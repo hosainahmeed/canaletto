@@ -3,7 +3,8 @@ import { HapticTab } from '@/components/haptic-tab';
 import { Image } from 'expo-image';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Platform, Text, View } from 'react-native';
 
 const TAB_ICONS = {
   index: {
@@ -38,7 +39,7 @@ const renderTabIcon = (route: keyof typeof TAB_ICONS) => ({ focused }: { focused
       backgroundColor: focused ? '#D4B785' : 'transparent',
       borderRadius: 50,
       marginTop: focused ? -15 : 5,
-      elevation: focused ? 3 : 0,
+      elevation: Platform.OS === 'ios' ? 0 : (focused ? 5 : 0),
     }}
   >
     <Image
@@ -59,12 +60,14 @@ const renderTabLabel = (label: string) => ({ focused, color }: { focused: boolea
       marginBottom: 4,
       color,
     }}
+    numberOfLines={1}
   >
     {label}
   </Text>
 );
 
 export default function TabLayout() {
+  const { t } = useTranslation()
   return (
     <Tabs
       screenOptions={{
@@ -75,41 +78,41 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: renderTabIcon('index'),
-          tabBarLabel: renderTabLabel('Home'),
+          tabBarLabel: renderTabLabel(t('tabs.home')),
         }}
       />
       <Tabs.Screen
         name="Property"
         options={{
-          title: 'Property',
+          title: t('tabs.properties'),
           tabBarIcon: renderTabIcon('Property'),
-          tabBarLabel: renderTabLabel('Property'),
+          tabBarLabel: renderTabLabel(t('tabs.properties')),
         }}
       />
       <Tabs.Screen
         name="Insights"
         options={{
-          title: 'Insights',
+          title: t('tabs.insights'),
           tabBarIcon: renderTabIcon('Insights'),
-          tabBarLabel: renderTabLabel('Insights'),
+          tabBarLabel: renderTabLabel(t('tabs.insights')),
         }}
       />
       <Tabs.Screen
         name="Support"
         options={{
-          title: 'Support',
+          title: t('tabs.support'),
           tabBarIcon: renderTabIcon('Support'),
-          tabBarLabel: renderTabLabel('Support'),
+          tabBarLabel: renderTabLabel(t('tabs.support')),
         }}
       />
       <Tabs.Screen
         name="Profile"
         options={{
-          title: 'Profile',
+          title: t('tabs.profile'),
           tabBarIcon: renderTabIcon('Profile'),
-          tabBarLabel: renderTabLabel('Profile'),
+          tabBarLabel: renderTabLabel(t('tabs.profile')),
         }}
       />
 

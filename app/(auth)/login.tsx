@@ -8,6 +8,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Keyboard,
   Platform,
@@ -27,6 +28,7 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const { width, height } = useWindowDimensions();
+  const { t } = useTranslation()
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -104,9 +106,9 @@ export default function LoginScreen() {
           >
             {/* Header Section */}
             <View style={styles.headerSection}>
-              <Text style={styles.welcomeTitle}>Welcome Back</Text>
+              <Text style={styles.welcomeTitle}>{t('login_screen.welcome_back')}</Text>
               <Text style={styles.subtitle}>
-                Access your property details, updates, and investment insights securely.
+                {t('login_screen.access_your_property_details')}
               </Text>
             </View>
 
@@ -114,8 +116,8 @@ export default function LoginScreen() {
             <View style={styles.formSection}>
               {/* Email Input */}
               <CustomInput
-                label="Email Address"
-                placeholder="Enter your email address"
+                label={t('login_screen.email_address')}
+                placeholder={t('placeholder.enter_your_email_address')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -127,7 +129,7 @@ export default function LoginScreen() {
 
               {/* Password Input */}
               <PasswordInput
-                label="Password"
+                label={t('login_screen.password')}
                 placeholder="••••••••"
                 value={password}
                 onChangeText={setPassword}
@@ -144,14 +146,15 @@ export default function LoginScreen() {
                   activeOpacity={0.7}
                 >
                   <Checkbox
+                    size={16}
                     checked={rememberMe}
                     onPress={() => setRememberMe(!rememberMe)}
                   />
-                  <Text style={styles.rememberMeText}>Remember me</Text>
+                  <Text style={styles.rememberMeText}>{t('login_screen.remember_me')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={handleForgotPassword}>
-                  <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                  <Text style={styles.forgotPasswordText}>{t('login_screen.forgot_password')}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -162,7 +165,7 @@ export default function LoginScreen() {
                 activeOpacity={0.8}
                 disabled={!rememberMe}
               >
-                <Text style={styles.loginButtonText}>Log In</Text>
+                <Text style={styles.loginButtonText}>{t('action.login')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -202,14 +205,14 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   welcomeTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 12,
     fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     lineHeight: 24,
     marginTop: 8,
@@ -226,15 +229,15 @@ const styles = StyleSheet.create({
   rememberMeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   rememberMeText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#374151',
     marginLeft: 8,
   },
   forgotPasswordText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#3B82F6',
     fontWeight: '500',
   },

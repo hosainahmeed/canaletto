@@ -2,8 +2,9 @@ import { IMAGE } from '@/assets/images/image.index';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
-import Button from '../ui/button';
+import Button, { ButtonSize } from '../ui/button';
 
 export interface Property {
   id: string;
@@ -20,6 +21,7 @@ const { width } = Dimensions.get('window')
 
 export default function PropertyCard({ property, onViewPress }: PropertyCardProps) {
   const router = useRouter()
+  const { t } = useTranslation()
   return (
     <View style={styles.card}>
       {/* Image Container */}
@@ -40,7 +42,8 @@ export default function PropertyCard({ property, onViewPress }: PropertyCardProp
 
         {/* View Property Button */}
         <Button
-          style={{ width: 200 }}
+          size={ButtonSize.MEDIUM}
+          style={{ width: 200, borderRadius: 8 }}
           onPress={() => {
             // if (onViewPress) {
             //   onViewPress?.()
@@ -49,7 +52,7 @@ export default function PropertyCard({ property, onViewPress }: PropertyCardProp
             //   router.push("/properties")
             // }
             router.push(`/properties/${property.id}`)
-          }} title="View Property"
+          }} title={t('action.view_property')}
           iconPosition='right'
           icon={<Image width={20} height={20} style={{ width: 20, height: 20 }} source={IMAGE.forward_icon} />}
         />

@@ -1,12 +1,14 @@
 import { IMAGE } from '@/assets/images/image.index'
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import FilterModal from './FilterModal'
 const { width: screenWidth } = Dimensions.get('window')
 
 
 export default function FilterHeader({ filterOptions }: { filterOptions: { label: string; value: string }[] }) {
+  const { t } = useTranslation()
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [isVisable, setIsVisable] = useState<boolean>(false)
   return (
@@ -14,7 +16,7 @@ export default function FilterHeader({ filterOptions }: { filterOptions: { label
       <TextInput
         style={styles.input}
         placeholderTextColor="#9CA3AF"
-        placeholder="Search by word"
+        placeholder={t('placeholder.search')}
       />
       <Pressable style={styles.filterIconContainer} onPress={() => setIsVisable(true)}>
         <Image source={IMAGE.filter_icon} style={styles.filterIcon} />

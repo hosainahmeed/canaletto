@@ -7,6 +7,7 @@ import { useState } from 'react';
 import 'react-native-reanimated';
 import { AuthProvider } from '../contexts/AuthContext';
 import '../lib/i18n';
+import GlobalContextProvider from './providers/GlobalContextProvider';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -19,7 +20,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <>
+        <GlobalContextProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="(auth)" />
@@ -32,7 +33,7 @@ export default function RootLayout() {
           </Stack>
 
           <StatusBar style="auto" />
-        </>
+        </GlobalContextProvider>
       </ThemeProvider>
     </AuthProvider>
   );

@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: '#374151',
     marginBottom: 8,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    fontSize: 16,
+    fontSize: 14,
     color: '#1F2937',
   },
   eyeIcon: {
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
   },
   errorText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#EF4444',
     marginTop: 4,
   },

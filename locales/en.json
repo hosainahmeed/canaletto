@@ -3,6 +3,7 @@
     "skip": "Skip",
     "next": "Next",
     "login": "Log In",
+    "logout": "Log Out",
     "send_verification_code": "Send Verification Code",
     "verify_code": "Verify Code",
     "resend": "Resend",
@@ -12,12 +13,128 @@
     "call_now": "Call now",
     "pending": "Pending",
     "paid": "Paid",
-    "submit_interest": "Submit Interest"
+    "submit_interest": "Submit Interest",
+    "switch_language": "Switch Language",
+    "cancel": "Nah, just kidding",
+    "update_profile": "Update Profile",
+    "save_change": "Save Change",
+    "close": "Close",
+    "view_all": "View All"
   },
   "welcome": "Welcome!",
   "change_language": "Change Language",
   "example": "This app includes example code to help you get started.",
   "select_language": "select language",
   "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
-  "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!"
+  "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!",
+  "login_screen": {
+    "welcome_back": "Welcome Back",
+    "access_your_property_details": "Access your property details, updates, and investment insights securely.",
+    "email_address": "Email Address",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?"
+  },
+  "forgot_password": {
+    "title": "Forgot Password",
+    "subtitle": "Enter your registered email address and we’ll send you a verification code to reset your password."
+  },
+  "page_title": {
+    "language_preferences": "Language Preferences",
+    "account_settings": "Account Settings",
+    "profile": "Profile",
+    "my_profile": "My Profile",
+    "update_profile": "Update Profile",
+    "my_properties": "My Properties",
+    "insights": "Insights",
+    "market_updates": "Market Updates",
+    "legal_updates": "Legal Updates",
+    "lifestyle": "Lifestyle",
+    "new_projects": "New Projects",
+    "latest_insights": "Latest Insights",
+    "property_details": "Property Details"
+  },
+  "account_settings": {
+    "change_password": "Change Password",
+    "push_notification": "Push Notification"
+  },
+  "change_password": {
+    "old_password": "Old Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password"
+  },
+  "push_notification": {
+    "title": "Push Notification Preferences",
+    "description": "Receive important updates about your properties, payments, projects, and account activity."
+  },
+  "profile": {
+    "my_profile": "My Profile",
+    "term": "Account Setting",
+    "terms_condition": "Terms & Condition",
+    "privacy_policy": "Privacy Policy",
+    "legal_company_info": "Legal & Company Info",
+    "more": "More"
+  },
+  "my_profile": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone / WhatsApp"
+  },
+  "message": {
+    "confirm_logout": "Are you sure you want to log out?",
+    "no_data_found": "No data found",
+    "welcome_to_csw": "Welcome to CSW",
+    "no_paid_payment_invoice_available": "No paid payment invoice available",
+    "no_pending_payment_invoice_available": "No pending payment invoice available"
+  },
+  "insights": {
+    "market_updates": "Market Updates",
+    "legal_updates": "Legal Updates",
+    "lifestyle": "Lifestyle",
+    "new_projects": "New Projects"
+  },
+  "placeholder": {
+    "search": "Search by word",
+    "enter_your_email_address": "Enter your email address"
+  },
+  "filter": {
+    "last_24_hours": "Last 24 Hours",
+    "last_3_days": "Last 3 Days",
+    "last_week": "Last Week",
+    "last_month": "Last Month",
+    "hotels": "Hotels",
+    "resorts": "Resorts",
+    "beach_waterfront": "Beach & Waterfront",
+    "dining_cafes": "Dining & Cafés",
+    "shopping_entertainment": "Shopping & Entertainment",
+    "city_guides": "City Guides"
+  },
+  "help_section": {
+    "title": "Need help or have a question?",
+    "description": "Our support team is available 24/7 to assist you"
+  },
+  "property_details": {
+    "size": "Size",
+    "rooms": "Rooms",
+    "type_of_use": "Type of Use",
+    "property_type": "Property Type",
+    "total_units": "Total Units",
+    "payment_plan": "Payment Plan",
+    "location": "Location",
+    "payment_info": "Payment Info",
+    "property_file": "Property Files",
+    "payment_status": "Payment Status",
+    "construction_progress": "Construction Progress",
+    "assigned_agent": "Assigned Agent",
+    "express_interest": "Express Interest",
+    "property_info": "Property Info",
+    "view_larger_map": "View Larger Map"
+  },
+  "tabs": {
+    "home": "Home",
+    "insights": "Insights",
+    "properties": "Properties",
+    "support": "Support",
+    "profile": "Profile"
+  }
 }

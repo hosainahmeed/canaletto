@@ -106,7 +106,8 @@
         {
           "photosPermission": "Canaletto needs access to your photos to allow you to upload documents and photos related to your services."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

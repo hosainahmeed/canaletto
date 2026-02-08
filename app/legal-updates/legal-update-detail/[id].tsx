@@ -5,12 +5,14 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
 export default function LegalUpdateDetail({ id }: { id: string }) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
 
@@ -49,7 +51,7 @@ export default function LegalUpdateDetail({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="Legal Update"
+          title={t('page_title.legal_updates')}
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}

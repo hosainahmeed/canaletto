@@ -1,11 +1,11 @@
 import { IMAGE } from '@/assets/images/image.index';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, Text } from 'react-native';
 const { width: screenWidth } = Dimensions.get('window');
 export default function GradientCard({ title, iconType, subTitle, color = ['#22C55E', '#FAFAFA', '#FAFAFA'], onPress }: { title: string; subTitle: string; color?: string[], iconType: 'green' | 'brand' | 'blue' | 'pink', onPress?: () => void }) {
   return (
-    <View style={[styles.container, { backgroundColor: color[0], borderColor: color[0] }]}>
+    <Pressable onPress={onPress} style={[styles.container, { backgroundColor: color[0], borderColor: color[0] }]}>
       <Text numberOfLines={1} style={styles.subTitle}>{subTitle}</Text>
       <Text numberOfLines={1} style={styles.title}>{title}</Text>
       <Pressable
@@ -57,7 +57,7 @@ export default function GradientCard({ title, iconType, subTitle, color = ['#22C
         colors={color as any}
         style={[styles.circle, styles.c6]}
       />
-    </View>
+    </Pressable>
   );
 }
 
@@ -84,10 +84,11 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '900',
     zIndex: 999,
     marginBottom: 12,
+    marginTop: 6,
     fontFamily: 'Nunito-Italic',
     fontStyle: 'italic',
   },

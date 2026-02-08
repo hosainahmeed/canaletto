@@ -10,6 +10,7 @@ import HelpSection from '@/components/share/HelpSection';
 import SectionHeader from '@/components/share/SectionHeader';
 import UserProfileHeader from '@/components/share/UserProfileHeader';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 const PROPERTIES = [
   {
@@ -23,6 +24,7 @@ const PROPERTIES = [
 
 export default function HomeScreen() {
   const router = useRouter()
+  const { t } = useTranslation()
   const renderProperty = ({ item }: any) => (
     <PropertyCard
       property={item}
@@ -42,19 +44,19 @@ export default function HomeScreen() {
             <UserProfileHeader />
             <WeatherScreen />
             <SectionHeader
-              title="MY Properties"
+              title={t("page_title.my_properties")}
               icon={IMAGE.property_icon}
               action={() => router.push("/(tabs)/Property")}
-              actionText="View All"
+              actionText={t("action.view_all")}
             />
           </>
         }
         ListFooterComponent={<>
           <SectionHeader
-            title="Latest Insights "
+            title={t("page_title.latest_insights")}
             icon={IMAGE.insights_icon}
             action={() => router.push("/(tabs)/Insights")}
-            actionText="View All"
+            actionText={t("action.view_all")}
           />
           <GradientCard
             iconType='green'
