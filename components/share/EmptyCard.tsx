@@ -3,10 +3,10 @@ import { Image } from 'expo-image'
 import React from 'react'
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
 const { width: screenWidth } = Dimensions.get("window")
-export default function EmptyCard({ title, icon, backgroundColor, color }: { title: string, icon?: string, backgroundColor?: string, color?: string }) {
+export default function EmptyCard({ title, icon, backgroundColor, color, iconStyle }: { title: string, icon?: string, backgroundColor?: string, color?: string, iconStyle?: object }) {
   return (
     <View style={{ width: screenWidth - 20, height: 120, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: color, borderRadius: 8, marginHorizontal: "auto", backgroundColor }}>
-      <Image source={icon ?? IMAGE.empty} style={styles.icon} />
+      <Image source={icon ?? IMAGE.empty} style={[styles.icon, iconStyle]} />
       <Text style={[styles.title, { color: color }]}>{title}</Text>
     </View>
   )

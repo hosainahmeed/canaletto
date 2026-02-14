@@ -78,19 +78,19 @@ export default function ForgotPasswordScreen() {
                 onPress={() => handleSendVerificationCode()}
                 activeOpacity={0.8}
               >
-                <Text style={styles.loginButtonText}>Send Verification Code</Text>
+                <Text style={styles.loginButtonText}>{t("action.send_verification_code")}</Text>
               </TouchableOpacity>
               <Text
                 style={{
                   marginTop: 12,
                   alignSelf: "flex-end",
-                  fontSize: 16,
+                  fontSize: 14,
                   color: '#3B82F6',
                   fontWeight: '500',
                 }}
                 onPress={() => {
                   handleBackToLogin()
-                }}>Back to Login</Text>
+                }}>{t("action.back_to_login")}</Text>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>

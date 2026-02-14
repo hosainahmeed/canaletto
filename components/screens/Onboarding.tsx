@@ -2,6 +2,7 @@ import { IMAGE } from '@/assets/images/image.index';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
   FlatList,
@@ -14,7 +15,6 @@ import {
 import SafeAreaViewWithSpacing from '../safe-area/SafeAreaViewWithSpacing';
 import NextButton from './NextButton';
 import Pagination from './Pagination';
-import slideData from './slideData';
 
 export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,6 +22,19 @@ export default function Onboarding() {
   const slideRef = useRef<FlatList>(null);
   const router = useRouter()
   const { height } = useWindowDimensions()
+  const { t } = useTranslation()
+  const slideDataArr = [
+    {
+      id: 1,
+      title: t("onboarding.welcome_to_your_real_estate_hub"),
+      description: t("onboarding.ready_to_take_control_of_your_properties"),
+    },
+    {
+      id: 2,
+      title: t("onboarding.discover_new_investment_gems"),
+      description: t("onboarding.looking_for_your_next_big_opportunity"),
+    }
+  ]
 
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
@@ -34,7 +47,7 @@ export default function Onboarding() {
   ).current;
 
   const scrollTo = () => {
-    if (currentIndex < slideData.length - 1) {
+    if (currentIndex < slideDataArr.length - 1) {
       slideRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
       handleFinish();
@@ -64,7 +77,7 @@ export default function Onboarding() {
         {/* Slides */}
         <View style={styles.slideContainer}>
           <FlatList
-            data={slideData}
+            data={slideDataArr}
             renderItem={({ item }) => <OnboardingItem item={item} />}
             showsHorizontalScrollIndicator={false}
             horizontal
@@ -84,12 +97,12 @@ export default function Onboarding() {
           />
         </View>
         {/* Pagination */}
-        <Pagination data={slideData} scrollX={scrollX} />
+        <Pagination data={slideDataArr} scrollX={scrollX} />
         {/* Next Button */}
         <NextButton
           handleSkip={handleSkip}
           currentIndex={currentIndex}
-          slideData={slideData}
+          slideData={slideDataArr}
           scrollTo={scrollTo}
         />
       </View>
@@ -162,7 +175,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   title: {
-    fontSize: 42,
+    fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'left',
     color: '#333',

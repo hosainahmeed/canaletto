@@ -29,6 +29,7 @@ export default function HelpSection({ title, description, icon, onPress }: { tit
 const styles = StyleSheet.create({
   card: {
     padding: 10,
+    paddingHorizontal: 15,
     marginVertical: 12,
     backgroundColor: '#fff',
     marginHorizontal: 'auto',

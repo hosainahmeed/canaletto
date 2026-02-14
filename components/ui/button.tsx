@@ -168,7 +168,7 @@ export default function Button({
       ) : (
         <>
           {icon && iconPosition === 'left' && icon}
-          <Text numberOfLines={1} style={getTextStyle()}>{title}</Text>
+          <Text numberOfLines={1} style={[getTextStyle(), { fontSize: 14 }]}>{title}</Text>
           {icon && iconPosition === 'right' && icon}
         </>
       )}

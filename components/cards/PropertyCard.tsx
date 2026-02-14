@@ -45,12 +45,6 @@ export default function PropertyCard({ property, onViewPress }: PropertyCardProp
           size={ButtonSize.MEDIUM}
           style={{ width: 200, borderRadius: 8 }}
           onPress={() => {
-            // if (onViewPress) {
-            //   onViewPress?.()
-            // } else {
-            //   Alert.alert("sdfß")
-            //   router.push("/properties")
-            // }
             router.push(`/properties/${property.id}`)
           }} title={t('action.view_property')}
           iconPosition='right'
@@ -92,7 +86,7 @@ const styles = StyleSheet.create({
     position: "relative"
   },
   propertyName: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,

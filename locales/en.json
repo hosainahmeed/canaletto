@@ -19,14 +19,19 @@
     "update_profile": "Update Profile",
     "save_change": "Save Change",
     "close": "Close",
-    "view_all": "View All"
+    "view_all": "View All",
+    "back_to_login": "Back to Login"
+  },
+  "onboarding": {
+    "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
+    "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!",
+    "discover_new_investment_gems": "Discover New Investment Gems",
+    "looking_for_your_next_big_opportunity": "Looking for your next big opportunity? Check out the latest projects and express interest with a tap. Your next great investment is just a few clicks away!"
   },
   "welcome": "Welcome!",
   "change_language": "Change Language",
   "example": "This app includes example code to help you get started.",
   "select_language": "select language",
-  "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
-  "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!",
   "login_screen": {
     "welcome_back": "Welcome Back",
     "access_your_property_details": "Access your property details, updates, and investment insights securely.",
@@ -38,6 +43,21 @@
   "forgot_password": {
     "title": "Forgot Password",
     "subtitle": "Enter your registered email address and we’ll send you a verification code to reset your password."
+  },
+  "new_password_set": {
+    "title": "Set New Password",
+    "subtitle": "Create a new password for your account to continue securely.",
+    "new_password": "New Password",
+    "confirm_new_password": "Confirm New Password",
+    "update_password": "Update Password",
+    "password_must_be_at_least_8_characters": "Password must be at least 8 characters",
+    "passwords_do_not_match": "Passwords do not match"
+  },
+  "verification_code": {
+    "title": "Verify Your OTP",
+    "subtitle": "Enter the 6-digit verification code sent to your email address.",
+    "didnt_receive_code": "Didn’t receive the code?",
+    "resend_in": "Resend in"
   },
   "page_title": {
     "language_preferences": "Language Preferences",
@@ -52,7 +72,9 @@
     "lifestyle": "Lifestyle",
     "new_projects": "New Projects",
     "latest_insights": "Latest Insights",
-    "property_details": "Property Details"
+    "property_details": "Property Details",
+    "add_invoice": "Add Invoice",
+    "notifications": "Notifications"
   },
   "account_settings": {
     "change_password": "Change Password",

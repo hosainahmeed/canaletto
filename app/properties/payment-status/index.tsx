@@ -18,6 +18,7 @@ import Animated, {
 
 
 type Invoice = {
+  id: string
   pdfLink: string
   date: string
   status: 'pending' | 'paid'
@@ -25,16 +26,19 @@ type Invoice = {
 
 const pendingInvoices: Invoice[] = [
   {
+    id: "1",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-15',
     status: 'pending',
   },
   {
+    id: "13",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-16',
     status: 'pending',
   },
   {
+    id: "123",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-17',
     status: 'pending',
@@ -43,16 +47,19 @@ const pendingInvoices: Invoice[] = [
 
 const paidInvoices: Invoice[] = [
   {
+    id: "1",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-15',
     status: 'paid',
   },
   {
+    id: "13",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-16',
     status: 'paid',
   },
   {
+    id: "1234",
     pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
     date: '2025-10-17',
     status: 'paid',
@@ -66,13 +73,13 @@ const TAB_GAP = 10
 const TAB_BUTTON_WIDTH = (TAB_WRAPPER_WIDTH - TAB_GAP) / 2
 export default function PaymentStaus() {
   const router = useRouter()
-  const [activeButton, setActiveButton] = React.useState<'pending' | 'Paid'>('pending')
+  const [activeButton, setActiveButton] = React.useState<'Payment Invoices' | 'Payment Plan'>('Payment Invoices')
   const [downloadingKey, setDownloadingKey] = React.useState<string | null>(null)
-  const TABS = ['pending', 'Paid'] as const
+  const TABS = ['Payment Invoices', 'Payment Plan'] as const
 
   const indicatorX = useSharedValue(0)
 
-  const handleTabChange = (tab: 'pending' | 'Paid', index: number) => {
+  const handleTabChange = (tab: 'Payment Invoices' | 'Payment Plan', index: number) => {
     setActiveButton(tab)
     indicatorX.value = withTiming(index * (TAB_BUTTON_WIDTH + TAB_GAP), { duration: 250 })
   }
@@ -81,11 +88,8 @@ export default function PaymentStaus() {
     transform: [{ translateX: indicatorX.value }],
   }))
 
-  const handleViewInvoice = React.useCallback((invoice: Invoice, index: number) => {
-    router.push({
-      pathname: '/properties/files/PdfViewer',
-      params: { pdfLink: invoice.pdfLink, title: `Invoice ${index + 1}` },
-    })
+  const handleViewInvoice = React.useCallback((invoice: Invoice) => {
+    router.push(`/properties/payment-status/invoice-details/${invoice.id}`)
   }, [router])
 
   const handleDownloadInvoice = React.useCallback(async (invoice: Invoice, index: number) => {
@@ -190,7 +194,7 @@ export default function PaymentStaus() {
         })}
       </View>
 
-      {activeButton === 'pending' ? (
+      {activeButton === 'Payment Invoices' ? (
         <InvoiceList
           data={pendingInvoices}
           emptyIcon={IMAGE.emptyGreen}
@@ -229,10 +233,11 @@ const InvoiceList = ({
   emptyIcon: any
   emptyColor: string
   emptyTitle: string
-  onViewInvoice: (invoice: Invoice, index: number) => void
+  onViewInvoice: (invoice: Invoice) => void
   onDownloadInvoice: (invoice: Invoice, index: number) => void
   downloadingKey: string | null
 }) => {
+  const router = useRouter()
   return (
     <FlatList
       data={data}
@@ -264,7 +269,7 @@ const InvoiceList = ({
             </View>
 
             <View style={styles.invoiceActions}>
-              <Pressable onPress={() => onViewInvoice(item, index)}>
+              <Pressable onPress={() => onViewInvoice(item)}>
                 <Image source={IMAGE.eye} style={styles.actionIcon} />
               </Pressable>
               <Pressable onPress={() => onDownloadInvoice(item, index)}>
@@ -283,7 +288,8 @@ const InvoiceList = ({
           </Card>
         )
       }}
-      ListFooterComponent={<HelpSection />}
+      ListFooterComponent={<HelpSection title='Add Invoice' description='Upload your invoice issued by the CSW team.' icon={IMAGE.add_invoice}
+        onPress={() => router.push('/properties/payment-status/add-invoice')} />}
       ListEmptyComponent={
         <EmptyCard
           icon={emptyIcon}

@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: 'Nunito-MediumItalic',
     fontWeight: '500',
     color: '#374151',
     marginBottom: 8,

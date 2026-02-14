@@ -107,7 +107,8 @@
           "photosPermission": "Canaletto needs access to your photos to allow you to upload documents and photos related to your services."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

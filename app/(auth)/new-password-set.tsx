@@ -2,11 +2,12 @@ import { IMAGE } from '@/assets/images/image.index'
 import PasswordInput from '@/components/PasswordInput'
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
-import Button from '@/components/ui/button'
+import Button, { ButtonSize } from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Keyboard,
   Platform,
@@ -21,7 +22,7 @@ import {
 export default function NewPasswordSet() {
   const router = useRouter()
   const { width, height } = useWindowDimensions()
-
+  const { t } = useTranslation()
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [newPasswordError, setNewPasswordError] = useState('')
@@ -33,11 +34,11 @@ export default function NewPasswordSet() {
     setConfirmPasswordError('')
 
     if (!newPassword || newPassword.length < 8) {
-      setNewPasswordError('Password must be at least 8 characters')
+      setNewPasswordError(t('new_password_set.password_must_be_at_least_8_characters'))
       valid = false
     }
     if (newPassword !== confirmPassword) {
-      setConfirmPasswordError('Passwords do not match')
+      setConfirmPasswordError(t('new_password_set.passwords_do_not_match'))
       valid = false
     }
 
@@ -80,16 +81,16 @@ export default function NewPasswordSet() {
           >
             {/* Header */}
             <View style={styles.headerSection}>
-              <Text style={styles.title}>Set New Password</Text>
+              <Text style={styles.title}>{t('new_password_set.title')}</Text>
               <Text style={styles.subtitle}>
-                Create a new password for your account to continue securely.
+                {t('new_password_set.subtitle')}
               </Text>
             </View>
 
             {/* Form */}
             <View style={styles.formSection}>
               <PasswordInput
-                label="New Password"
+                label={t('new_password_set.new_password')}
                 placeholder="••••••••"
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -97,7 +98,7 @@ export default function NewPasswordSet() {
                 returnKeyType="next"
               />
               <PasswordInput
-                label="Confirm New Password"
+                label={t('new_password_set.confirm_new_password')}
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -106,8 +107,9 @@ export default function NewPasswordSet() {
                 onSubmitEditing={handleUpdatePassword}
               />
               <Button
-                title="Update Password"
+                title={t('new_password_set.update_password')}
                 onPress={handleUpdatePassword}
+                size={ButtonSize.LARGE}
                 disabled={!newPassword || !confirmPassword}
               />
             </View>
@@ -134,20 +136,20 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'android' ? 20 : 0,
   },
   headerSection: {
-    marginBottom: 40,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '600',
-    fontStyle: 'italic',
     color: '#1F2937',
     marginBottom: 12,
+    fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     lineHeight: 24,
-    marginTop: 8,
+    marginBottom: 8,
   },
   formSection: {
     width: '100%',

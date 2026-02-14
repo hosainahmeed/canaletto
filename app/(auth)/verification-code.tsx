@@ -5,6 +5,7 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dimensions,
   Platform,
@@ -22,6 +23,7 @@ export default function VerificationCode() {
   const router = useRouter()
   const [otpCode, setOtpCode] = useState('')
   const [resendTimer, setResendTimer] = useState(30)
+  const { t } = useTranslation()
 
   /* --------------- Timer Logic --------------- */
   useEffect(() => {
@@ -70,9 +72,9 @@ export default function VerificationCode() {
           >
             <View style={styles.container}>
               {/* Header */}
-              <Text style={styles.title}>Verify Your OTP</Text>
+              <Text style={styles.title}>{t('verification_code.title')}</Text>
               <Text style={styles.subtitle}>
-                Enter the 6-digit verification code sent to your email address.
+                {t('verification_code.subtitle')}
               </Text>
 
               {/* OTP Input */}
@@ -89,14 +91,14 @@ export default function VerificationCode() {
 
               {/* Resend Timer */}
               <View style={styles.resendRow}>
-                <Text style={styles.resendLabel}>Didn’t receive the code?</Text>
+                <Text style={styles.resendLabel}>{t('verification_code.didnt_receive_code')}</Text>
                 {resendTimer > 0 ? (
                   <Text style={styles.timer}>
-                    Resend in 00:{resendTimer.toString().padStart(2, '0')}
+                    {t('verification_code.resend_in')} 00:{resendTimer.toString().padStart(2, '0')}
                   </Text>
                 ) : (
                   <Pressable onPress={handleResend}>
-                    <Text style={styles.resendAction}>Resend</Text>
+                    <Text style={styles.resendAction}>{t('action.resend')}</Text>
                   </Pressable>
                 )}
               </View>
@@ -107,19 +109,19 @@ export default function VerificationCode() {
                 style={[styles.button, otpCode.length < 6 && styles.buttonDisabled]}
                 disabled={otpCode.length < 6}
               >
-                <Text style={styles.buttonText}>Verify Code</Text>
+                <Text style={styles.buttonText}>{t('action.verify_code')}</Text>
               </Pressable>
               <Text
                 style={{
                   marginTop: 12,
                   alignSelf: "flex-end",
-                  fontSize: 16,
+                  fontSize: 14,
                   color: '#3B82F6',
                   fontWeight: '500',
                 }}
                 onPress={() => {
                   handleBackToLogin()
-                }}>Back to Login</Text>
+                }}>{t('action.back_to_login')}</Text>
             </View>
           </ScrollView>
         </KeyboardAvoider>
@@ -157,16 +159,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '600',
-    fontStyle: 'italic',
     color: '#1F2937',
     marginBottom: 12,
+    fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
-    marginBottom: 32,
+    lineHeight: 24,
+    marginBottom: 8,
   },
   otpWrapper: {
     alignItems: 'center',

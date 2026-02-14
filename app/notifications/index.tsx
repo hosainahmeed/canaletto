@@ -1,10 +1,12 @@
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import EmptyCard from '@/components/share/EmptyCard'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, ListRenderItem, StyleSheet, Text, View } from 'react-native'
 
 const { width: screenWidth } = Dimensions.get('window')
@@ -16,6 +18,7 @@ type NotificationItem = {
   isRead: boolean
 }
 
+// const NOTIFICATIONS: NotificationItem[] = []
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: '1',
@@ -30,9 +33,9 @@ const NOTIFICATIONS: NotificationItem[] = [
     isRead: true,
   },
 ]
-
 export default function NotificationScreen() {
   const router = useRouter()
+  const { t } = useTranslation()
 
   const renderNotificationItem: ListRenderItem<NotificationItem> = ({ item }) => (
     <Card
@@ -63,7 +66,7 @@ export default function NotificationScreen() {
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic', fontFamily: 'Montserrat-Italic' }}
-        title="Notifications"
+        title={t("page_title.notifications")}
       />
       <FlatList
         data={NOTIFICATIONS}
@@ -73,13 +76,14 @@ export default function NotificationScreen() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Image source={IMAGE.notification_bing} style={styles.emptyIcon} />
-            <Text style={styles.emptyTitle}>You are all caught up</Text>
-            <Text style={styles.emptyDescription}>
-              New alerts will appear here. Stay tuned!
-            </Text>
-          </View>
+          // <View style={styles.emptyState}>
+          //   <Image source={IMAGE.notification_bing} style={styles.emptyIcon} />
+          //   <Text style={styles.emptyTitle}>You are all caught up</Text>
+          //   <Text style={styles.emptyDescription}>
+          //     New alerts will appear here. Stay tuned!
+          //   </Text>
+          // </View>
+          <EmptyCard icon={IMAGE.notification_bing} title='No Notifications' iconStyle={{ width: 40, height: 40 }} color="#D4B785" backgroundColor="#F9F7F2" />
         }
       />
     </SafeAreaViewWithSpacing>
