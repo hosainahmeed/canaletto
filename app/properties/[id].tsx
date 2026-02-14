@@ -2,22 +2,132 @@ import { propertyDetailsIcon } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import HelpSection from '@/components/share/HelpSection'
+import ImageCarousel from '@/components/share/ImageCarousel'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React, { useRef, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dimensions, FlatList, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
-const { width, height } = Dimensions.get('window')
-const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
+const { width } = Dimensions.get('window')
+
+/* ---------------- Error Boundary ---------------- */
+
+class ErrorBoundary extends React.Component<any, any> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: any) {
+    console.log('Property Screen Error:', error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Something went wrong loading the property details.
+          </Text>
+        </View>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+/* ---------------- Detail Row ---------------- */
+
+const DetailRow = memo(({ item, isLast }: any) => {
+  if (!item) return null
+
+  return (
+    <View style={[styles.row, !isLast && styles.rowDivider]}>
+      <Image source={item.icon} style={styles.rowIcon} />
+      <View style={styles.rowText}>
+        <Text style={styles.rowLabel}>{item.label}</Text>
+        <Text style={styles.rowValue}>{item.value}</Text>
+      </View>
+    </View>
+  )
+})
+
+/* ---------------- Safe Map Component ---------------- */
+
+const MapComponent = ({
+  lat,
+  lng,
+  name,
+  location,
+  style,
+  scrollEnabled = false,
+  zoomEnabled = false,
+}: any) => {
+  const isValidCoordinates =
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    !isNaN(lat) &&
+    !isNaN(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+
+  if (!isValidCoordinates) {
+    return (
+      <View style={[style, styles.mapFallback]}>
+        <Text style={styles.mapFallbackText}>Location unavailable</Text>
+      </View>
+    )
+  }
+
+  return (
+    <MapView
+      style={style}
+      provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+      initialRegion={{
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      }}
+      scrollEnabled={scrollEnabled}
+      zoomEnabled={zoomEnabled}
+    >
+      <Marker
+        coordinate={{ latitude: lat, longitude: lng }}
+        title={name}
+        description={location}
+      />
+    </MapView>
+  )
+}
+
+/* ---------------- Main Screen ---------------- */
+
 export default function PropertyByID({ id }: { id: string }) {
   const router = useRouter()
   const { t } = useTranslation()
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showLargerMap, setShowLargerMap] = useState(false)
-  const flatListRef = useRef<FlatList>(null)
+  const [loading] = useState(false)
 
   const propertyData = {
     name: 'The Wilds Project',
@@ -45,275 +155,129 @@ export default function PropertyByID({ id }: { id: string }) {
     { icon: propertyDetailsIcon.payment_plan, label: t('property_details.payment_plan'), value: propertyData.payment_plan },
   ]
 
-  const PROPERTY_INFO = [
-    { icon: propertyDetailsIcon.property_files, label: t('property_details.property_file'), styles: { color: '#3b82f680', backgroundColor: "rgba(59, 130, 246, 0.2)" }, route: "/properties/files" },
-    { icon: propertyDetailsIcon.payment_status, label: t('property_details.payment_status'), styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
-    { icon: propertyDetailsIcon.construction, label: t('property_details.construction_progress'), styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
-    { icon: propertyDetailsIcon.assigned_agent, label: t('property_details.assigned_agent'), styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
-  ]
+  const handleBackPress = useCallback(() => {
+    if (router.canGoBack()) router.back()
+    else router.replace('/')
+  }, [router])
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x
-    const currentIndex = Math.round(contentOffsetX / width)
-    setActiveImageIndex(currentIndex)
+  if (loading) {
+    return (
+      <SafeAreaViewWithSpacing>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+        </View>
+      </SafeAreaViewWithSpacing>
+    )
   }
 
-  const renderImageItem = ({ item }: { item: string }) => (
-    <View style={styles.imageContainer}>
-      <Image
-        source={{ uri: item }}
-        style={styles.heroImage}
-        contentFit="cover"
-        transition={300}
-      />
-    </View>
-  )
-
   return (
-    <SafeAreaViewWithSpacing>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <BackHeaderButton
-          title={t('page_title.property_details')}
-          titleFontWeight={800}
-          titleFontFamily="Montserrat-Italic"
-          titleStyle={{ fontStyle: 'italic' }}
-          onPress={() =>
-            router.canGoBack() ? router.back() : router.replace('/')
-          }
-        />
-
-        {/* Image Carousel */}
-        <View style={styles.carouselWrapper}>
-          <FlatList
-            ref={flatListRef}
-            data={propertyData.image}
-            renderItem={renderImageItem}
-            keyExtractor={(item, index) => `image-${index}`}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            snapToInterval={width}
-            decelerationRate="fast"
-            bounces={false}
+    <ErrorBoundary>
+      <SafeAreaViewWithSpacing>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <BackHeaderButton
+            title={t('page_title.property_details')}
+            onPress={handleBackPress}
           />
 
-          {/* Pagination Dots */}
-          {propertyData.image.length > 1 && (
-            <View style={styles.paginationContainer}>
-              {propertyData.image.map((_, index) => (
-                <View
-                  key={`dot-${index}`}
-                  style={[
-                    styles.paginationDot,
-                    index === activeImageIndex && styles.paginationDotActive,
-                  ]}
-                />
-              ))}
-            </View>
-          )}
-        </View>
+          <ImageCarousel images={propertyData.image} />
 
-        {/* Title */}
-        <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>{propertyData.name}</Text>
-        </View>
-
-        {/* Details Card */}
-        <Card style={[styles.card, { width: width - 20 }]}>
-          {DETAILS.map((item, index) => (
-            <DetailRow
-              key={item.label}
-              item={item}
-              isLast={index === DETAILS.length - 1}
-            />
-          ))}
-        </Card>
-
-        {/* Location Card */}
-        <Card style={[styles.card, { width: width - 20 }]}>
-          <DetailRow
-            item={{
-              icon: propertyDetailsIcon.location,
-              label: t('property_details.location'),
-              value: propertyData.location,
-            }}
-            isLast
-          />
-
-          {/* Map View */}
-          <View style={styles.mapContainer}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              initialRegion={{
-                latitude: propertyData.lat,
-                longitude: propertyData.lng,
-                latitudeDelta: 0.02,
-                longitudeDelta: 0.02,
-              }}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              pitchEnabled={false}
-              rotateEnabled={false}
-            >
-              <Marker
-                coordinate={{
-                  latitude: propertyData.lat,
-                  longitude: propertyData.lng,
-                }}
-                title={propertyData.name}
-                description={propertyData.location}
-              />
-            </MapView>
-            <TouchableOpacity
-              style={styles.viewLargerMapButton}
-              onPress={() => setShowLargerMap(true)}
-            >
-              <Text numberOfLines={1} style={styles.viewLargerMapText}>{t('property_details.view_larger_map')}</Text>
-            </TouchableOpacity>
+          <View style={styles.titleWrapper}>
+            <Text style={styles.propertyName}>{propertyData.name}</Text>
           </View>
-        </Card>
-        <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>{t('property_details.property_info')}</Text>
-        </View>
-        <View style={styles.propertyInfoGrid}>
-          {PROPERTY_INFO.map((item) => (
-            <Pressable
-              key={item.label}
-              style={styles.propertyInfoPressable}
-              onPress={() => router.push(item?.route as any)}
-            >
-              <Card style={[
-                styles.propertyInfoCard,
-                {
-                  backgroundColor: item?.styles?.backgroundColor,
-                  borderColor: item?.styles?.color,
-                },
-              ]}
-              >
-                <Image source={item?.icon} style={styles.propertyInfoIcon} />
-                <Text numberOfLines={1} style={[styles.propertyInfoLabel, { color: item?.styles?.color }]}>{item.label}</Text>
-              </Card>
-            </Pressable>
-          ))}
-        </View>
-        <HelpSection />
-        {/* Bottom Spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
 
-      {/* Larger Map Modal */}
-      <Modal
-        visible={showLargerMap}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={() => setShowLargerMap(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+          <Card style={[styles.card, { width: width - 20 }]}>
+            {DETAILS.map((item, index) => (
+              <DetailRow
+                key={`${item.label}-${index}`}
+                item={item}
+                isLast={index === DETAILS.length - 1}
+              />
+            ))}
+          </Card>
+
+          <Card style={[styles.card, { width: width - 20 }]}>
+            <DetailRow
+              item={{
+                icon: propertyDetailsIcon.location,
+                label: t('property_details.location'),
+                value: propertyData.location,
+              }}
+              isLast
+            />
+
+            <View style={styles.mapContainer}>
+              <MapComponent
+                lat={propertyData.lat}
+                lng={propertyData.lng}
+                name={propertyData.name}
+                location={propertyData.location}
+                style={styles.map}
+              />
+
+              <TouchableOpacity
+                style={styles.viewLargerMapButton}
+                onPress={() => setShowLargerMap(true)}
+              >
+                <Text style={styles.viewLargerMapText}>
+                  {t('property_details.view_larger_map')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Card>
+
+          <HelpSection />
+          <View style={{ height: 30 }} />
+        </ScrollView>
+
+        {/* Full Screen Map */}
+        <Modal visible={showLargerMap} animationType="slide">
+          <View style={{ flex: 1 }}>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setShowLargerMap(false)}
             >
-              <Text style={styles.closeButtonText}>✕</Text>
+              <Text style={{ fontSize: 18 }}>✕</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Property Location</Text>
-            <View style={styles.placeholder} />
-          </View>
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.fullScreenMap}
-            initialRegion={{
-              latitude: propertyData.lat,
-              longitude: propertyData.lng,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-            scrollEnabled={true}
-            zoomEnabled={true}
-            pitchEnabled={true}
-            rotateEnabled={true}
-          >
-            <Marker
-              coordinate={{
-                latitude: propertyData.lat,
-                longitude: propertyData.lng,
-              }}
-              title={propertyData.name}
-              description={propertyData.location}
+
+            <MapComponent
+              lat={propertyData.lat}
+              lng={propertyData.lng}
+              name={propertyData.name}
+              location={propertyData.location}
+              style={{ flex: 1 }}
+              scrollEnabled
+              zoomEnabled
             />
-          </MapView>
-        </View>
-      </Modal>
-    </SafeAreaViewWithSpacing >
+          </View>
+        </Modal>
+      </SafeAreaViewWithSpacing>
+    </ErrorBoundary>
   )
 }
 
-const DetailRow = ({ item, isLast }: any) => (
-  <View style={[styles.row, !isLast && styles.rowDivider]}>
-    <Image source={item.icon} style={styles.rowIcon} />
-    <View style={styles.rowText}>
-      <Text style={styles.rowLabel}>{item.label}</Text>
-      <Text style={styles.rowValue}>{item.value}</Text>
-    </View>
-  </View>
-)
-
-/* ---------- Styles ---------- */
+/* ---------------- Styles ---------------- */
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-  },
+  scrollContent: { flexGrow: 1 },
 
-  carouselWrapper: {
-    width,
-    height: IMAGE_HEIGHT,
-    position: 'relative',
-  },
-
-  imageContainer: {
-    width,
-    height: IMAGE_HEIGHT,
-  },
-
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-
-  paginationContainer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
   },
 
-  paginationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  paginationDotActive: {
-    backgroundColor: '#fff',
-    width: 24,
-  },
-
-  imageCounterText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+  errorText: {
+    fontSize: 16,
+    color: 'red',
   },
 
   titleWrapper: {
@@ -322,16 +286,14 @@ const styles = StyleSheet.create({
   },
 
   propertyName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#111',
-    fontFamily: 'Montserrat-SemiBoldItalic',
     fontStyle: 'italic',
   },
 
   card: {
     marginTop: 16,
-    marginHorizontal: "auto",
+    alignSelf: 'center',
     borderRadius: 12,
   },
 
@@ -352,21 +314,17 @@ const styles = StyleSheet.create({
     height: 44,
   },
 
-  rowText: {
-    flex: 1,
-  },
+  rowText: { flex: 1 },
 
   rowLabel: {
     fontSize: 10,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: '#B0B0B0',
-    fontWeight: '500',
   },
 
   rowValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111',
     marginTop: 2,
   },
 
@@ -382,99 +340,38 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  propertyInfoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    marginTop: 16,
+  mapFallback: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  propertyInfoPressable: {
-    width: '48%',
-    marginBottom: 12,
-  },
-
-  propertyInfoCard: {
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-
-  propertyInfoIcon: {
-    width: 40,
-    height: 40,
-  },
-
-  propertyInfoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  bottomSpacing: {
-    height: 24,
+  mapFallbackText: {
+    color: '#666',
   },
 
   viewLargerMapButton: {
     position: 'absolute',
     bottom: 12,
     right: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 6,
   },
 
   viewLargerMapText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '600',
-  },
-
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    paddingTop: 50,
   },
 
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  closeButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-  },
-
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111',
-  },
-
-  placeholder: {
-    width: 32,
-  },
-
-  fullScreenMap: {
-    flex: 1,
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 20,
   },
 })
