@@ -19,7 +19,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+
+// Conditional import for MapView to avoid crash
+let MapView: any, Marker: any
+try {
+  const maps = require('react-native-maps')
+  MapView = maps.default
+  Marker = maps.Marker
+} catch (e) {
+  console.warn('react-native-maps not available', e)
+}
 
 const { width } = Dimensions.get('window')
 
@@ -61,7 +70,10 @@ const DetailRow = memo(({ item, isLast }: any) => {
 
   return (
     <View style={[styles.row, !isLast && styles.rowDivider]}>
-      <Image source={item.icon} style={styles.rowIcon} />
+      <Image
+        source={item.icon}
+        style={styles.rowIcon}
+      />
       <View style={styles.rowText}>
         <Text style={styles.rowLabel}>{item.label}</Text>
         <Text style={styles.rowValue}>{item.value}</Text>
@@ -91,7 +103,7 @@ const MapComponent = ({
     lng >= -180 &&
     lng <= 180
 
-  if (!isValidCoordinates) {
+  if (!MapView || !isValidCoordinates) {
     return (
       <View style={[style, styles.mapFallback]}>
         <Text style={styles.mapFallbackText}>Location unavailable</Text>
@@ -102,7 +114,7 @@ const MapComponent = ({
   return (
     <MapView
       style={style}
-      provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+      provider={Platform.OS === 'android' ? MapView.PROVIDER_GOOGLE : undefined}
       initialRegion={{
         latitude: lat,
         longitude: lng,
@@ -182,7 +194,10 @@ export default function PropertyByID({ id }: { id: string }) {
             onPress={handleBackPress}
           />
 
-          <ImageCarousel images={propertyData.image} />
+          {/* Only render carousel if images exist */}
+          {Array.isArray(propertyData.image) && propertyData.image.length > 0 && (
+            <ImageCarousel images={propertyData.image} />
+          )}
 
           <View style={styles.titleWrapper}>
             <Text style={styles.propertyName}>{propertyData.name}</Text>
