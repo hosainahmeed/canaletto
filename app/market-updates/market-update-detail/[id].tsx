@@ -62,7 +62,7 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
         <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData.image}
+            data={propertyData?.image}
             renderItem={renderImageItem}
             keyExtractor={(item, index) => `image-${index}`}
             horizontal
@@ -76,14 +76,14 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
           />
 
           {/* Pagination Dots */}
-          {propertyData.image.length > 1 && (
-            <View style={styles.paginationContainer}>
-              {propertyData.image.map((_, index) => (
+          {propertyData?.image?.length > 1 && (
+            <View style={styles?.paginationContainer}>
+              {propertyData?.image.map((_, index) => (
                 <View
                   key={`dot-${index}`}
                   style={[
-                    styles.paginationDot,
-                    index === activeImageIndex && styles.paginationDotActive,
+                    styles?.paginationDot,
+                    index === activeImageIndex && styles?.paginationDotActive,
                   ]}
                 />
               ))}
@@ -93,12 +93,12 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
 
         {/* Title */}
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.title}>{propertyData.name}</Text>
+          <Text numberOfLines={2} style={styles.title}>{propertyData?.name}</Text>
         </View>
         <View style={styles.descriptionWrapper}>
-          <Text numberOfLines={2} style={styles.descriptionStyle}>{propertyData.description}</Text>
+          <Text numberOfLines={2} style={styles.descriptionStyle}>{propertyData?.description}</Text>
         </View>
-        <InsightsDownSection icon={IMAGE.market_icon} title="Market Updates" description="Posted on 14 January 2028" />
+        <InsightsDownSection icon={IMAGE?.market_icon} title="Market Updates" description="Posted on 14 January 2028" />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
