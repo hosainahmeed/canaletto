@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Button from '../ui/button';
 
@@ -11,15 +12,16 @@ interface NextButtonProps {
 }
 
 export default function NextButton({ scrollTo, handleSkip, currentIndex, slideData }: NextButtonProps) {
+  const { t } = useTranslation()
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={styles.skipText}>{t('action.skip')}</Text>
       </TouchableOpacity>
       <Button
         iconPosition='right'
         icon={<MaterialIcons name="arrow-forward" size={18} color="#FFFFFF" />}
-        style={{ borderRadius: 30, shadowColor: "white" }} onPress={scrollTo} title="Next" />
+        style={{ borderRadius: 30, shadowColor: "white" }} onPress={scrollTo} title={t('action.next')} />
     </View>
   );
 }

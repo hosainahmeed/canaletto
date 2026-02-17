@@ -2,11 +2,13 @@ import { IMAGE, propertyDetailsIcon } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import InsightsDownSection from '@/components/share/InsightsDownSection'
+import MapModal from '@/components/share/MapModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
@@ -17,6 +19,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showLargerMap, setShowLargerMap] = useState(false)
   const flatListRef = useRef<FlatList>(null)
+  const { t } = useTranslation()
 
   const propertyData = {
     id: '1',
@@ -38,11 +41,11 @@ export default function NewProjectDetail({ id }: { id: string }) {
   }
 
   const DETAILS = [
-    { icon: propertyDetailsIcon.size, label: 'Size', value: propertyData.size },
-    { icon: propertyDetailsIcon.rooms, label: 'Rooms', value: propertyData.rooms },
-    { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: propertyData.type_of_use },
-    { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: propertyData.property_type },
-    { icon: propertyDetailsIcon.units, label: 'Total Units', value: propertyData.total_units },
+    { icon: propertyDetailsIcon.size, label: 'Size', value: propertyData?.size },
+    { icon: propertyDetailsIcon.rooms, label: 'Rooms', value: propertyData?.rooms },
+    { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: propertyData?.type_of_use },
+    { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: propertyData?.property_type },
+    { icon: propertyDetailsIcon.units, label: 'Total Units', value: propertyData?.total_units },
   ]
 
   const PROPERTY_INFO = [
@@ -76,7 +79,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="New Projects"
+          title={t('page_title.new_projects')}
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}
@@ -89,7 +92,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
         <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData.image}
+            data={propertyData?.image}
             renderItem={renderImageItem}
             keyExtractor={(item, index) => `image-${index}`}
             horizontal
@@ -103,9 +106,9 @@ export default function NewProjectDetail({ id }: { id: string }) {
           />
 
           {/* Pagination Dots */}
-          {propertyData.image.length > 1 && (
+          {propertyData?.image.length > 1 && (
             <View style={styles.paginationContainer}>
-              {propertyData.image.map((_, index) => (
+              {propertyData?.image.map((_, index) => (
                 <View
                   key={`dot-${index}`}
                   style={[
@@ -118,13 +121,12 @@ export default function NewProjectDetail({ id }: { id: string }) {
           )}
         </View>
         <View style={{ backgroundColor: "rgba(168, 85, 247, 0.4)", padding: 8, borderRadius: 8, marginBottom: 16, width: "30%", justifyContent: "center", alignContent: "center", marginTop: 12, marginLeft: 12 }}>
-          <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{propertyData.status}</Text>
+          <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{propertyData?.status}</Text>
         </View>
         {/* Title */}
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>{propertyData.name}</Text>
+          <Text numberOfLines={2} style={styles.propertyName}>{propertyData?.name}</Text>
         </View>
-
         {/* Details Card */}
         <Card style={[styles.card, { width: width - 20 }]}>
           {DETAILS.map((item, index) => (
@@ -135,6 +137,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
             />
           ))}
         </Card>
+
         <View style={styles.titleWrapper}>
           <Text numberOfLines={2} style={styles.propertyName}>Property Info</Text>
         </View>
@@ -160,46 +163,14 @@ export default function NewProjectDetail({ id }: { id: string }) {
             item={{
               icon: propertyDetailsIcon.location,
               label: 'Location',
-              value: propertyData.location,
+              value: propertyData?.location,
             }}
             isLast
           />
-
-          {/* Map View */}
-          <View style={styles.mapContainer}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              initialRegion={{
-                latitude: propertyData.lat,
-                longitude: propertyData.lng,
-                latitudeDelta: 0.02,
-                longitudeDelta: 0.02,
-              }}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              pitchEnabled={false}
-              rotateEnabled={false}
-            >
-              <Marker
-                coordinate={{
-                  latitude: propertyData.lat,
-                  longitude: propertyData.lng,
-                }}
-                title={propertyData.name}
-                description={propertyData.location}
-              />
-            </MapView>
-            <TouchableOpacity
-              style={styles.viewLargerMapButton}
-              onPress={() => setShowLargerMap(true)}
-            >
-              <Text style={styles.viewLargerMapText}>View Larger Map</Text>
-            </TouchableOpacity>
-          </View>
+          <MapModal propertyData={propertyData} setShowLargerMap={setShowLargerMap} />
         </Card>
         <Button
-          title="Get Insights"
+          title={t('action.get_insights')}
           style={{
             width: width - 20,
             marginHorizontal: 10,
@@ -209,11 +180,10 @@ export default function NewProjectDetail({ id }: { id: string }) {
           icon={<Image source={IMAGE.thumb} style={{ width: 16, height: 16 }} />}
           iconPosition='right'
           onPress={() => {
-            router.push(`/new-projects/express-interest/${propertyData.id}` as any)
+            router.push(`/new-projects/express-interest/${propertyData?.id}` as any)
           }}
         />
         <InsightsDownSection titleColor='#A855F7' icon={IMAGE.newProject} title="New Projects" description="Posted on 14 January 2026" />
-        {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
@@ -224,7 +194,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
         presentationStyle="fullScreen"
         onRequestClose={() => setShowLargerMap(false)}
       >
-        <View style={styles.modalContainer}>
+        {propertyData?.lat && propertyData?.lng && <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -239,8 +209,8 @@ export default function NewProjectDetail({ id }: { id: string }) {
             provider={PROVIDER_GOOGLE}
             style={styles.fullScreenMap}
             initialRegion={{
-              latitude: propertyData.lat,
-              longitude: propertyData.lng,
+              latitude: propertyData?.lat || 0,
+              longitude: propertyData?.lng || 0,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -251,14 +221,14 @@ export default function NewProjectDetail({ id }: { id: string }) {
           >
             <Marker
               coordinate={{
-                latitude: propertyData.lat,
-                longitude: propertyData.lng,
+                latitude: propertyData?.lat,
+                longitude: propertyData?.lng,
               }}
-              title={propertyData.name}
-              description={propertyData.location}
+              title={propertyData?.name}
+              description={propertyData?.location}
             />
           </MapView>
-        </View>
+        </View>}
       </Modal>
     </SafeAreaViewWithSpacing >
   )
@@ -332,7 +302,8 @@ const styles = StyleSheet.create({
   },
 
   propertyName: {
-    fontSize: 20,
+    fontSize: 16,
+    marginTop: 12,
     fontWeight: '700',
     color: '#111',
     fontFamily: 'Montserrat-SemiBoldItalic',
@@ -380,18 +351,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  mapContainer: {
-    marginTop: 12,
-    borderRadius: 12,
-    overflow: 'hidden',
-    height: 180,
-  },
-
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-
   propertyInfoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -435,23 +394,6 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: 24,
   },
-
-  viewLargerMapButton: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-
-  viewLargerMapText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
   modalContainer: {
     flex: 1,
     backgroundColor: '#fff',

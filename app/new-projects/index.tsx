@@ -4,6 +4,7 @@ import FilterHeader from '@/components/share/FilterHeader'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 
 const DATA = [
@@ -26,6 +27,7 @@ const DATA = [
 
 export default function NewProjects() {
   const router = useRouter()
+  const { t } = useTranslation()
 
   const renderItem = ({ item }: any) => (
     <GradientCard
@@ -55,7 +57,7 @@ export default function NewProjects() {
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM, SafeAreaEdge.TOP, SafeAreaEdge.LEFT, SafeAreaEdge.RIGHT]}>
       <BackHeaderButton
-        title="New Projects"
+        title={t('page_title.new_projects')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}

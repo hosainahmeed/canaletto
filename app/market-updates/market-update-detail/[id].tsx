@@ -5,6 +5,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const { width, height } = Dimensions.get('window')
@@ -13,6 +14,7 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
   const router = useRouter()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
+  const { t } = useTranslation()
 
   const propertyData = {
     name: 'Dubai Property Market Shows Strong Q1 Growth',
@@ -49,7 +51,7 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="Market Update"
+          title={t('page_title.market_updates')}
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}
@@ -98,7 +100,7 @@ export default function MarketUpdateDetail({ id }: { id: string }) {
         <View style={styles.descriptionWrapper}>
           <Text numberOfLines={2} style={styles.descriptionStyle}>{propertyData?.description}</Text>
         </View>
-        <InsightsDownSection icon={IMAGE?.market_icon} title="Market Updates" description="Posted on 14 January 2028" />
+        <InsightsDownSection icon={IMAGE?.market_icon} title={t('page_title.market_updates')} description="Posted on 14 January 2028" />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>

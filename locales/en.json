@@ -20,7 +20,8 @@
     "save_change": "Save Change",
     "close": "Close",
     "view_all": "View All",
-    "back_to_login": "Back to Login"
+    "back_to_login": "Back to Login",
+    "get_insights": "Get Insights"
   },
   "onboarding": {
     "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
@@ -151,6 +152,11 @@
     "express_interest": "Express Interest",
     "property_info": "Property Info",
     "view_larger_map": "View Larger Map"
+  },
+  "support": {
+    "title": "Canaletto Sky World Support",
+    "description": "Our support team is available 24/7 to assist you",
+    "status": "Active"
   },
   "tabs": {
     "home": "Home",

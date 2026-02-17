@@ -11,10 +11,12 @@ import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
   Dimensions,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native'
 
@@ -114,10 +116,10 @@ const MapComponent = ({
       style={style}
       provider={Platform.OS === 'android' ? MapView.PROVIDER_GOOGLE : undefined}
       initialRegion={{
-        latitude: lat,
-        longitude: lng,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
+        latitude: lat || 23.8103,
+        longitude: lng || 90.4125,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
       }}
       scrollEnabled={scrollEnabled}
       zoomEnabled={zoomEnabled}
@@ -221,7 +223,7 @@ export default function PropertyByID({ id }: { id: string }) {
               isLast
             />
 
-            {/* <View style={styles.mapContainer}>
+            <View style={styles.mapContainer}>
               <MapComponent
                 lat={propertyData.lat}
                 lng={propertyData.lng}
@@ -238,7 +240,7 @@ export default function PropertyByID({ id }: { id: string }) {
                   {t('property_details.view_larger_map')}
                 </Text>
               </TouchableOpacity>
-            </View> */}
+            </View>
           </Card>
 
           <HelpSection />
@@ -246,7 +248,7 @@ export default function PropertyByID({ id }: { id: string }) {
         </ScrollView>
 
         {/* Full Screen Map */}
-        {/* <Modal visible={showLargerMap} animationType="slide">
+        <Modal visible={showLargerMap} animationType="slide">
           <View style={{ flex: 1 }}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -265,7 +267,7 @@ export default function PropertyByID({ id }: { id: string }) {
               zoomEnabled
             />
           </View>
-        </Modal> */}
+        </Modal>
       </SafeAreaViewWithSpacing>
     </ErrorBoundary>
   )

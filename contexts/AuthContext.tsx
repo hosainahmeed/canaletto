@@ -20,7 +20,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [loginUser, setLoginUser] = useState(true);
+  const [loginUser, setLoginUser] = useState(false);
 
   return (
     <AuthContext.Provider value={{ loginUser, setLoginUser }}>

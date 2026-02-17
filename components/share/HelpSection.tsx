@@ -40,18 +40,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    // fontWeight: '900',
+    width: '90%',
     flexWrap: 'wrap',
     wordWrap: 'wrap',
     fontFamily: 'Nunito-MediumItalic',
   },
   description: {
     fontSize: 12,
+    wordWrap: 'wrap',
+    width: '90%',
     fontWeight: '400',
     fontFamily: 'Nunito-Italic',
     color: '#5d5c5cff',
     flexWrap: 'wrap',
-    wordWrap: 'wrap',
   },
   iconWrapper: {
     width: 48,

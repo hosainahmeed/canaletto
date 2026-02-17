@@ -33,7 +33,12 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.INTERNET"
       ],
-      "package": "com.realstate.canaletto"
+      "package": "com.realstate.canaletto",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC3esyXDxGvHFum3gusmoiyq42o-1Y6Rls"
+        }
+      }
     },
     "web": {
       "output": "static",

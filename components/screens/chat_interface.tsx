@@ -10,6 +10,7 @@ import {
   TextInput,
   View
 } from 'react-native'
+import SafeAreaViewWithSpacing, { SafeAreaEdge } from '../safe-area/SafeAreaViewWithSpacing'
 
 interface MessageItemProps {
   _id: number
@@ -62,48 +63,50 @@ export default function ChatInterface() {
   }
 
   return (
-    <KeyboardAvoider
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0}
-    >
-      {/* Messages */}
-      <View style={styles.listWrapper}>
-        <FlatList
-          ref={listRef}
-          data={data.reverse()}
-          inverted
-          keyExtractor={(item) => item._id.toString()}
-          renderItem={({ item }) => <MessageItem message={item} />}
-          contentContainerStyle={styles.list}
-          keyboardDismissMode="interactive"
-        />
-      </View>
-
-      {/* Input Bar */}
-      <View style={styles.inputWrapper}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            value={message}
-            onChangeText={setMessage}
-            placeholder="Message..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            style={[styles.input, { height: Math.min(120, inputHeight) }]}
-            onContentSizeChange={(e) =>
-              setInputHeight(e.nativeEvent.contentSize.height + 12)
-            }
-          />
-
-          <Ionicons
-            name="send"
-            size={22}
-            color={message.trim() ? '#D4B785' : '#9CA3AF'}
-            onPress={sendMessage}
-            style={{ borderLeftWidth: 1, borderLeftColor: "#fff", paddingLeft: 4 }}
+    <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM]}>
+      <KeyboardAvoider
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0}
+      >
+        {/* Messages */}
+        <View style={styles.listWrapper}>
+          <FlatList
+            ref={listRef}
+            data={data.reverse()}
+            inverted
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={({ item }) => <MessageItem message={item} />}
+            contentContainerStyle={styles.list}
+            keyboardDismissMode="interactive"
           />
         </View>
-      </View>
-    </KeyboardAvoider>
+
+        {/* Input Bar */}
+        <View style={styles.inputWrapper}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Message..."
+              placeholderTextColor="#9CA3AF"
+              multiline
+              style={[styles.input, { height: Math.min(120, inputHeight) }]}
+              onContentSizeChange={(e) =>
+                setInputHeight(e.nativeEvent.contentSize.height + 12)
+              }
+            />
+
+            <Ionicons
+              name="send"
+              size={22}
+              color={message.trim() ? '#D4B785' : '#9CA3AF'}
+              onPress={sendMessage}
+              style={{ borderLeftWidth: 1, borderLeftColor: "#fff", paddingLeft: 4 }}
+            />
+          </View>
+        </View>
+      </KeyboardAvoider>
+    </SafeAreaViewWithSpacing>
   )
 }
 

@@ -6,10 +6,12 @@ import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 
 export default function Support() {
   const router = useRouter()
+  const { t } = useTranslation()
   const { width: screenWidth } = useWindowDimensions()
   return (
     <SafeAreaViewWithSpacing>
@@ -31,13 +33,13 @@ export default function Support() {
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
             <Image source={IMAGE.moon} style={styles.icon} />
             <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>• Active</Text>
+              <Text style={styles.badgeText}>• {t("support.status")}</Text>
             </View>
           </View>
           <View style={styles.contentWrapper}>
             <View>
-              <Text style={styles.title}>Canaletto Sky World Support</Text>
-              <Text style={styles.subtitle}>Our support team is available 24/7 to assist you</Text>
+              <Text style={styles.title}>{t("support.title")}</Text>
+              <Text style={styles.subtitle}>{t("support.description")}</Text>
             </View>
             <LinearGradient style={styles.iconWrapper} colors={["#D4B785", "#B08D59"]}>
               <Image style={styles.chatIcon} source={IMAGE.support_icon_fill} />
@@ -93,12 +95,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontFamily: 'Nunito-Italic',
     fontStyle: 'italic',
+    wordWrap: 'wrap',
+    width: '90%',
   },
   subtitle: {
     fontSize: 12,
     fontWeight: '400',
     fontFamily: 'Nunito-Italic',
     fontStyle: 'italic',
+    wordWrap: 'wrap',
+    width: '90%',
     color: '#B0B0B0',
   },
   iconWrapper: {

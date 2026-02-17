@@ -5,7 +5,7 @@
   "select_language": "Sprache auswählen",
   "action": {
     "skip": "Überspringen",
-    "next": "Weiter",
+    "next": "Nächste",
     "login": "Anmelden",
     "logout": "Abmelden",
     "send_verification_code": "Verifizierungscode senden",
@@ -24,7 +24,8 @@
     "save_change": "Änderung speichern",
     "close": "Schließen",
     "view_all": "Alle anzeigen",
-    "back_to_login": "Zurück zur Anmeldung"
+    "back_to_login": "Zurück zur Anmeldung",
+    "get_insights": "Erhalte Einblicke"
   },
   "login_screen": {
     "welcome_back": "Willkommen zurück",
@@ -152,11 +153,16 @@
     "property_info": "Immobilieninformationen",
     "view_larger_map": "Größere Karte anzeigen"
   },
+  "support": {
+    "title": "Canaletto Sky World Support",
+    "description": "Unser Support-Team ist rund um die Uhr (24/7) für Sie da.",
+    "status": "Aktiv"
+  },
   "tabs": {
     "home": "Startseite",
     "insights": "Einblicke",
     "properties": "Immobilien",
-    "support": "Support",
+    "support": "Unterstützung",
     "profile": "Profil"
   }
 }
