@@ -14,12 +14,23 @@ export default function HelpSection({ title, description, icon, onPress }: { tit
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress || (() => router.push('/(tabs)/Support'))}>
       <Card style={[styles.card, { width: screenWidth - 20 }]}>
-        <View>
-          <Text numberOfLines={1} style={styles.title}>{title || t("help_section.title")}</Text>
-          <Text numberOfLines={1} style={styles.description}>{description || t("help_section.description")}</Text>
+        <View style={styles.textContainer}>
+          <Text numberOfLines={1} style={styles.title}>
+            {title || t("help_section.title")}
+          </Text>
+          <Text numberOfLines={1} style={styles.description}>
+            {description || t("help_section.description")}
+          </Text>
         </View>
-        <LinearGradient style={styles.iconWrapper} colors={["#D4B785", "#B08D59"]}>
-          <Image style={styles.icon} source={icon || IMAGE.support_icon_fill} />
+
+        <LinearGradient
+          style={styles.iconWrapper}
+          colors={["#D4B785", "#B08D59"]}
+        >
+          <Image
+            style={styles.icon}
+            source={icon || IMAGE.support_icon_fill}
+          />
         </LinearGradient>
       </Card>
     </TouchableOpacity>
@@ -38,21 +49,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
   },
+
+  textContainer: {
+    flex: 1,
+    marginRight: 10
+  },
+
   title: {
     fontSize: 14,
-    width: '90%',
-    flexWrap: 'wrap',
-    wordWrap: 'wrap',
     fontFamily: 'Nunito-MediumItalic',
   },
+
   description: {
     fontSize: 12,
-    wordWrap: 'wrap',
-    width: '90%',
     fontWeight: '400',
     fontFamily: 'Nunito-Italic',
     color: '#5d5c5cff',
-    flexWrap: 'wrap',
   },
   iconWrapper: {
     width: 48,

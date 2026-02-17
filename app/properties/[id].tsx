@@ -13,6 +13,7 @@ import {
   Dimensions,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -166,7 +167,12 @@ export default function PropertyByID({ id }: { id: string }) {
     { icon: propertyDetailsIcon.units, label: t('property_details.total_units'), value: propertyData.total_units },
     { icon: propertyDetailsIcon.payment_plan, label: t('property_details.payment_plan'), value: propertyData.payment_plan },
   ]
-
+  const PROPERTY_INFO = [
+    { icon: propertyDetailsIcon.property_files, label: t('property_details.property_file'), styles: { color: '#3b82f680', backgroundColor: "rgba(59, 130, 246, 0.2)" }, route: "/properties/files" },
+    { icon: propertyDetailsIcon.payment_status, label: t('property_details.payment_status'), styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
+    { icon: propertyDetailsIcon.construction, label: t('property_details.construction_progress'), styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
+    { icon: propertyDetailsIcon.assigned_agent, label: t('property_details.assigned_agent'), styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
+  ]
   const handleBackPress = useCallback(() => {
     if (router.canGoBack()) router.back()
     else router.replace('/')
@@ -242,9 +248,32 @@ export default function PropertyByID({ id }: { id: string }) {
               </TouchableOpacity>
             </View>
           </Card>
-
+          <View style={styles.titleWrapper}>
+            <Text numberOfLines={2} style={styles.propertyName}>{t('property_details.property_info')}</Text>
+          </View>
+          <View style={styles.propertyInfoGrid}>
+            {PROPERTY_INFO.map((item) => (
+              <Pressable
+                key={item.label}
+                style={styles.propertyInfoPressable}
+                onPress={() => router.push(item?.route as any)}
+              >
+                <Card style={[
+                  styles.propertyInfoCard,
+                  {
+                    backgroundColor: item?.styles?.backgroundColor,
+                    borderColor: item?.styles?.color,
+                  },
+                ]}
+                >
+                  <Image source={item?.icon} style={styles.propertyInfoIcon} />
+                  <Text numberOfLines={1} style={[styles.propertyInfoLabel, { color: item?.styles?.color }]}>{item.label}</Text>
+                </Card>
+              </Pressable>
+            ))}
+          </View>
           <HelpSection />
-          <View style={{ height: 30 }} />
+          <View style={styles.bottomSpacing} />
         </ScrollView>
 
         {/* Full Screen Map */}
@@ -311,7 +340,40 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 12,
   },
+  propertyInfoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    marginTop: 16,
+  },
 
+  propertyInfoPressable: {
+    width: '48%',
+    marginBottom: 12,
+  },
+
+  propertyInfoCard: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+
+  propertyInfoIcon: {
+    width: 40,
+    height: 40,
+  },
+
+  propertyInfoLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  bottomSpacing: {
+    height: 24,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
