@@ -1,16 +1,21 @@
 import { Ionicons } from '@expo/vector-icons'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from 'react-native'
-import SafeAreaViewWithSpacing, { SafeAreaEdge } from '../safe-area/SafeAreaViewWithSpacing'
+import SafeAreaViewWithSpacing, {
+  SafeAreaEdge,
+} from '../safe-area/SafeAreaViewWithSpacing'
+
+/* ---------------- Types ---------------- */
 
 interface MessageItemProps {
   _id: number
@@ -24,9 +29,13 @@ interface MessageItemProps {
   }
 }
 
+/* ---------------- Chat Screen ---------------- */
+
 export default function ChatInterface() {
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
   const listRef = useRef<FlatList>(null)
 
   const [data, setData] = useState<MessageItemProps[]>([
@@ -35,54 +44,108 @@ export default function ChatInterface() {
       message: 'Hey! How are you doing?',
       createdAt: new Date(),
       isMyMessage: true,
-      user: { _id: 1, name: 'Me', avatar: 'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png' },
+      user: {
+        _id: 1,
+        name: 'Me',
+        avatar:
+          'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+      },
     },
     {
       _id: 2,
       message: "I'm good! What about you?",
       createdAt: new Date(),
       isMyMessage: false,
-      user: { _id: 2, name: 'Support', avatar: 'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png' },
+      user: {
+        _id: 2,
+        name: 'Support',
+        avatar:
+          'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+      },
     },
   ])
 
+  /* ---------------- Keyboard Handling ---------------- */
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    )
+
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    )
+
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
+
+  /* ---------------- Auto Scroll ---------------- */
+
+  useEffect(() => {
+    listRef.current?.scrollToOffset({
+      offset: 0,
+      animated: true,
+    })
+  }, [data])
+
+  /* ---------------- Send Message ---------------- */
 
   const sendMessage = () => {
     if (!message.trim()) return
-    console.log('SEND MESSAGE:', message)
-    setMessage('')
-    setInputHeight(40)
-    const newMessage = {
-      _id: Math.random(),
+
+    const newMessage: MessageItemProps = {
+      _id: Date.now(),
       message,
       createdAt: new Date(),
       isMyMessage: true,
-      user: { _id: 1, name: 'Me', avatar: 'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png' },
+      user: {
+        _id: 1,
+        name: 'Me',
+        avatar:
+          'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+      },
     }
-    setData([...data, newMessage])
+
+    setData((prev) => [...prev, newMessage])
+    setMessage('')
+    setInputHeight(40)
   }
+
+  /* ---------------- UI ---------------- */
 
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM]}>
       <KeyboardAvoidingView
         style={styles.container}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
       >
-        {/* Messages */}
+        {/* Message List */}
         <View style={styles.listWrapper}>
           <FlatList
             ref={listRef}
-            data={data.reverse()}
+            data={[...data].reverse()} // ✅ prevent mutation bug
             inverted
             keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => <MessageItem message={item} />}
             contentContainerStyle={styles.list}
             keyboardDismissMode="interactive"
+            showsVerticalScrollIndicator={false}
           />
         </View>
 
-        {/* Input Bar */}
-        <View style={styles.inputWrapper}>
+        {/* Input */}
+        <View
+          style={[
+            styles.inputWrapper,
+            { paddingBottom: keyboardHeight > 0 ? 8 : 0 },
+          ]}
+        >
           <View style={styles.inputContainer}>
             <TextInput
               value={message}
@@ -101,7 +164,7 @@ export default function ChatInterface() {
               size={22}
               color={message.trim() ? '#D4B785' : '#9CA3AF'}
               onPress={sendMessage}
-              style={{ borderLeftWidth: 1, borderLeftColor: "#fff", paddingLeft: 4 }}
+              style={styles.sendIcon}
             />
           </View>
         </View>
@@ -114,6 +177,7 @@ export default function ChatInterface() {
 
 const MessageItem = ({ message }: { message: MessageItemProps }) => {
   const isMine = message.isMyMessage
+
   const time = message.createdAt.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -129,6 +193,7 @@ const MessageItem = ({ message }: { message: MessageItemProps }) => {
         <Text style={[styles.text, isMine && styles.myText]}>
           {message.message}
         </Text>
+
         <Text style={[styles.time, isMine && styles.myTime]}>{time}</Text>
       </View>
     </View>
@@ -143,13 +208,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
 
+  listWrapper: {
+    flex: 1,
+  },
+
   list: {
     padding: 12,
     gap: 12,
-  },
-
-  listWrapper: {
-    flex: 1,
   },
 
   messageRow: {
@@ -205,7 +270,8 @@ const styles = StyleSheet.create({
   },
 
   inputWrapper: {
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#FFF',
@@ -226,5 +292,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     maxHeight: 120,
     paddingVertical: 6,
+  },
+
+  sendIcon: {
+    borderLeftWidth: 1,
+    borderLeftColor: '#fff',
+    paddingLeft: 8,
   },
 })
