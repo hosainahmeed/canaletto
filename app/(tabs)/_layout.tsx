@@ -74,6 +74,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: "#D4B785",
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarHideOnKeyboard: true,
       }}>
       <Tabs.Screen
         name="index"

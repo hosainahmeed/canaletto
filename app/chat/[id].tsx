@@ -4,7 +4,6 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { StyleSheet } from 'react-native'
 
 export default function Chat({ id }: { id: string }) {
   const { loginUser } = useAuth()
@@ -33,27 +32,3 @@ export default function Chat({ id }: { id: string }) {
     </SafeAreaViewWithSpacing>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 10,
-  },
-  message: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-  },
-})

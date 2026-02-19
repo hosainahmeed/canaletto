@@ -1,9 +1,9 @@
-import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useRef, useState } from 'react'
 import {
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
@@ -64,7 +64,7 @@ export default function ChatInterface() {
 
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM]}>
-      <KeyboardAvoider
+      <KeyboardAvoidingView
         style={styles.container}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0}
       >
@@ -105,7 +105,7 @@ export default function ChatInterface() {
             />
           </View>
         </View>
-      </KeyboardAvoider>
+      </KeyboardAvoidingView>
     </SafeAreaViewWithSpacing>
   )
 }
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    maxHeight: 120, // ≈ 3 lines
+    maxHeight: 120,
     paddingVertical: 6,
   },
 })
