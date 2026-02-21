@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.transparent,
   },
   danger: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FE4C5D',
   },
 
   // Button sizes

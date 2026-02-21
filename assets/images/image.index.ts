@@ -1,7 +1,5 @@
 export const IMAGE = {
   bursar: require("./burj-arab.png"),
-  home_icon: require("./home_icon.png"),
-  home_icon_fill: require("./home_icon_fill.png"),
   property_icon: require("./property_icon.png"),
   property_icon_fill: require("./property_icon_fill.png"),
   profile_icon: require("./profile_icon.png"),
@@ -9,7 +7,6 @@ export const IMAGE = {
   support_icon: require("./support_icon.png"),
   support_icon_fill: require("./support_icon_fill.png"),
   insights_icon: require("./insights_icon.png"),
-  insights_icon_fill: require("./insights_icon_fill.png"),
   back_icon: require("./back_icon.png"),
   forward_icon: require("./forward_icon.png"),
   green_forward: require("./green_forward.png"),

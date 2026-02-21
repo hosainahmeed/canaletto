@@ -13,7 +13,7 @@ export default function InsightsDownSection({ icon, title, description, onPress,
         <View style={styles.iconWrapper} >
           <Image style={styles.icon} source={icon} />
         </View>
-        <View>
+        <View style={{ overflow: "hidden" }}>
           <Text numberOfLines={1} style={[styles.title, { color: titleColor || '#000' }]}>{title}</Text>
           <Text numberOfLines={1} style={styles.description}>{description}</Text>
         </View>
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '900',
     fontFamily: 'Nunito-SemiBold',
   },

@@ -16,39 +16,39 @@ export interface Property {
 export interface PropertyCardProps {
   property: Property;
   onViewPress?: () => void;
+  isTablet?: boolean;
 }
-const { width } = Dimensions.get('window')
 
-export default function PropertyCard({ property, onViewPress }: PropertyCardProps) {
-  const router = useRouter()
-  const { t } = useTranslation()
+const { width } = Dimensions.get('window');
+
+export default function PropertyCard({ property, onViewPress, isTablet }: PropertyCardProps) {
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  const cardWidth = isTablet ? width / 2 - 24 : width - 24; // dynamic width for tablets and mobiles
+  const imageHeight = isTablet ? 220 : 180; // adaptive image height
+
   return (
-    <View style={styles.card}>
-      {/* Image Container */}
-      <View style={styles.imageContainer}>
+    <View style={[styles.card, { width: cardWidth }]}>
+      <View style={[styles.imageContainer, { height: imageHeight }]}>
         <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
       </View>
 
-      {/* Content Container */}
       <View style={styles.contentContainer}>
-        {/* Property Name */}
-        <Text style={styles.propertyName}>{property.name}</Text>
+        <Text style={[styles.propertyName, { fontSize: isTablet ? 18 : 16 }]}>{property.name}</Text>
         <Image style={styles.bursar} source={IMAGE.bursar} />
-        {/* Location */}
         <View style={styles.locationContainer}>
           <Ionicons name="location-outline" size={16} color="#9CA3AF" />
           <Text style={styles.locationText}>{property.location}</Text>
         </View>
 
-        {/* View Property Button */}
         <Button
           size={ButtonSize.MEDIUM}
-          style={{ width: 200, borderRadius: 8 }}
-          onPress={() => {
-            router.push(`/properties/${property.id}`)
-          }} title={t('action.view_property')}
+          style={{ alignSelf: 'flex-start', borderRadius: 8, minWidth: "100%" }}
+          onPress={() => router.push(`/properties/${property.id}`)}
+          title={t('action.view_property')}
           iconPosition='right'
-          icon={<Image width={20} height={20} style={{ width: 20, height: 20 }} source={IMAGE.forward_icon} />}
+          icon={<Image style={{ width: 20, height: 20 }} source={IMAGE.forward_icon} />}
         />
       </View>
     </View>
@@ -62,14 +62,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginVertical: 8,
     borderWidth: 1,
-    padding: 0.5,
-    borderColor: `#DDDDDD`,
-    width: width - 20,
-    marginHorizontal: 'auto',
+    borderColor: '#DDDDDD',
   },
   imageContainer: {
     width: '100%',
-    height: 200,
     backgroundColor: '#F3F4F6',
     overflow: 'hidden',
     borderTopLeftRadius: 16,
@@ -81,12 +77,11 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   contentContainer: {
-    padding: 10,
+    padding: 12,
     paddingTop: 16,
-    position: "relative"
+    position: "relative",
   },
   propertyName: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,
@@ -96,10 +91,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 100,
-    height: 150,
+    width: 80,
+    height: 120,
     zIndex: 999,
-    pointerEvents: "none"
+    pointerEvents: "none",
   },
   locationContainer: {
     flexDirection: 'row',
@@ -111,11 +106,5 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginLeft: 4,
     flex: 1,
-  },
-  viewButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.2,
   },
 });

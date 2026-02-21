@@ -1,6 +1,5 @@
 import SplashScreen from '@/components/SplahScreen';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -25,21 +24,21 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <KeyboardProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <GlobalContextProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen
-                name="modal"
-                options={{ presentation: 'modal' }}
-              />
-            </Stack>
+        {/* <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> */}
+        <GlobalContextProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: 'modal' }}
+            />
+          </Stack>
 
-            <StatusBar style="auto" />
-          </GlobalContextProvider>
-        </ThemeProvider>
+          <StatusBar style="auto" />
+        </GlobalContextProvider>
+        {/* </ThemeProvider> */}
       </KeyboardProvider>
     </AuthProvider>
   );

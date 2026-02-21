@@ -2,6 +2,7 @@ import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import Button, { ButtonSize, ButtonType } from '@/components/ui/button'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -252,45 +253,48 @@ export default function InvoiceDetails() {
           }}
           ListFooterComponent={() => {
             return (
-              <Card style={styles.invoiceCard}>
-                <View style={styles.invoiceLeft}>
-                  <Image source={IMAGE.pdfIcon} style={styles.pdfIcon} />
-                  <View>
-                    <Text style={styles.invoiceTitle}>
-                      Invoice {invoice?.id}.pdf
-                    </Text>
-                    <Text style={styles.invoiceDate}>
-                      Due Date: {invoice?.date}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.invoiceStatus,
-                        { color: invoice?.status === 'paid' ? '#22C55E' : '#F59E0B' },
-                      ]}
-                    >
-                      {invoice?.status?.toUpperCase()}
-                    </Text>
+              <View style={{ flex: 1, flexDirection: 'column', gap: 12 }}>
+                <Card style={styles.invoiceCard}>
+                  <View style={styles.invoiceLeft}>
+                    <Image source={IMAGE.pdfIcon} style={styles.pdfIcon} />
+                    <View>
+                      <Text style={styles.invoiceTitle}>
+                        Invoice {invoice?.id}.pdf
+                      </Text>
+                      <Text style={styles.invoiceDate}>
+                        Due Date: {invoice?.date}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.invoiceStatus,
+                          { color: invoice?.status === 'paid' ? '#22C55E' : '#F59E0B' },
+                        ]}
+                      >
+                        {invoice?.status?.toUpperCase()}
+                      </Text>
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.invoiceActions}>
-                  <Pressable onPress={() => handleViewInvoice(invoice)}>
-                    <Image source={IMAGE.eye} style={styles.actionIcon} />
-                  </Pressable>
-                  <Pressable onPress={() => handleModalDownload()}>
-                    {downloading ? (
-                      <View style={[styles.downloadingText, { justifyContent: "center", alignItems: "center" }]}>
-                        <ActivityIndicator size="small" />
-                      </View>
-                    ) : (
-                      <Image
-                        source={IMAGE.download}
-                        style={styles.actionIcon}
-                      />
-                    )}
-                  </Pressable>
-                </View>
-              </Card>
+                  <View style={styles.invoiceActions}>
+                    <Pressable onPress={() => handleViewInvoice(invoice)}>
+                      <Image source={IMAGE.eye} style={styles.actionIcon} />
+                    </Pressable>
+                    <Pressable onPress={() => handleModalDownload()}>
+                      {downloading ? (
+                        <View style={[styles.downloadingText, { justifyContent: "center", alignItems: "center" }]}>
+                          <ActivityIndicator size="small" />
+                        </View>
+                      ) : (
+                        <Image
+                          source={IMAGE.download}
+                          style={styles.actionIcon}
+                        />
+                      )}
+                    </Pressable>
+                  </View>
+                </Card>
+                <Button type={ButtonType.DANGER} size={ButtonSize.LARGE} onPress={() => { }} title='delete this Invoice' />
+              </View>
             )
           }}
         />

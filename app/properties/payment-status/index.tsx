@@ -201,7 +201,6 @@ export default function PaymentStaus() {
           emptyColor="#22C55E"
           emptyTitle={t('message.no_pending_payment_invoice_available')}
           onViewInvoice={handleViewInvoice}
-          onDownloadInvoice={handleDownloadInvoice}
           downloadingKey={downloadingKey}
         />
       ) : (
@@ -234,7 +233,7 @@ const InvoiceList = ({
   emptyColor: string
   emptyTitle: string
   onViewInvoice: (invoice: Invoice) => void
-  onDownloadInvoice: (invoice: Invoice, index: number) => void
+  onDownloadInvoice?: (invoice: Invoice, index: number) => void
   downloadingKey: string | null
 }) => {
   const router = useRouter()
@@ -272,7 +271,7 @@ const InvoiceList = ({
               <Pressable onPress={() => onViewInvoice(item)}>
                 <Image source={IMAGE.eye} style={styles.actionIcon} />
               </Pressable>
-              <Pressable onPress={() => onDownloadInvoice(item, index)}>
+              {onDownloadInvoice && <Pressable onPress={() => onDownloadInvoice?.(item, index)}>
                 {downloadingKey !== invoiceKey ? (
                   <Image
                     source={IMAGE.download}
@@ -283,7 +282,7 @@ const InvoiceList = ({
                     <ActivityIndicator size="small" />
                   </View>
                 )}
-              </Pressable>
+              </Pressable>}
             </View>
           </Card>
         )

@@ -1,31 +1,30 @@
-import { IMAGE } from '@/assets/images/image.index';
 import { HapticTab } from '@/components/haptic-tab';
-import { Image } from 'expo-image';
+import { Building03Icon, Chatting01Icon, Home01Icon, Idea01Icon, UserCircle02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Text, View } from 'react-native';
-
 const TAB_ICONS = {
   index: {
-    focused: IMAGE.home_icon_fill,
-    unfocused: IMAGE.home_icon,
+    focused: <HugeiconsIcon icon={Home01Icon} size={24} color="#fff" />,
+    unfocused: <HugeiconsIcon icon={Home01Icon} size={24} color="#666666" />,
   },
   Property: {
-    focused: IMAGE.property_icon_fill,
-    unfocused: IMAGE.property_icon,
+    focused: <HugeiconsIcon icon={Building03Icon} size={24} color="#fff" />,
+    unfocused: <HugeiconsIcon icon={Building03Icon} size={24} color="#666666" />,
   },
   Insights: {
-    focused: IMAGE.insights_icon_fill,
-    unfocused: IMAGE.insights_icon,
+    focused: <HugeiconsIcon icon={Idea01Icon} size={24} color="#fff" />,
+    unfocused: <HugeiconsIcon icon={Idea01Icon} size={24} color="#666666" />,
   },
   Support: {
-    focused: IMAGE.support_icon_fill,
-    unfocused: IMAGE.support_icon,
+    focused: <HugeiconsIcon icon={Chatting01Icon} size={24} color="#fff" />,
+    unfocused: <HugeiconsIcon icon={Chatting01Icon} size={24} color="#666666" />,
   },
   Profile: {
-    focused: IMAGE.profile_icon_fill,
-    unfocused: IMAGE.profile_icon,
+    focused: <HugeiconsIcon icon={UserCircle02Icon} size={24} color="#fff" />,
+    unfocused: <HugeiconsIcon icon={UserCircle02Icon} size={24} color="#666666" />,
   },
 } as const;
 
@@ -42,13 +41,14 @@ const renderTabIcon = (route: keyof typeof TAB_ICONS) => ({ focused }: { focused
       elevation: Platform.OS === 'ios' ? 0 : (focused ? 5 : 0),
     }}
   >
-    <Image
+    {focused ? TAB_ICONS[route].focused : TAB_ICONS[route].unfocused}
+    {/* <Image
       source={focused ? TAB_ICONS[route].focused : TAB_ICONS[route].unfocused}
       style={{ width: 24, height: 24 }}
       contentFit="contain"
       transition={1000}
       priority="high"
-    />
+    /> */}
   </View>
 );
 
