@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   FlatList,
-  Image,
   Platform,
   StyleSheet,
   Text,
@@ -145,9 +144,9 @@ const MessageItem = ({ message }: { message: MessageItemProps }) => {
 
   return (
     <View style={[styles.messageRow, isMine && styles.myRow]}>
-      {!isMine && (
+      {/* {!isMine && (
         <Image source={{ uri: message.user.avatar }} style={styles.avatar} />
-      )}
+      )} */}
 
       <View style={[styles.bubble, isMine ? styles.myBubble : styles.otherBubble]}>
         <Text style={[styles.text, isMine && styles.myText]}>

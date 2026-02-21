@@ -148,8 +148,8 @@ export default function LifestyleDetail({ id }: { id: string }) {
             ))
           }
         </View>
-        <HelpSection title="Interested in visiting or booking?" description="Visit their official Site for more details." icon={IMAGE.share_icon} onPress={() => router.push("/")} />
-        <InsightsDownSection titleColor='#B08D59' icon={IMAGE.lifestyle_icon} title="Lifestyle" description="Posted on 14 January 2026" />
+        <HelpSection title="Interested in visiting or booking?" description="Visit their official Site for more details." icon={IMAGE.share_icon} onPress={() => { }} />
+        <InsightsDownSection titleColor='#B08D59' icon={IMAGE.lifestyle_icon} title="Lifestyle" description="Posted on 14 January 2026" onPress={() => { }} />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
