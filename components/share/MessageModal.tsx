@@ -17,6 +17,7 @@ type MessageModalProps = {
   visible: boolean
   onClose: () => void
   onConfirm: () => void
+  actionType?: "danger" | "success" | "warning"
 }
 
 export default function MessageModal({
@@ -24,7 +25,18 @@ export default function MessageModal({
   visible,
   onClose,
   onConfirm,
+  actionType
 }: MessageModalProps) {
+
+  const bgColor = {
+    danger: '#DC2626',
+    success: '#22C55E',
+    warning: '#F59E0B',
+  };
+
+  const getBgColor = (type?: string) => {
+    return type ? bgColor[type as keyof typeof bgColor] : bgColor.danger;
+  };
   return (
     <Modal
       visible={visible}
@@ -42,16 +54,19 @@ export default function MessageModal({
             {message?.message}
           </Text>}
 
-          {message?.confirmText && <Pressable
-            onPress={onConfirm}
-            android_ripple={{ color: '#ffffff33' }}
-            style={({ pressed }) => [
-              styles.confirmButton,
-              pressed && Platform.OS === 'ios' && styles.pressed,
-            ]}
-          >
-            <Text style={styles.confirmText}>{message?.confirmText}</Text>
-          </Pressable>}
+          {message?.confirmText && (
+            <Pressable
+              onPress={onConfirm}
+              android_ripple={{ color: '#ffffff33' }}
+              style={({ pressed }) => [
+                styles.confirmButton,
+                { backgroundColor: getBgColor(actionType) },
+                pressed && Platform.OS === 'ios' && styles.pressed,
+              ]}
+            >
+              <Text style={styles.confirmText}>{message?.confirmText}</Text>
+            </Pressable>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -103,11 +118,18 @@ const styles = StyleSheet.create({
 
   confirmButton: {
     width: '100%',
-    backgroundColor: '#D4B785',
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
+  },
+
+  cancelButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
   },
 
   confirmText: {
@@ -117,7 +139,8 @@ const styles = StyleSheet.create({
   },
 
   cancelText: {
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '600',
     color: '#6B7280',
   },
 

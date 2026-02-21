@@ -25,7 +25,8 @@
     "close": "Schließen",
     "view_all": "Alle anzeigen",
     "back_to_login": "Zurück zur Anmeldung",
-    "get_insights": "Erhalte Einblicke"
+    "get_insights": "Erhalte Einblicke",
+    "delete_this_invoice": "Diese Rechnung löschen"
   },
   "login_screen": {
     "welcome_back": "Willkommen zurück",
@@ -75,7 +76,8 @@
     "latest_insights": "Neueste Einblicke",
     "property_details": "Immobilienangaben",
     "add_invoice": "Rechnung hinzufügen",
-    "notifications": "Benachrichtigungen"
+    "notifications": "Benachrichtigungen",
+    "invoice_details": "Détails de la facture"
   },
 
   "account_settings": {

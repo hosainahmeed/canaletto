@@ -21,7 +21,8 @@
     "close": "Close",
     "view_all": "View All",
     "back_to_login": "Back to Login",
-    "get_insights": "Get Insights"
+    "get_insights": "Get Insights",
+    "delete_this_invoice": "Delete this Invoice"
   },
   "onboarding": {
     "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
@@ -75,7 +76,8 @@
     "latest_insights": "Latest Insights",
     "property_details": "Property Details",
     "add_invoice": "Add Invoice",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "invoice_details": "Invoice Details"
   },
   "account_settings": {
     "change_password": "Change Password",

@@ -1,13 +1,17 @@
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import MessageModal from '@/components/share/MessageModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button, { ButtonSize, ButtonType } from '@/components/ui/button'
+import { AlertSquareIcon, Delete02FreeIcons } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react-native'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
-import { ActivityIndicator, Alert, Dimensions, FlatList, Modal, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { ActivityIndicator, Alert, Dimensions, FlatList, Modal, Platform, Pressable, Share, StyleSheet, Text, ToastAndroid, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 const { width } = Dimensions.get('window')
@@ -74,6 +78,8 @@ export default function InvoiceDetails() {
   const [showPdfModal, setShowPdfModal] = React.useState(false)
   const [selectedInvoice, setSelectedInvoice] = React.useState<Invoice | null>(null)
   const [invoice, setInvoice] = React.useState<Invoice | null>(null)
+  const { t } = useTranslation()
+  const [isVisible, setIsVisible] = React.useState(false)
 
   React.useEffect(() => {
     const loadInvoice = async () => {
@@ -226,7 +232,7 @@ export default function InvoiceDetails() {
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
-        title={`Invoice Details`}
+        title={t('page_title.invoice_details')}
         titleFontWeight={800}
         titleFontFamily="Montserrat-Italic"
         titleStyle={{ fontStyle: 'italic' }}
@@ -293,12 +299,30 @@ export default function InvoiceDetails() {
                     </Pressable>
                   </View>
                 </Card>
-                <Button type={ButtonType.DANGER} size={ButtonSize.LARGE} onPress={() => { }} title='delete this Invoice' />
+                <Button
+                  onPress={() => setIsVisible(true)}
+                  icon={<HugeiconsIcon icon={Delete02FreeIcons} color={"#FFF"} size={24} />}
+                  type={ButtonType.DANGER} size={ButtonSize.LARGE} title={t('action.delete_this_invoice')} />
               </View>
             )
           }}
         />
-
+        <MessageModal
+          visible={isVisible}
+          onClose={() => setIsVisible(false)}
+          onConfirm={() => {
+            const message = Platform.OS === "android" ? 'Invoice deleted successfully' : 'Invoice deleted successfully.';
+            ToastAndroid.show(message, ToastAndroid.SHORT);
+            setIsVisible(false)
+          }}
+          actionType='danger'
+          message={{
+            icon: <HugeiconsIcon color="red" size={48} icon={AlertSquareIcon} />,
+            title: 'Delete Invoice',
+            message: 'Are you sure you want to delete this invoice?',
+            confirmText: 'Delete',
+          }}
+        />
         {/* PDF Modal */}
         <Modal
           visible={showPdfModal}
