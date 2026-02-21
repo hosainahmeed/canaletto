@@ -63,7 +63,7 @@ export default function HomeScreen() {
         numColumns={numColumns}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
-        key={numColumns} // forces re-render when column count changes
+        key={numColumns}
         ListHeaderComponent={
           <>
             <UserProfileHeader />
@@ -106,6 +106,5 @@ const styles = StyleSheet.create({
   },
   propertyWrapper: {
     flex: 1,
-    margin: 6,
   },
 });
