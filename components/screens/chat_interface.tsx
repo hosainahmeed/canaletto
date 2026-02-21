@@ -129,7 +129,7 @@ export default function ChatInterface() {
         <View style={styles.listWrapper}>
           <FlatList
             ref={listRef}
-            data={[...data].reverse()} // ✅ prevent mutation bug
+            data={[...data].reverse()}
             inverted
             keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => <MessageItem message={item} />}
