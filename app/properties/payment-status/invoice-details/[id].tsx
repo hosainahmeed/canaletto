@@ -303,9 +303,12 @@ export default function InvoiceDetails() {
                   onPress={() => setIsVisible(true)}
                   icon={<HugeiconsIcon icon={Delete02FreeIcons} color={"#FFF"} size={24} />}
                   type={ButtonType.DANGER} size={ButtonSize.LARGE} title={t('action.delete_this_invoice')} />
+                <View style={{ height: 20 }} />
               </View>
             )
           }}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
         />
         <MessageModal
           visible={isVisible}
@@ -376,6 +379,7 @@ export default function InvoiceDetails() {
           </View>
         </Modal>
       </View>
+
     </SafeAreaViewWithSpacing>
   )
 }
@@ -403,6 +407,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 12,
+    paddingVertical: 12
   },
   infoCard: {
     marginTop: 8,
