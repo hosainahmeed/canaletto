@@ -128,8 +128,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "187ddebb-f679-4c62-ae42-73b4ee568f9a"
+        "projectId": "86b86b79-e827-41ef-8442-f4b43f176ce0"
       }
-    }
+    },
+    "owner": "eas-hosain-2"
   }
 }

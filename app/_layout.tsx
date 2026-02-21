@@ -4,12 +4,12 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import 'react-native-reanimated';
 import { AuthProvider } from '../contexts/AuthContext';
 import '../lib/i18n';
 import { updateLanguageFromSecureStore } from '../lib/i18n';
 import GlobalContextProvider from './providers/GlobalContextProvider';
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [isReady, setIsReady] = useState(false);
@@ -24,21 +24,23 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <GlobalContextProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="modal"
-              options={{ presentation: 'modal' }}
-            />
-          </Stack>
+      <KeyboardProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <GlobalContextProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="modal"
+                options={{ presentation: 'modal' }}
+              />
+            </Stack>
 
-          <StatusBar style="auto" />
-        </GlobalContextProvider>
-      </ThemeProvider>
+            <StatusBar style="auto" />
+          </GlobalContextProvider>
+        </ThemeProvider>
+      </KeyboardProvider>
     </AuthProvider>
   );
 }

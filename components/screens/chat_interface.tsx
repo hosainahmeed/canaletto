@@ -3,19 +3,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   FlatList,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from 'react-native'
-import SafeAreaViewWithSpacing, {
-  SafeAreaEdge,
-} from '../safe-area/SafeAreaViewWithSpacing'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
-/* ---------------- Types ---------------- */
 
 interface MessageItemProps {
   _id: number
@@ -29,12 +24,10 @@ interface MessageItemProps {
   }
 }
 
-/* ---------------- Chat Screen ---------------- */
 
 export default function ChatInterface() {
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   const listRef = useRef<FlatList>(null)
 
@@ -65,26 +58,6 @@ export default function ChatInterface() {
     },
   ])
 
-  /* ---------------- Keyboard Handling ---------------- */
-
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
-    )
-
-    const hideSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
-    )
-
-    return () => {
-      showSub.remove()
-      hideSub.remove()
-    }
-  }, [])
-
-  /* ---------------- Auto Scroll ---------------- */
 
   useEffect(() => {
     listRef.current?.scrollToOffset({
@@ -93,7 +66,6 @@ export default function ChatInterface() {
     })
   }, [data])
 
-  /* ---------------- Send Message ---------------- */
 
   const sendMessage = () => {
     if (!message.trim()) return
@@ -116,64 +88,52 @@ export default function ChatInterface() {
     setInputHeight(40)
   }
 
-  /* ---------------- UI ---------------- */
 
   return (
-    <SafeAreaViewWithSpacing edges={[SafeAreaEdge.BOTTOM]}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
-      >
-        {/* Message List */}
-        <View style={styles.listWrapper}>
-          <FlatList
-            ref={listRef}
-            data={[...data].reverse()}
-            inverted
-            keyExtractor={(item) => item._id.toString()}
-            renderItem={({ item }) => <MessageItem message={item} />}
-            contentContainerStyle={styles.list}
-            keyboardDismissMode="interactive"
-            showsVerticalScrollIndicator={false}
+    <KeyboardAwareScrollView bottomOffset={62} contentContainerStyle={styles.container}>
+      {/* Message List */}
+      <View style={styles.listWrapper}>
+        <FlatList
+          ref={listRef}
+          data={[...data].reverse()}
+          inverted
+          keyExtractor={(item) => item._id.toString()}
+          renderItem={({ item }) => <MessageItem message={item} />}
+          contentContainerStyle={styles.list}
+          keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+
+      {/* Input */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={message}
+            onChangeText={setMessage}
+            placeholder="Message..."
+            placeholderTextColor="#9CA3AF"
+            multiline
+            style={[styles.input, { height: Math.min(120, inputHeight) }]}
+            onContentSizeChange={(e) =>
+              setInputHeight(e.nativeEvent.contentSize.height + 12)
+            }
+          />
+
+          <Ionicons
+            name="send"
+            size={22}
+            color={message.trim() ? '#D4B785' : '#9CA3AF'}
+            onPress={sendMessage}
+            style={styles.sendIcon}
           />
         </View>
-
-        {/* Input */}
-        <View
-          style={[
-            styles.inputWrapper,
-            { paddingBottom: keyboardHeight > 0 ? 8 : 0 },
-          ]}
-        >
-          <View style={styles.inputContainer}>
-            <TextInput
-              value={message}
-              onChangeText={setMessage}
-              placeholder="Message..."
-              placeholderTextColor="#9CA3AF"
-              multiline
-              style={[styles.input, { height: Math.min(120, inputHeight) }]}
-              onContentSizeChange={(e) =>
-                setInputHeight(e.nativeEvent.contentSize.height + 12)
-              }
-            />
-
-            <Ionicons
-              name="send"
-              size={22}
-              color={message.trim() ? '#D4B785' : '#9CA3AF'}
-              onPress={sendMessage}
-              style={styles.sendIcon}
-            />
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaViewWithSpacing>
+      </View>
+    </KeyboardAwareScrollView>
   )
 }
 
-/* ---------------- Message Bubble ---------------- */
+
 
 const MessageItem = ({ message }: { message: MessageItemProps }) => {
   const isMine = message.isMyMessage
@@ -200,7 +160,6 @@ const MessageItem = ({ message }: { message: MessageItemProps }) => {
   )
 }
 
-/* ---------------- Styles ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -285,6 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    marginBottom: Platform.OS === 'ios' ? 24 : 16,
   },
 
   input: {
