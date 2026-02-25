@@ -1,10 +1,11 @@
 import PropertyCard, { Property } from '@/components/cards/PropertyCard'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { FlashList } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 
 export default function PropertyScreen() {
   const router = useRouter()
@@ -47,13 +48,19 @@ export default function PropertyScreen() {
         titleStyle={{ fontStyle: 'italic', fontFamily: 'Montserrat-Italic' }}
         title={t('page_title.my_properties')}
       />
-      <FlatList
+      <FlashList
         data={properties}
         renderItem={(item) => <PropertyCard onViewPress={() => { }} property={item.item} />}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainer}
       />
     </SafeAreaViewWithSpacing>
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1
+  }
+})

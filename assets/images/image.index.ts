@@ -37,7 +37,9 @@ export const IMAGE = {
   lifestyle_icon: require("./lifestyle.png"),
   check: require("./check.png"),
   share_icon: require("./share-icon.png"),
-  add_invoice: require("./add_invoice.png")
+  add_invoice: require("./add_invoice.png"),
+  logo: require("./logo.png"),
+  logoBlackVariant: require("./black-logo-2.png")
 } as const
 
 export const InsightsIcons = {

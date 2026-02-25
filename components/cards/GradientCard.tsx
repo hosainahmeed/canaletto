@@ -1,65 +1,68 @@
 import { IMAGE } from '@/assets/images/image.index';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
 import { Dimensions, Pressable, StyleSheet, Text } from 'react-native';
 const { width: screenWidth } = Dimensions.get('window');
-export default function GradientCard({ title, iconType, subTitle, color = ['#22C55E', '#FAFAFA', '#FAFAFA'], onPress }: { title: string; subTitle: string; color?: string[], iconType: 'green' | 'brand' | 'blue' | 'pink', onPress?: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={[styles.container, { backgroundColor: color[0], borderColor: color[0] }]}>
-      <Text numberOfLines={1} style={styles.subTitle}>{subTitle}</Text>
-      <Text numberOfLines={1} style={styles.title}>{title}</Text>
-      <Pressable
-        onPress={onPress}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 100,
-          backgroundColor: "#fff",
-          justifyContent: "center",
-          alignItems: "center"
-        }}
-      >
-        <Image source={iconType === 'green' ? IMAGE.green_forward : iconType === 'brand' ? IMAGE.brand_forward : iconType === 'blue' ? IMAGE.blue_forward : IMAGE.pink_forward} style={{ width: 10, height: 10 }} />
+export default React.memo(
+  function GradientCard({ title, iconType, subTitle, color = ['#22C55E', '#FAFAFA', '#FAFAFA'], onPress }: { title: string; subTitle: string; color?: string[], iconType: 'green' | 'brand' | 'blue' | 'pink', onPress?: () => void }) {
+    return (
+      <Pressable onPress={onPress} style={[styles.container, { backgroundColor: color[0], borderColor: color[0] }]}>
+        <Text numberOfLines={1} style={styles.subTitle}>{subTitle}</Text>
+        <Text numberOfLines={1} style={styles.title}>{title}</Text>
+        <Pressable
+          onPress={onPress}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 100,
+            backgroundColor: "#fff",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Image source={iconType === 'green' ? IMAGE.green_forward : iconType === 'brand' ? IMAGE.brand_forward : iconType === 'blue' ? IMAGE.blue_forward : IMAGE.pink_forward} style={{ width: 10, height: 10 }} />
+        </Pressable>
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c1]}
+        />
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c2]}
+        />
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c3]}
+        />
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c4]}
+        />
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c5]}
+        />
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          colors={color as any}
+          style={[styles.circle, styles.c6]}
+        />
       </Pressable>
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c1]}
-      />
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c2]}
-      />
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c3]}
-      />
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c4]}
-      />
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c5]}
-      />
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        colors={color as any}
-        style={[styles.circle, styles.c6]}
-      />
-    </Pressable>
-  );
-}
+    );
+  }
+)
 
 const styles = StyleSheet.create({
   container: {

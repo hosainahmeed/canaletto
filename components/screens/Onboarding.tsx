@@ -1,11 +1,11 @@
 import { IMAGE } from '@/assets/images/image.index';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -143,6 +143,13 @@ const OnboardingItem = ({ item }: { item: any }) => {
           },
         ]}
       >
+        <View style={{ width: "100%", alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <Image
+            resizeMode="contain"
+            source={IMAGE.logoBlackVariant}
+            style={{ width: 300, height: 150, opacity: 0.5 }}
+          />
+        </View>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
       </Animated.View>
@@ -180,7 +187,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: '#333',
     marginBottom: 15,
-    fontFamily: 'Montserrat-Italic',
+    fontFamily: 'Montserrat-SemiBoldItalic',
     fontStyle: 'italic',
   },
   description: {

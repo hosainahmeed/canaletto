@@ -21,12 +21,12 @@ export interface PropertyCardProps {
 
 const { width } = Dimensions.get('window');
 
-export default function PropertyCard({ property, onViewPress, isTablet }: PropertyCardProps) {
+export default React.memo(function PropertyCard({ property, onViewPress, isTablet }: PropertyCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const cardWidth = isTablet ? width / 2 - 24 : width - 24; // dynamic width for tablets and mobiles
-  const imageHeight = isTablet ? 220 : 180; // adaptive image height
+  const cardWidth = isTablet ? width / 2 - 20 : width - 20;
+  const imageHeight = isTablet ? 220 : 180;
 
   return (
     <View style={[styles.card, { width: cardWidth }]}>
@@ -53,7 +53,7 @@ export default function PropertyCard({ property, onViewPress, isTablet }: Proper
       </View>
     </View>
   );
-}
+})
 
 const styles = StyleSheet.create({
   card: {
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderWidth: 1,
     borderColor: '#DDDDDD',
+    marginHorizontal: "auto",
   },
   imageContainer: {
     width: '100%',

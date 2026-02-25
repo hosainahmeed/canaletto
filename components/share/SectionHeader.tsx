@@ -11,24 +11,26 @@ interface SectionHeaderProps {
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export default function SectionHeader({ title, icon, action, actionText = 'View All' }: SectionHeaderProps) {
-  return (
-    <View style={styles.container}>
-      <View style={styles.headerContent}>
-        {icon && <View style={styles.iconWrapper}>
-          <Image source={icon} style={styles.icon} />
-        </View>}
-        <Text numberOfLines={1} style={styles.title}>{title}</Text>
+export default React.memo(
+  function SectionHeader({ title, icon, action, actionText = 'View All' }: SectionHeaderProps) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerContent}>
+          {icon && <View style={styles.iconWrapper}>
+            <Image source={icon} style={styles.icon} />
+          </View>}
+          <Text numberOfLines={1} style={styles.title}>{title}</Text>
+        </View>
+        {action && (
+          <Pressable onPress={action}>
+            <Text numberOfLines={1} style={styles.action}>{actionText}</Text>
+          </Pressable>
+        )}
       </View>
-      {action && (
-        <Pressable onPress={action}>
-          <Text numberOfLines={1} style={styles.action}>{actionText}</Text>
-        </Pressable>
-      )}
-    </View>
-  )
-}
+    )
+  }
 
+)
 const styles = StyleSheet.create({
   container: {
     width: screenWidth - 20,

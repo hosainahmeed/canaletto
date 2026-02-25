@@ -5,37 +5,39 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 const { width: screenWidth } = Dimensions.get("window")
-export default function UserProfileHeader() {
-  const router = useRouter()
-  const { t } = useTranslation()
-  const Userdata = {
-    img: "https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png",
-    name: "Roberts Junior",
+export default React.memo(
+  function UserProfileHeader() {
+    const router = useRouter()
+    const { t } = useTranslation()
+    const Userdata = {
+      img: "https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png",
+      name: "Roberts Junior",
 
-  }
+    }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.userInfo}>
-        <View style={styles.avatarWrapper}>
-          <Image style={styles.avatar} source={{ uri: Userdata.img }} />
+    return (
+      <View style={styles.container}>
+        <View style={styles.userInfo}>
+          <View style={styles.avatarWrapper}>
+            <Image style={styles.avatar} source={{ uri: Userdata.img }} />
+          </View>
+          <View>
+            <Text style={styles.userName}>{Userdata.name}</Text>
+            <Text style={styles.welcomeText}>{t("message.welcome_to_csw")}</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.userName}>{Userdata.name}</Text>
-          <Text style={styles.welcomeText}>{t("message.welcome_to_csw")}</Text>
-        </View>
+        <Pressable
+          style={styles.notificationButton}
+          onPress={() => {
+            router.push("/notifications")
+          }}
+        >
+          <Image style={styles.notificationIcon} source={IMAGE.notification_bing} />
+        </Pressable>
       </View>
-      <Pressable
-        style={styles.notificationButton}
-        onPress={() => {
-          router.push("/notifications")
-        }}
-      >
-        <Image style={styles.notificationIcon} source={IMAGE.notification_bing} />
-      </Pressable>
-    </View>
-  )
-}
+    )
+  }
+)
 
 const styles = StyleSheet.create({
   container: {

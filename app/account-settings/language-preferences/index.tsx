@@ -26,8 +26,6 @@ export default function LanguagePreferences() {
   }
 
   const applyLanguageChange = () => {
-    // Language is already updated in the context when selected
-    // Just navigate back
     router.back()
   }
 

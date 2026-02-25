@@ -3,11 +3,12 @@ import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import LogoutModal from '@/components/share/LogoutModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { FlashList } from "@shopify/flash-list"
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
   icon: string
@@ -36,7 +37,7 @@ export default function Profile() {
     setIsShowModal(true)
   }
 
-  const sections: { title?: string; data: MenuItem[] }[] = [
+  const sections = useMemo(() => [
     {
       data: [
         { icon: ProfileIcons.profile, title: t('profile.my_profile'), onPress: () => pushRouting("/my-profile") },
@@ -52,7 +53,7 @@ export default function Profile() {
         { icon: ProfileIcons.logout, title: t('action.logout'), onPress: () => logOutAction() },
       ],
     },
-  ]
+  ], [t])
 
   return (
     <SafeAreaViewWithSpacing>
@@ -66,7 +67,7 @@ export default function Profile() {
         titleStyle={styles.headerTitle}
       />
 
-      <FlatList
+      <FlashList
         data={sections}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
@@ -87,7 +88,7 @@ export default function Profile() {
     </SafeAreaViewWithSpacing>
   )
 }
-const ProfileHeader = ({ user }: any) => {
+const ProfileHeader = memo(({ user }: any) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
@@ -97,8 +98,8 @@ const ProfileHeader = ({ user }: any) => {
       <Text style={styles.userName}>{user.name}</Text>
     </View>
   )
-}
-const MenuSection = ({
+})
+const MenuSection = memo(({
   title,
   data,
 }: {
@@ -114,9 +115,9 @@ const MenuSection = ({
       ))}
     </View>
   )
-}
+})
 
-const MenuItemRow = ({ icon, title, onPress }: MenuItem) => {
+const MenuItemRow = memo(({ icon, title, onPress }: MenuItem) => {
   return (
     <Pressable onPress={onPress}>
       <Card style={styles.menuCard}>
@@ -130,7 +131,7 @@ const MenuItemRow = ({ icon, title, onPress }: MenuItem) => {
       </Card>
     </Pressable>
   )
-}
+})
 
 const styles = StyleSheet.create({
   headerTitle: {

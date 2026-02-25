@@ -22,7 +22,7 @@ interface GlobalProviderProps {
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 const GlobalContextProvider = ({ children }: GlobalProviderProps) => {
-  const [selectedLanguage, setSelectedLanguageState] = useState<Language>('en');
+  const [selectedLanguage, setSelectedLanguageState] = useState<Language>('de');
   const [isLanguageLoaded, setIsLanguageLoaded] = useState(false);
 
   // Load language from SecureStore on mount
@@ -36,7 +36,7 @@ const GlobalContextProvider = ({ children }: GlobalProviderProps) => {
           await i18n.changeLanguage(savedLanguage);
         } else {
           // If no saved language, use current i18n language or default to 'en'
-          const currentLanguage = (i18n.language as Language) || 'en';
+          const currentLanguage = (i18n.language as Language) || 'en'; //TODO : make default language german
           setSelectedLanguageState(currentLanguage);
           // Save the current language to SecureStore
           await SecureStore.setItemAsync('selectedLanguage', currentLanguage);
