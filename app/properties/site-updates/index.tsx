@@ -48,7 +48,7 @@ export default function SiteUpdates() {
         </View>
 
         <View style={styles.fileActions}>
-          <Pressable onPress={() => { }}>
+          <Pressable onPress={() => router.push("/properties/site-updates/construction-images/[id]")}>
             <Image source={IMAGE.eye} style={styles.actionIcon} />
           </Pressable>
         </View>
