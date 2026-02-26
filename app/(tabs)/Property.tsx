@@ -32,6 +32,41 @@ export default function PropertyScreen() {
         'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
       location: 'Location 3',
     },
+    {
+      id: '3-1',
+      name: 'Property 3',
+      image:
+        'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
+      location: 'Location 3',
+    },
+    {
+      id: '3-2',
+      name: 'Property 3',
+      image:
+        'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
+      location: 'Location 3',
+    },
+    {
+      id: '3-3',
+      name: 'Property 3',
+      image:
+        'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
+      location: 'Location 3',
+    },
+    {
+      id: '3-4',
+      name: 'Property 3',
+      image:
+        'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
+      location: 'Location 3',
+    },
+    {
+      id: '3-5',
+      name: 'Property 3',
+      image:
+        'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg?metadata=true&quality=85',
+      location: 'Location 3',
+    },
   ]
   return (
     <SafeAreaViewWithSpacing>
@@ -53,13 +88,17 @@ export default function PropertyScreen() {
         renderItem={(item) => <PropertyCard onViewPress={() => { }} property={item.item} />}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        style={styles.container}
       />
     </SafeAreaViewWithSpacing>
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
   contentContainer: {
     flex: 1
   }

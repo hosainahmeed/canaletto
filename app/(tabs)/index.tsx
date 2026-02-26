@@ -82,6 +82,7 @@ export default function HomeScreen() {
           icon={IMAGE.property_icon}
           action={goProperty}
           actionText={t("action.view_all")}
+          style={{ marginBottom: -20 }}
         />
       </>
     ),
@@ -93,19 +94,53 @@ export default function HomeScreen() {
   const ListFooter = useMemo(
     () => (
       <>
-        <SectionHeader
-          title={t("page_title.latest_insights")}
-          icon={IMAGE.insights_icon}
-          action={goInsights}
-          actionText={t("action.view_all")}
-        />
+        <View>
+          <SectionHeader
+            title="Legal Updates"
+            icon={IMAGE.legal}
+            action={() => router.push("/legal-updates")}
+            actionText={t("action.view_all")}
+          />
 
-        <GradientCard
-          iconType="green"
-          title="Dubai Property Market Shows Strong Q1 Growth"
-          subTitle="Latest Insights"
-          onPress={goLegalUpdate}
-        />
+          <GradientCard
+            iconType="green"
+            title="Dubai Property Market Shows Strong Q1 Growth"
+            subTitle="Legal Updates"
+            onPress={goLegalUpdate}
+          />
+        </View>
+        <View>
+          <SectionHeader
+            title="New Projects"
+            icon={IMAGE.newProjectIcon}
+            action={() => router.push("/new-projects")}
+            actionText={t("action.view_all")}
+          />
+
+          <GradientCard
+            iconType="pink"
+            color={['#A855F780', '#FAFAFA', '#FAFAFA']}
+            title="Dubai Property Market Shows Strong Q1 Growth"
+            subTitle="New Projects"
+            onPress={goLegalUpdate}
+          />
+        </View>
+        <View>
+          <SectionHeader
+            title="Latest Insights"
+            icon={IMAGE.insights_icon}
+            action={goInsights}
+            actionText={t("action.view_all")}
+          />
+
+          <GradientCard
+            iconType="blue"
+            color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
+            title="Dubai Property Market Shows Strong Q1 Growth"
+            subTitle="Market Updates"
+            onPress={goLegalUpdate}
+          />
+        </View>
 
         <HelpSection />
       </>

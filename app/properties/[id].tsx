@@ -172,6 +172,8 @@ export default function PropertyByID({ id }: { id: string }) {
     { icon: propertyDetailsIcon.payment_status, label: t('property_details.payment_status'), styles: { color: '#22C55E80', backgroundColor: "rgba(34, 197, 94, 0.2)" }, route: "/properties/payment-status" },
     { icon: propertyDetailsIcon.construction, label: t('property_details.construction_progress'), styles: { color: '#B08D5980', backgroundColor: "rgba(176, 141, 89, 0.2)" }, route: "/properties/construction" },
     { icon: propertyDetailsIcon.assigned_agent, label: t('property_details.assigned_agent'), styles: { color: '#A855F780', backgroundColor: "rgba(168, 85, 247, 0.2)" }, route: "/properties/assigned-agent" },
+    { icon: propertyDetailsIcon.site_updates, label: t('property_details.site_updates'), styles: { color: '#06B6D480', backgroundColor: "rgba(6, 182, 212, 0.2)" }, route: "/properties/site-updates" },
+    { icon: propertyDetailsIcon.property_packages, label: t('property_details.property_packages'), styles: { color: '#ef4444b3', backgroundColor: "rgba(239, 68, 68, 0.2)" }, route: "/properties/property-packages" },
   ]
   const handleBackPress = useCallback(() => {
     if (router.canGoBack()) router.back()
@@ -364,6 +366,7 @@ const styles = StyleSheet.create({
   propertyInfoIcon: {
     width: 40,
     height: 40,
+    objectFit: 'contain',
   },
 
   propertyInfoLabel: {

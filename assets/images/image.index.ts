@@ -20,6 +20,8 @@ export const IMAGE = {
   empty: require("./empty.png"),
   emptyPurple: require("./empty-purple.png"),
   pdfIcon: require("./pdf-icon.png"),
+  image_placeholder: require("./image-placeholder-icon.png"),
+  image_placeholder2: require("./image-placeholder-icon2.png"),
   download: require("./download.png"),
   emptyGreen: require("./empty-green.png"),
   eye: require("./eye.png"),
@@ -39,7 +41,9 @@ export const IMAGE = {
   share_icon: require("./share-icon.png"),
   add_invoice: require("./add_invoice.png"),
   logo: require("./logo.png"),
-  logoBlackVariant: require("./black-logo-2.png")
+  logoBlackVariant: require("./black-logo-2.png"),
+  legal: require("./legal.png"),
+  newProjectIcon: require("./new-project-icon.png"),
 } as const
 
 export const InsightsIcons = {
@@ -76,6 +80,8 @@ export const propertyDetailsIcon = {
   size: require("./property-details-icons/size.png"),
   type_of_use: require("./property-details-icons/type-of-use.png"),
   units: require("./property-details-icons/units.png"),
+  site_updates: require("./property-details-icons/site-updates.png"),
+  property_packages: require("./property-details-icons/property-packages.png"),
 } as const
 
 export const modalIcon = {

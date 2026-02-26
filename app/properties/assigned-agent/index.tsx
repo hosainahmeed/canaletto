@@ -22,7 +22,8 @@ export default function AssignedAgent() {
     name: 'Roberts Junior',
     profile_image:
       'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
-    phone: "+ 971 50 XXX XXXX"
+    phone: "+ 971 50 XXX XXXX",
+    email: "robert @canaletto.com",
   }
   const MenuItemData = [
     {
@@ -101,7 +102,7 @@ export default function AssignedAgent() {
           style={{ flex: 1, borderRadius: 12 }}
           icon={<Ionicons name="chatbubbles-outline" size={20} color="#fff" />}
           type={ButtonType.PRIMARY}
-          onPress={() => router.push("/chat/1")}
+          onPress={() => Linking.openURL(`https://mail.google.com/mail/?view=cm&fs=1&to=${userData.email}`)}
           title='Message'
         />
       </View>

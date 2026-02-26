@@ -77,7 +77,9 @@
     "property_details": "Property Details",
     "add_invoice": "Add Invoice",
     "notifications": "Notifications",
-    "invoice_details": "Invoice Details"
+    "invoice_details": "Invoice Details",
+    "package_brief": "Package Brief",
+    "property_packages": "Property Packages"
   },
   "account_settings": {
     "change_password": "Change Password",
@@ -151,6 +153,8 @@
     "payment_status": "Payment Status",
     "construction_progress": "Construction Progress",
     "assigned_agent": "Assigned Agent",
+    "site_updates": "Site Updates",
+    "property_packages": "Property Packages",
     "express_interest": "Express Interest",
     "property_info": "Property Info",
     "view_larger_map": "View Larger Map"

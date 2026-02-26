@@ -77,7 +77,9 @@
     "property_details": "Immobilienangaben",
     "add_invoice": "Rechnung hinzufügen",
     "notifications": "Benachrichtigungen",
-    "invoice_details": "Détails de la facture"
+    "invoice_details": "Détails de la facture",
+    "package_brief": "Paketübersicht",
+    "property_packages": "Immobilienpakete"
   },
 
   "account_settings": {
@@ -151,6 +153,8 @@
     "payment_status": "Zahlungsstatus",
     "construction_progress": "Baufortschritt",
     "assigned_agent": "Zugewiesener Makler",
+    "site_updates": "Standortaktualisierungen",
+    "property_packages": "Immobilienpakete",
     "express_interest": "Interesse äußern",
     "property_info": "Immobilieninformationen",
     "view_larger_map": "Größere Karte anzeigen"

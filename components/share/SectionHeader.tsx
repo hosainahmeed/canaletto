@@ -7,14 +7,15 @@ interface SectionHeaderProps {
   icon?: any
   action?: () => void
   actionText?: string
+  style?: any
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default React.memo(
-  function SectionHeader({ title, icon, action, actionText = 'View All' }: SectionHeaderProps) {
+  function SectionHeader({ title, icon, action, actionText = 'View All', style }: SectionHeaderProps) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, style]}>
         <View style={styles.headerContent}>
           {icon && <View style={styles.iconWrapper}>
             <Image source={icon} style={styles.icon} />
