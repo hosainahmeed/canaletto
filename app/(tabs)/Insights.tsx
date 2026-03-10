@@ -62,8 +62,8 @@ export default function Insights() {
         numColumns={2}
         columnWrapperStyle={{
           justifyContent: 'space-between',
-          gap: 8,
-          marginVertical: 8,
+          gap: 10,
+          marginVertical: 6,
         }}
         renderItem={({ item }) => (
           <InsightsCard onPress={item.onPress} title={item.title} icon={item.icon} color={item.color} bgColor={item.bgColor} />

@@ -6,10 +6,12 @@ import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider';
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   Keyboard,
   Platform,
   ScrollView,
@@ -20,10 +22,12 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSignInMutation } from '../redux/services/authApis';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('hosaindev6@gmail.com');
-  const [password, setPassword] = useState('123456');
+  const [signIn, { isLoading }] = useSignInMutation()
+  const [email, setEmail] = useState('client3@yopmail.com');
+  const [password, setPassword] = useState('password');
   const [rememberMe, setRememberMe] = useState(true);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -37,7 +41,7 @@ export default function LoginScreen() {
 
 
   const router = useRouter()
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Dismiss keyboard
     Keyboard.dismiss();
 
@@ -65,14 +69,17 @@ export default function LoginScreen() {
     }
 
     if (isValid) {
-      console.log('Login:', { email, password, rememberMe });
-      // Handle login logic
+      const data = {
+        email,
+        password
+      }
+      const res = await signIn(data).unwrap()
+      SecureStore.setItem("accessToken", res?.data?.accessToken)
       router.push("/(tabs)")
     }
   };
 
   const handleForgotPassword = async () => {
-    console.log('Forgot password');
     Keyboard.dismiss()
     router.push("/(auth)/forgot-password")
     // Navigate to forgot password screen
@@ -165,7 +172,7 @@ export default function LoginScreen() {
                 activeOpacity={0.8}
                 disabled={!rememberMe}
               >
-                <Text style={styles.loginButtonText}>{t('action.login')}</Text>
+                {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>{t('action.login')}</Text>}
               </TouchableOpacity>
             </View>
           </ScrollView>

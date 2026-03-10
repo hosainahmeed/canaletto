@@ -8,9 +8,24 @@ import Button, { ButtonSize } from '../ui/button';
 
 export interface Property {
   id: string;
+  managerId: string;
   name: string;
-  image: string;
-  location: string;
+  images: string[];
+  type: string;
+  size: string;
+  totalRooms: number;
+  status: string;
+  paymentPlan: string;
+  units: number;
+  constructionProgressPercentage: number;
+  address: string;
+  createdAt: string;
+  updatedAt: string;
+  manager: {
+    name: string;
+    email: string;
+    phone: string;
+  };
 }
 
 export interface PropertyCardProps {
@@ -21,7 +36,7 @@ export interface PropertyCardProps {
 
 const { width } = Dimensions.get('window');
 
-export default React.memo(function PropertyCard({ property, onViewPress, isTablet }: PropertyCardProps) {
+export default React.memo(function PropertyCard({ property, isTablet }: PropertyCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -31,21 +46,21 @@ export default React.memo(function PropertyCard({ property, onViewPress, isTable
   return (
     <View style={[styles.card, { width: cardWidth }]}>
       <View style={[styles.imageContainer, { height: imageHeight }]}>
-        <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
+        <Image source={{ uri: property?.images[0] }} style={styles.image} resizeMode="cover" />
       </View>
 
       <View style={styles.contentContainer}>
-        <Text style={[styles.propertyName, { fontSize: isTablet ? 18 : 16 }]}>{property.name}</Text>
+        <Text style={[styles.propertyName, { fontSize: isTablet ? 18 : 16 }]}>{property?.name}</Text>
         <Image style={styles.bursar} source={IMAGE.bursar} />
         <View style={styles.locationContainer}>
           <Ionicons name="location-outline" size={16} color="#9CA3AF" />
-          <Text style={styles.locationText}>{property.location}</Text>
+          <Text style={styles.locationText}>{property?.address}</Text>
         </View>
 
         <Button
           size={ButtonSize.MEDIUM}
           style={{ alignSelf: 'flex-start', borderRadius: 8, minWidth: "100%" }}
-          onPress={() => router.push(`/properties/${property.id}`)}
+          onPress={() => router.push(`/properties/${property?.id}`)}
           title={t('action.view_property')}
           iconPosition='right'
           icon={<Image style={{ width: 20, height: 20 }} source={IMAGE.forward_icon} />}

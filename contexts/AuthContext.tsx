@@ -1,8 +1,10 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import { useGetMyProfileQuery } from '@/app/redux/services/userApis';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   loginUser: boolean;
   setLoginUser: (value: boolean) => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,9 +23,18 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loginUser, setLoginUser] = useState(false);
+  const { data, isLoading } = useGetMyProfileQuery(undefined)
+
+  useEffect(() => {
+    if (data?.success) {
+      setLoginUser(true)
+    } else {
+      setLoginUser(false)
+    }
+  }, [data])
 
   return (
-    <AuthContext.Provider value={{ loginUser, setLoginUser }}>
+    <AuthContext.Provider value={{ loginUser, setLoginUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,10 +4,10 @@ import { Redirect } from 'expo-router';
 import React from 'react';
 
 export default function Index() {
-  const { loginUser } = useAuth();
+  const { loginUser, isLoading } = useAuth();
 
   // Show onboarding screen for first-time users
-  if (!loginUser) {
+  if (!loginUser && !isLoading) {
     return <OnboardingScreen />;
   }
 

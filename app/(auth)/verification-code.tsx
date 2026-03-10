@@ -34,7 +34,6 @@ export default function VerificationCode() {
 
   const handleVerify = () => {
     if (otpCode.length === 6) {
-      console.log('Entered OTP:', otpCode)
       router.push('/new-password-set')
     }
   }

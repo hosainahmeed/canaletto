@@ -1,88 +1,170 @@
+import { useGetMyProfileQuery } from '@/app/redux/services/userApis'
 import { IMAGE } from '@/assets/images/image.index'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
+
 const { width: screenWidth } = Dimensions.get("window")
-export default React.memo(
-  function UserProfileHeader() {
-    const router = useRouter()
-    const { t } = useTranslation()
-    const Userdata = {
-      img: "https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png",
-      name: "Roberts Junior",
 
-    }
+export default React.memo(function UserProfileHeader() {
 
+  const router = useRouter()
+  const { t } = useTranslation()
+  const { data, isLoading } = useGetMyProfileQuery(undefined)
+
+  const name = data?.data?.name || ""
+  const profileImage = data?.data?.profile_image
+  const firstLetter = name?.charAt(0)?.toUpperCase()
+
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.userInfo}>
-          <View style={styles.avatarWrapper}>
-            <Image style={styles.avatar} source={{ uri: Userdata.img }} />
-          </View>
+          {/* Avatar Skeleton */}
+          <View style={styles.avatarSkeleton} />
           <View>
-            <Text style={styles.userName}>{Userdata.name}</Text>
-            <Text style={styles.welcomeText}>{t("message.welcome_to_csw")}</Text>
+            <View style={styles.nameSkeleton} />
+            <View style={styles.textSkeleton} />
           </View>
         </View>
-        <Pressable
-          style={styles.notificationButton}
-          onPress={() => {
-            router.push("/notifications")
-          }}
-        >
-          <Image style={styles.notificationIcon} source={IMAGE.notification_bing} />
-        </Pressable>
+        <View style={styles.notificationSkeleton} />
       </View>
     )
   }
-)
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.userInfo}>
+        <View style={styles.avatarWrapper}>
+          {profileImage ? (
+            <Image
+              style={styles.avatar}
+              source={{ uri: profileImage }}
+            />
+          ) : (
+            <View style={[styles.avatarFallback, { backgroundColor: "#B08D59" }]}>
+              <Text style={styles.avatarLetter}>{firstLetter}</Text>
+            </View>
+          )}
+        </View>
+        <View>
+          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.welcomeText}>
+            {t("message.welcome_to_csw")}
+          </Text>
+        </View>
+
+      </View>
+
+      <Pressable
+        style={styles.notificationButton}
+        onPress={() => router.push("/notifications")}
+      >
+        <Image
+          style={styles.notificationIcon}
+          source={IMAGE.notification_bing}
+        />
+      </Pressable>
+    </View>
+  )
+})
 
 const styles = StyleSheet.create({
+
   container: {
-    flex: 1,
     width: screenWidth - 20,
     marginHorizontal: "auto",
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    paddingVertical: 12
   },
+
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 12
   },
+
   avatarWrapper: {
     width: 44,
     height: 44,
-    overflow: "hidden",
     borderRadius: 100,
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: "#DDDDDD"
   },
+
   avatar: {
     width: "100%",
     height: "100%"
   },
+
+  avatarFallback: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  avatarLetter: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600"
+  },
+
   userName: {
     fontFamily: 'Montserrat-SemiBoldItalic',
-    fontSize: 18,
+    fontSize: 18
   },
+
   welcomeText: {
     fontFamily: 'Montserrat-Italic',
-    fontSize: 14,
+    fontSize: 14
   },
+
   notificationButton: {
     padding: 8,
     borderWidth: 1,
     borderRadius: 1000,
     borderColor: "#DDDDDD"
   },
+
   notificationIcon: {
     width: 24,
-    height: 24,
+    height: 24
+  },
+
+  /* Skeleton Styles */
+
+  avatarSkeleton: {
+    width: 44,
+    height: 44,
+    borderRadius: 100,
+    backgroundColor: "#E5E5E5"
+  },
+
+  nameSkeleton: {
+    width: 120,
+    height: 14,
+    borderRadius: 6,
+    backgroundColor: "#E5E5E5",
+    marginBottom: 6
+  },
+
+  textSkeleton: {
+    width: 90,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#E5E5E5"
+  },
+
+  notificationSkeleton: {
+    width: 40,
+    height: 40,
+    borderRadius: 100,
+    backgroundColor: "#E5E5E5"
   }
+
 })

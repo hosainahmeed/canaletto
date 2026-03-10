@@ -36,7 +36,7 @@ export default function ConstructionImages() {
   const renderGridItem = ({ item, index }: { item: typeof imageCategories[0]; index: number }) => (
     <Pressable style={styles.imageContainer} onPress={() => openImageModal(index)}>
       <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.overlay} />
+      {/* <View style={styles.overlay} /> */}
     </Pressable>
   )
 
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 150,
     borderRadius: 12,
-    opacity: 0.7,
+    opacity: 0.9,
   },
   overlay: {
     position: 'absolute',

@@ -158,19 +158,15 @@ export default React.memo(
 
       if (includesAny('blizzard')) return 'blizzerd'
       if (includesAny('blowing snow')) return 'blowingSnow'
-
       if (includesAny('clear') && includesAny('night')) return 'clearNight'
       if (includesAny('cloud') && includesAny('clear') && includesAny('night')) return 'cloudyClearNight'
       if (includesAny('cloud') && includesAny('clear')) return 'cloudyClear'
-
       if (includesAny('partly') && includesAny('cloud') && includesAny('night')) return 'partlyCloudyNight'
       if (includesAny('partly') && includesAny('cloud')) return 'partlyCloudy'
       if (includesAny('cloud')) return 'cloudy'
-
       if (includesAny('drizzle') && includesAny('night')) return 'drizzleNight'
       if (includesAny('drizzle') && includesAny('sun', 'day')) return 'drizzleSun'
       if (includesAny('drizzle')) return 'drizzle'
-
       if (includesAny('heavy rain')) return 'heavyRain'
       if (includesAny('rain') && includesAny('night')) return 'rainNight'
       if (includesAny('rain') && includesAny('sun', 'day')) return 'rainSun'
@@ -180,7 +176,6 @@ export default React.memo(
       if (includesAny('thunderstorm') && includesAny('severe')) return 'severThunderstorm'
       if (includesAny('thunderstorm')) return 'scatterdThunderstorm'
       if (includesAny('rain')) return 'rain'
-
       if (includesAny('sleet')) return 'sleet'
       if (includesAny('hail')) return 'hail'
       if (includesAny('snow')) return 'snow'
@@ -189,6 +184,7 @@ export default React.memo(
 
       return includesAny('clear') ? 'sunny' : 'sunny'
     }
+
     return (
       <Card
         style={{

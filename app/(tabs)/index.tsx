@@ -7,38 +7,30 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import GradientCard from "@/components/cards/GradientCard";
-import PropertyCard from "@/components/cards/PropertyCard";
+import PropertyCard, { Property } from "@/components/cards/PropertyCard";
 import SafeAreaViewWithSpacing from "@/components/safe-area/SafeAreaViewWithSpacing";
 import WeatherScreen from "@/components/screens/WeatherScreen";
 import HelpSection from "@/components/share/HelpSection";
 import SectionHeader from "@/components/share/SectionHeader";
 import UserProfileHeader from "@/components/share/UserProfileHeader";
 
-const PROPERTIES = [
-  {
-    id: "1",
-    name: "Property 1",
-    image:
-      "https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg",
-    location: "Abu Dhabi, Al Hudayriat Island, Bashayer Villas",
-  },
-  {
-    id: "2",
-    name: "Property 2",
-    image:
-      "https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg",
-    location: "Abu Dhabi, Al Hudayriat Island, Bashayer Villas",
-  },
-];
-
+import { useGetMyPropertyQuery } from "../redux/services/propertyApis";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
 
+  const { data, isLoading } = useGetMyPropertyQuery(undefined);
+
   const isTablet = width >= 720;
   const numColumns = isTablet ? 2 : 1;
+
+  /* -------- SKELETON DATA -------- */
+
+  const skeletonData = useMemo(() => Array.from({ length: 4 }), []);
+
+  /* -------- NAVIGATION -------- */
 
   const goProperty = useCallback(
     () => router.push("/(tabs)/Property"),
@@ -55,19 +47,23 @@ export default function HomeScreen() {
     [router]
   );
 
+  /* -------- PROPERTY ITEM -------- */
+
   const renderProperty = useCallback(
-    ({ item }: any) => (
+    ({ item }: { item: Property }) => (
       <View style={styles.propertyWrapper}>
-        <PropertyCard
-          property={item}
-          isTablet={isTablet}
-          onViewPress={() =>
-            console.log("View Property", item.id)
-          }
-        />
+        <PropertyCard property={item} isTablet={isTablet} />
       </View>
     ),
-    [isTablet]
+    [isTablet, data]
+  );
+
+  /* -------- PROPERTY SKELETON -------- */
+
+  const renderPropertySkeleton = () => (
+    <View style={styles.propertyWrapper}>
+      <View style={styles.propertySkeleton} />
+    </View>
   );
 
   /* -------- HEADER -------- */
@@ -77,6 +73,7 @@ export default function HomeScreen() {
       <>
         <UserProfileHeader />
         <WeatherScreen />
+
         <SectionHeader
           title={t("page_title.my_properties")}
           icon={IMAGE.property_icon}
@@ -109,6 +106,7 @@ export default function HomeScreen() {
             onPress={goLegalUpdate}
           />
         </View>
+
         <View>
           <SectionHeader
             title="New Projects"
@@ -125,6 +123,7 @@ export default function HomeScreen() {
             onPress={goLegalUpdate}
           />
         </View>
+
         <View>
           <SectionHeader
             title="Latest Insights"
@@ -148,12 +147,20 @@ export default function HomeScreen() {
     [t, goInsights, goLegalUpdate]
   );
 
+  /* -------- DATA SOURCE -------- */
+
+  const listData = isLoading ? skeletonData : data?.data ?? [];
+  console.log("property data", data)
+  /* -------- RENDER -------- */
+
   return (
     <SafeAreaViewWithSpacing>
       <FlashList
-        data={PROPERTIES}
-        renderItem={renderProperty}
-        keyExtractor={(item) => item.id}
+        data={listData}
+        renderItem={isLoading ? renderPropertySkeleton : renderProperty}
+        keyExtractor={(item, index) =>
+          item?.id ? item.id : index.toString()
+        }
         numColumns={numColumns}
         key={numColumns}
         showsVerticalScrollIndicator={false}
@@ -165,14 +172,21 @@ export default function HomeScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 24,
     paddingHorizontal: 12,
     gap: 12,
   },
+
   propertyWrapper: {
     flex: 1,
+  },
+
+  propertySkeleton: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 16,
   },
 });

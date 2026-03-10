@@ -50,7 +50,6 @@ export default function NewPasswordSet() {
     if (!validate()) return
 
     // 🔐 API call goes here
-    console.log('Password updated:', newPassword)
     router.push('/(auth)/login') // redirect after update
   }
 
