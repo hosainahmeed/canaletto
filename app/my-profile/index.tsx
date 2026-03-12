@@ -5,12 +5,13 @@ import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpac
 import ShimmerEffect from '@/components/shimmer/ShimmerEffect'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
+import useUserDetails from '@/hooks/useUserDetails'
+import { FlashList } from '@shopify/flash-list'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { useGetMyProfileQuery } from '../redux/services/userApis'
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
   icon: string
@@ -22,31 +23,67 @@ type MenuItem = {
 export default function MyProfile() {
   const router = useRouter()
   const { t } = useTranslation()
-  const { data, isLoading } = useGetMyProfileQuery(undefined)
+  const { userDetails, isLoading, refetch } = useUserDetails()
+
   const userData = {
-    name: data?.data?.name || 'Roberts Junior',
-    profile_image: data?.data?.profile_image,
+    name: userDetails?.name || 'Roberts Junior',
+    profile_image: userDetails?.profile_image,
   }
-  const MenuItemData = [
+
+  const menuItems = useMemo(() => [
     {
+      id: 'name',
       icon: ProfileIcons.user,
       title: t('my_profile.name'),
-      value: data?.data?.name || "----",
+      value: userDetails?.name || "----",
       onPress: () => console.log('Name pressed'),
     },
     {
+      id: 'email',
       icon: ProfileIcons.mail,
       title: t('my_profile.email'),
-      value: data?.data?.email || "----",
+      value: userDetails?.email || "----",
       onPress: () => console.log('Email pressed'),
     },
     {
+      id: 'phone',
       icon: ProfileIcons.phone,
       title: t('my_profile.phone'),
-      value: data?.data?.phone || "+ XXX XX XXX XXXX",
+      value: userDetails?.phone || "+ XXX XX XXX XXXX",
       onPress: () => console.log('Phone pressed'),
     },
-  ]
+  ], [userDetails, t])
+
+  const flashListData = useMemo(() => [
+    { type: 'header', data: userData },
+    ...menuItems.map(item => ({ type: 'menu', data: item })),
+    { type: 'button', data: { onPress: () => router.push('/my-profile/update-profile') } }
+  ], [userData, menuItems])
+
+  const renderItem = ({ item }: { item: any }) => {
+    switch (item.type) {
+      case 'header':
+        return <ProfileHeader user={item.data} isLoading={isLoading} />
+      case 'menu':
+        return <MenuItemRow {...item.data} />
+      case 'button':
+        return (
+          <Button
+            style={styles.updateButton}
+            iconPosition='right'
+            icon={<Image source={ProfileIcons.edit} style={{ width: 16, height: 16 }} />}
+            onPress={item.data.onPress}
+            title={t('action.update_profile')}
+          />
+        )
+      default:
+        return null
+    }
+  }
+
+  const getItemType = (item: any) => {
+    return item.type
+  }
 
   return (
     <SafeAreaViewWithSpacing>
@@ -59,19 +96,19 @@ export default function MyProfile() {
         titleFontFamily="Montserrat-Italic"
         titleStyle={styles.headerTitle}
       />
-      <ProfileHeader user={userData} isLoading={isLoading} />
-      {
-        MenuItemData.map((item, index) => (
-          <MenuItemRow
-            key={index}
-            icon={item.icon}
-            title={item.title}
-            value={item.value}
-            onPress={item.onPress}
+      <FlashList
+        data={flashListData}
+        renderItem={renderItem}
+        getItemType={getItemType}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
           />
-        ))
-      }
-      <Button style={styles.updateButton} iconPosition='right' icon={<Image source={ProfileIcons.edit} style={{ width: 16, height: 16 }} />} onPress={() => router.push('/my-profile/update-profile')} title={t('action.update_profile')} />
+        }
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaViewWithSpacing>
   )
 }
@@ -104,17 +141,19 @@ const ProfileHeader = ({ user, isLoading }: any) => {
 
 const MenuItemRow = ({ icon, title, value, onPress }: MenuItem) => {
   return (
-    <Pressable onPress={onPress}>
-      <Card style={styles.menuCard}>
-        <View style={styles.menuLeft}>
-          <Image source={icon} style={styles.menuIcon} />
-          <View>
-            <Text style={styles.menuText}>{title}</Text>
-            <Text style={styles.menuValue}>{value}</Text>
+    <View style={styles.menuWrapper}>
+      <Pressable onPress={onPress} style={styles.menuPressable}>
+        <Card style={styles.menuCard}>
+          <View style={styles.menuLeft}>
+            <Image source={icon} style={styles.menuIcon} />
+            <View>
+              <Text style={styles.menuText}>{title}</Text>
+              <Text style={styles.menuValue}>{value}</Text>
+            </View>
           </View>
-        </View>
-      </Card>
-    </Pressable>
+        </Card>
+      </Pressable>
+    </View>
   )
 }
 
@@ -125,7 +164,26 @@ const styles = StyleSheet.create({
   },
 
   listContent: {
+    paddingHorizontal: 12,
     paddingBottom: 24,
+  },
+
+  menuWrapper: {
+    marginBottom: 8,
+  },
+
+  menuPressable: {
+    width: '100%',
+  },
+
+  menuCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginHorizontal: 0,
   },
 
   profileHeader: {
@@ -179,24 +237,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBoldItalic',
   },
 
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    fontFamily: 'Montserrat-SemiBoldItalic',
-  },
-
-  menuCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    marginHorizontal: 12,
-    marginBottom: 8,
-  },
 
   menuLeft: {
     flexDirection: 'row',
@@ -223,8 +263,8 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     borderRadius: 10,
-    marginHorizontal: 12,
-    marginVertical: 12,
+    marginHorizontal: 0,
+    marginTop: 12,
     height: 48
   },
   arrow: {

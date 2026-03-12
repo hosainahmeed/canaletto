@@ -1,14 +1,16 @@
 import { IMAGE, ProfileIcons } from '@/assets/images/image.index'
+import Avatar from '@/components/avatar'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import LogoutModal from '@/components/share/LogoutModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import useUserDetails from '@/hooks/useUserDetails'
 import { FlashList } from "@shopify/flash-list"
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
 type MenuItem = {
   icon: string
@@ -20,11 +22,11 @@ export default function Profile() {
   const router = useRouter()
   const { t } = useTranslation()
   const [isShowModal, setIsShowModal] = useState(false)
+  const { userDetails, isLoading } = useUserDetails()
 
   const userData = {
-    name: 'Roberts Junior',
-    profile_image:
-      'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+    name: userDetails?.name || 'N/A',
+    profile_image: userDetails?.profile_image
   }
 
   const pushRouting = (path: any) => {
@@ -76,6 +78,9 @@ export default function Profile() {
         renderItem={({ item }) => (
           <MenuSection title={item.title} data={item.data} />
         )}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} />
+        }
       />
       <LogoutModal
         visible={isShowModal}
@@ -92,7 +97,8 @@ const ProfileHeader = memo(({ user }: any) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
-        <Image source={{ uri: user.profile_image }} style={styles.avatar} />
+        {user?.profile_image ? <Image source={{ uri: user?.profile_image }} style={styles.avatar} /> :
+          <Avatar name={user.name} size={64} />}
       </View>
 
       <Text style={styles.userName}>{user.name}</Text>

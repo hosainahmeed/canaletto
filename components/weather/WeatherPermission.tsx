@@ -11,20 +11,20 @@ interface WeatherPermissionProps {
   error?: string | null
 }
 
-export default React.memo(function WeatherPermission({ 
-  onRequestLocation, 
-  error 
+export default React.memo(function WeatherPermission({
+  onRequestLocation,
+  error
 }: WeatherPermissionProps) {
   return (
     <LinearGradient
       colors={['#D4B785', '#B08D59']}
       style={[styles.container, {
-        padding: 12, 
-        borderRadius: 16, 
-        borderWidth: 1, 
-        borderColor: "#dadada", 
-        overflow: "hidden", 
-        width: width - 24, 
+        padding: 12,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "#dadada",
+        overflow: "hidden",
+        width: width - 24,
         marginHorizontal: "auto"
       }]}
     >
@@ -40,12 +40,12 @@ export default React.memo(function WeatherPermission({
             </Text>
           </View>
         </View>
-        <Button 
-          type={ButtonType.SECONDARY} 
+        <Button
+          type={ButtonType.SECONDARY}
           style={styles.permissionButton}
-          icon={<Ionicons name="locate" size={20} color="#fff" style={styles.buttonIcon} />} 
-          title='Grant Location Access' 
-          onPress={onRequestLocation} 
+          icon={<Ionicons name="locate" size={20} color="#fff" style={styles.buttonIcon} />}
+          title='Grant Location Access'
+          onPress={onRequestLocation}
         />
         {error && (
           <View style={styles.errorContainer}>
@@ -89,17 +89,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#FFF',
     textAlign: 'left',
-    lineHeight: 24,
+    lineHeight: 17,
     opacity: 0.9,
-    marginBottom: 40,
+    marginVertical: 12,
   },
   permissionButton: {
-    flex: 1, 
-    width: width - 48, 
-    borderRadius: 12, 
-    backgroundColor: "rgba(255, 255, 255, 0.2)", 
-    backgroundBlendMode: "darken", 
-    borderWidth: 0.5, 
+    flex: 1,
+    width: width - 48,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundBlendMode: "darken",
+    borderWidth: 0.5,
     borderColor: "#E5E7EB"
   },
   buttonIcon: {

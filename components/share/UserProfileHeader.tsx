@@ -36,7 +36,7 @@ export default React.memo(function UserProfileHeader() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.userInfo}>
+      {data ? <View style={styles.userInfo}>
         <View style={styles.avatarWrapper}>
           {profileImage ? (
             <Image
@@ -55,8 +55,18 @@ export default React.memo(function UserProfileHeader() {
             {t("message.welcome_to_csw")}
           </Text>
         </View>
-
       </View>
+        :
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 2 }}>
+          <View style={[styles.avatarWrapper, { backgroundColor: "#B08D59" }]}>
+            <Image
+              style={[styles.avatar, { borderRadius: 12 }]}
+              source={IMAGE.logo}
+            />
+          </View>
+          <Text numberOfLines={1} style={[styles.userName, { fontSize: 18 }]}>Welcome to CSW</Text>
+        </View>
+      }
 
       <Pressable
         style={styles.notificationButton}

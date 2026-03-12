@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useMemo } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { RefreshControl, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { IMAGE } from "@/assets/images/image.index";
 import { useRouter } from "expo-router";
@@ -73,7 +73,6 @@ export default function HomeScreen() {
       <>
         <UserProfileHeader />
         <WeatherScreen />
-
         <SectionHeader
           title={t("page_title.my_properties")}
           icon={IMAGE.property_icon}
@@ -167,6 +166,9 @@ export default function HomeScreen() {
         contentContainerStyle={styles.contentContainer}
         ListHeaderComponent={ListHeader}
         ListFooterComponent={ListFooter}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} />
+        }
       />
     </SafeAreaViewWithSpacing>
   );
