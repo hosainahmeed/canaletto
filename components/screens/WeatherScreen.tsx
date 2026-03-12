@@ -3,6 +3,7 @@ import useWeather from '@/hooks/useWeather'
 import { useFocusEffect } from '@react-navigation/native'
 import React, { useCallback, useEffect } from 'react'
 import { Animated } from 'react-native'
+import { preloadWeatherIcons } from '../../utils/weatherIcons'
 import { WeatherCard, WeatherError, WeatherLoading, WeatherPermission } from '../weather'
 
 export default React.memo(
@@ -18,6 +19,11 @@ export default React.memo(
         fetchWeather(location.latitude, location.longitude)
       }
     }, [location, fetchWeather])
+
+    // Preload weather icons for better performance
+    useEffect(() => {
+      preloadWeatherIcons()
+    }, [])
 
     // Refresh location when screen comes into focus
     useFocusEffect(

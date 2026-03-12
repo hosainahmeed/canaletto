@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native'
 import { LocationData } from '../../types/location'
+import { getWeatherIconAuto } from '../../utils/weatherIcons'
 import Card from '../cards/Card'
 
 const { width } = Dimensions.get('window')
@@ -27,38 +28,8 @@ export default React.memo(function WeatherCard({
   fadeAnim,
   scaleAnim
 }: WeatherCardProps) {
-  const getWeatherIconKey = (condition: string): keyof typeof weatherIcon => {
-    const cond = condition.toLowerCase()
-    const includesAny = (...phrases: string[]) => phrases.some((phrase) => cond.includes(phrase))
-
-    if (includesAny('blizzard')) return 'blizzerd'
-    if (includesAny('blowing snow')) return 'blowingSnow'
-    if (includesAny('clear') && includesAny('night')) return 'clearNight'
-    if (includesAny('cloud') && includesAny('clear') && includesAny('night')) return 'cloudyClearNight'
-    if (includesAny('cloud') && includesAny('clear')) return 'cloudyClear'
-    if (includesAny('partly') && includesAny('cloud') && includesAny('night')) return 'partlyCloudyNight'
-    if (includesAny('partly') && includesAny('cloud')) return 'partlyCloudy'
-    if (includesAny('cloud')) return 'cloudy'
-    if (includesAny('drizzle') && includesAny('night')) return 'drizzleNight'
-    if (includesAny('drizzle') && includesAny('sun', 'day')) return 'drizzleSun'
-    if (includesAny('drizzle')) return 'drizzle'
-    if (includesAny('heavy rain')) return 'heavyRain'
-    if (includesAny('rain') && includesAny('night')) return 'rainNight'
-    if (includesAny('rain') && includesAny('sun', 'day')) return 'rainSun'
-    if (includesAny('rain') && includesAny('thunder')) return 'rainThunderstorm'
-    if (includesAny('shower') && includesAny('night')) return 'scatteradShowersNight'
-    if (includesAny('shower')) return 'scatterdShowers'
-    if (includesAny('thunderstorm') && includesAny('severe')) return 'severThunderstorm'
-    if (includesAny('thunderstorm')) return 'scatterdThunderstorm'
-    if (includesAny('rain')) return 'rain'
-    if (includesAny('sleet')) return 'sleet'
-    if (includesAny('hail')) return 'hail'
-    if (includesAny('snow')) return 'snow'
-    if (includesAny('fog', 'mist')) return 'fog'
-    if (includesAny('wind')) return 'wind'
-
-    return includesAny('clear') ? 'sunny' : 'sunny'
-  }
+  // Get optimized weather icon with automatic day/night detection
+  const weatherIconKey = weather?.condition ? getWeatherIconAuto(weather.condition) : 'sunny'
 
   return (
     <Animated.View
@@ -102,11 +73,7 @@ export default React.memo(function WeatherCard({
           </View>
           <View style={styles.iconWrapper}>
             <Image
-              source={
-                weather?.condition
-                  ? weatherIcon[getWeatherIconKey(weather.condition)]
-                  : weatherIcon.sunny
-              }
+              source={weatherIcon[weatherIconKey]}
               style={styles.weatherIcon}
             />
           </View>
