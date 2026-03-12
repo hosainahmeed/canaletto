@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
+import * as ImagePicker from 'expo-image-picker'
+import React, { useEffect, useState } from 'react'
 import {
-  Modal,
-  Platform,
-  Pressable,
+  Alert, Linking, Modal, Platform, Pressable,
   StyleSheet,
   Text
 } from 'react-native'
@@ -11,16 +10,150 @@ import {
 type Props = {
   visible: boolean
   onClose: () => void
-  onCamera: () => void
-  onGallery: () => void
+  onImageSelected: (uri: string) => void
 }
 
 export default function ImagePickerModal({
   visible,
   onClose,
-  onCamera,
-  onGallery,
+  onImageSelected,
 }: Props) {
+  const [hasCamera, setHasCamera] = useState(true)
+  const [isCheckingPermission, setIsCheckingPermission] = useState(false)
+
+  useEffect(() => {
+    checkCameraAvailability()
+  }, [])
+
+  const checkCameraAvailability = async () => {
+    try {
+      const result = await ImagePicker.getCameraPermissionsAsync()
+      setHasCamera(result.granted !== false)
+    } catch (error) {
+      console.log('Camera not available:', error)
+      setHasCamera(false)
+    }
+  }
+
+  const showPermissionAlert = (title: string, message: string, settingsAction?: () => void) => {
+    Alert.alert(
+      title,
+      message,
+      settingsAction
+        ? [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Settings', onPress: settingsAction },
+        ]
+        : [{ text: 'OK', style: 'default' }]
+    )
+  }
+
+  const requestCameraPermission = async () => {
+    try {
+      setIsCheckingPermission(true)
+      const { status } = await ImagePicker.requestCameraPermissionsAsync()
+
+      if (status === 'granted') {
+        launchCamera()
+      } else if (status === 'denied') {
+        showPermissionAlert(
+          'Camera Permission Required',
+          'Please grant camera permission to take photos. You can enable this in Settings.',
+          () => Linking.openSettings()
+        )
+      }
+    } catch (error) {
+      console.error('Camera permission error:', error)
+      showPermissionAlert(
+        'Camera Error',
+        'Unable to access camera. The device may not have a camera or there was an error.'
+      )
+    } finally {
+      setIsCheckingPermission(false)
+    }
+  }
+
+  const requestGalleryPermission = async () => {
+    try {
+      setIsCheckingPermission(true)
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+      if (status === 'granted') {
+        launchImageLibrary()
+      } else if (status === 'denied') {
+        showPermissionAlert(
+          'Gallery Permission Required',
+          'Please grant gallery permission to select photos. You can enable this in Settings.',
+          () => Linking.openSettings()
+        )
+      }
+    } catch (error) {
+      console.error('Gallery permission error:', error)
+      showPermissionAlert(
+        'Gallery Error',
+        'Unable to access gallery. Please try again later.'
+      )
+    } finally {
+      setIsCheckingPermission(false)
+    }
+  }
+
+  const launchCamera = async () => {
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      })
+
+      if (!result.canceled && result.assets[0]) {
+        onImageSelected(result.assets[0].uri)
+        onClose()
+      }
+    } catch (error) {
+      console.error('Camera launch error:', error)
+      showPermissionAlert(
+        'Camera Error',
+        'Failed to launch camera. The device may not have a camera.'
+      )
+    }
+  }
+
+  const launchImageLibrary = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      })
+
+      if (!result.canceled && result.assets[0]) {
+        onImageSelected(result.assets[0].uri)
+        onClose()
+      }
+    } catch (error) {
+      console.error('Gallery launch error:', error)
+      showPermissionAlert(
+        'Gallery Error',
+        'Failed to open gallery. Please try again.'
+      )
+    }
+  }
+
+  const handleCameraPress = () => {
+    if (!hasCamera) {
+      showPermissionAlert(
+        'Camera Not Available',
+        'This device does not have a camera or the camera is not available.'
+      )
+      return
+    }
+    requestCameraPermission()
+  }
+
+  const handleGalleryPress = () => {
+    requestGalleryPermission()
+  }
   return (
     <Modal
       visible={visible}
@@ -35,19 +168,15 @@ export default function ImagePickerModal({
           <ActionButton
             icon="camera-outline"
             label="Take Photo"
-            onPress={() => {
-              onClose()
-              onCamera()
-            }}
+            onPress={handleCameraPress}
+            disabled={!hasCamera || isCheckingPermission}
           />
 
           <ActionButton
             icon="image-outline"
             label="Choose from Gallery"
-            onPress={() => {
-              onClose()
-              onGallery()
-            }}
+            onPress={handleGalleryPress}
+            disabled={isCheckingPermission}
           />
 
           <Pressable
@@ -69,21 +198,29 @@ const ActionButton = ({
   icon,
   label,
   onPress,
+  disabled = false,
 }: {
   icon: any
   label: string
   onPress: () => void
+  disabled?: boolean
 }) => (
   <Pressable
     onPress={onPress}
+    disabled={disabled}
     android_ripple={{ color: '#00000010' }}
     style={({ pressed }) => [
       styles.actionRow,
-      pressed && Platform.OS === 'ios' && styles.pressed,
+      disabled && styles.disabledAction,
+      pressed && Platform.OS === 'ios' && !disabled && styles.pressed,
     ]}
   >
-    <Ionicons name={icon} size={22} color="#D4B785" />
-    <Text style={styles.actionText}>{label}</Text>
+    <Ionicons
+      name={icon}
+      size={22}
+      color={disabled ? '#9CA3AF' : '#D4B785'}
+    />
+    <Text style={[styles.actionText, disabled && styles.disabledText]}>{label}</Text>
   </Pressable>
 )
 
@@ -143,5 +280,13 @@ const styles = StyleSheet.create({
 
   pressed: {
     opacity: 0.6,
+  },
+
+  disabledAction: {
+    opacity: 0.5,
+  },
+
+  disabledText: {
+    color: '#9CA3AF',
   },
 })

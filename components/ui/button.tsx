@@ -180,7 +180,7 @@ export default function Button({
 const colors = {
   white: '#FFFFFF',
   black: '#000000',
-  brown: '#B08D59',
+  brown: 'rgba(176, 141, 89,0.8)',
   brownLight: '#B08D59',
   brownDark: '#B08D59',
   gray: '#999999',

@@ -1,7 +1,6 @@
 import { Image } from 'expo-image'
-import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Pressable,
   ScrollView,
@@ -9,7 +8,9 @@ import {
   View
 } from 'react-native'
 
+import { useGetMyProfileQuery } from '@/app/redux/services/userApis'
 import { ProfileIcons } from '@/assets/images/image.index'
+import Avatar from '@/components/avatar/Avatar'
 import CustomInput from '@/components/CustomInput'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import ImagePickerModal from '@/components/share/ImagePickerModal'
@@ -20,51 +21,32 @@ import { useTranslation } from 'react-i18next'
 export default function UpdateProfile() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { data, isLoading } = useGetMyProfileQuery(undefined)
   const [imageModalVisible, setImageModalVisible] = useState(false)
 
-  const userData = {
-    name: 'Roberts Junior',
-    phoneNumber: '+971 50 XXX XXXX',
-    profile_image:
-      'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
-  }
-
-  const [fullName, setFullName] = useState(userData.name)
-  const [phone, setPhone] = useState(userData.phoneNumber)
-  const [imageUri, setImageUri] = useState<string | null>(
-    userData.profile_image
-  )
+  // Initialize form states with API data
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [imageUri, setImageUri] = useState<string | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
 
-  /* ---------------- IMAGE PICKERS ---------------- */
+  // Update form states when API data loads
+  useEffect(() => {
+    if (data?.data) {
+      setFullName(data.data.name || '')
+      setPhone(data.data.phone || '')
+      setImageUri(data.data.profile_image || null)
+    }
+  }, [data])
 
   const pickFromGallery = async () => {
-    const { status } =
-      await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (status !== 'granted') return
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    })
-
-    if (!result.canceled) {
-      handleImage(result.assets[0].uri)
-    }
+    // This function is now handled by the ImagePickerModal component
+    setImageModalVisible(true)
   }
 
   const takePhoto = async () => {
-    const { status } =
-      await ImagePicker.requestCameraPermissionsAsync()
-    if (status !== 'granted') return
-
-    const result = await ImagePicker.launchCameraAsync({
-      quality: 0.8,
-    })
-
-    if (!result.canceled) {
-      handleImage(result.assets[0].uri)
-    }
+    // This function is now handled by the ImagePickerModal component
+    setImageModalVisible(true)
   }
 
   const handleImage = async (uri: string) => {
@@ -85,12 +67,14 @@ export default function UpdateProfile() {
 
   const onSave = () => {
     const payload = {
-      name: fullName,
-      phone,
+      name: fullName.trim(),
+      phone: phone.trim(),
       avatar: imageFile,
     }
 
     console.log('UPDATE PROFILE PAYLOAD:', payload)
+    // TODO: Add API call to update profile
+    // router.back()
   }
 
   return (
@@ -109,7 +93,12 @@ export default function UpdateProfile() {
         <Pressable onPress={openImageOptions}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: imageUri || '' }} style={styles.avatar} />
+              <Avatar
+                source={imageUri ? { uri: imageUri } : undefined}
+                name={fullName || 'User'}
+                size={100}
+                fontSize={36}
+              />
               <View style={styles.cameraIconWrapper}>
                 <Image style={styles.cameraIcon} source={ProfileIcons.camera} />
               </View>
@@ -142,8 +131,7 @@ export default function UpdateProfile() {
       <ImagePickerModal
         visible={imageModalVisible}
         onClose={() => setImageModalVisible(false)}
-        onCamera={takePhoto}
-        onGallery={pickFromGallery}
+        onImageSelected={handleImage}
       />
 
     </SafeAreaViewWithSpacing>
@@ -167,15 +155,9 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 2,
     borderColor: 'rgba(221,221,221,0.6)',
-    backgroundColor: 'rgba(212,183,133,0.35)',
+    backgroundColor: 'rgba(212,183,133,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-
-  avatar: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 26,
   },
 
   saveButton: {

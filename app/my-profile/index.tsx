@@ -1,6 +1,8 @@
 import { ProfileIcons } from '@/assets/images/image.index'
+import Avatar from '@/components/avatar/Avatar'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import ShimmerEffect from '@/components/shimmer/ShimmerEffect'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
@@ -8,6 +10,7 @@ import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useGetMyProfileQuery } from '../redux/services/userApis'
 
 type MenuItem = {
   icon: string
@@ -19,28 +22,28 @@ type MenuItem = {
 export default function MyProfile() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { data, isLoading } = useGetMyProfileQuery(undefined)
   const userData = {
-    name: 'Roberts Junior',
-    profile_image:
-      'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+    name: data?.data?.name || 'Roberts Junior',
+    profile_image: data?.data?.profile_image,
   }
   const MenuItemData = [
     {
       icon: ProfileIcons.user,
       title: t('my_profile.name'),
-      value: "Roberts Junior ",
+      value: data?.data?.name || "----",
       onPress: () => console.log('Name pressed'),
     },
     {
       icon: ProfileIcons.mail,
       title: t('my_profile.email'),
-      value: "robert @canaletto.com ",
+      value: data?.data?.email || "----",
       onPress: () => console.log('Email pressed'),
     },
     {
       icon: ProfileIcons.phone,
       title: t('my_profile.phone'),
-      value: "+ 971 50 XXX XXXX",
+      value: data?.data?.phone || "+ XXX XX XXX XXXX",
       onPress: () => console.log('Phone pressed'),
     },
   ]
@@ -56,7 +59,7 @@ export default function MyProfile() {
         titleFontFamily="Montserrat-Italic"
         titleStyle={styles.headerTitle}
       />
-      <ProfileHeader user={userData} />
+      <ProfileHeader user={userData} isLoading={isLoading} />
       {
         MenuItemData.map((item, index) => (
           <MenuItemRow
@@ -72,13 +75,29 @@ export default function MyProfile() {
     </SafeAreaViewWithSpacing>
   )
 }
-const ProfileHeader = ({ user }: any) => {
+const ProfileHeader = ({ user, isLoading }: any) => {
   return (
     <View style={styles.profileHeader}>
-      <View style={styles.avatarWrapper}>
-        <Image source={{ uri: user.profile_image }} style={styles.avatar} />
-      </View>
-      <Text style={styles.userName}>{user.name}</Text>
+      {isLoading ? (
+        <ShimmerEffect style={styles.avatarWrapper}>
+          <View style={styles.avatarShimmer} />
+        </ShimmerEffect>
+      ) : (
+        <Avatar
+          source={{ uri: user.profile_image }}
+          name={user.name}
+          size={100}
+          fontSize={36}
+          style={styles.avatarWrapper}
+        />
+      )}
+      {isLoading ? (
+        <ShimmerEffect style={styles.nameShimmer}>
+          <View style={styles.nameShimmerInner} />
+        </ShimmerEffect>
+      ) : (
+        <Text style={styles.userName}>{user.name}</Text>
+      )}
     </View>
   )
 }
@@ -119,10 +138,32 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: 'rgba(221,221,221,0.6)',
-    backgroundColor: 'rgba(212,183,133,0.35)',
+    borderColor: 'rgba(221,221,221,0.9)',
+    backgroundColor: 'rgba(212,183,133,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
+  },
+
+  avatarShimmer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#E5E7EB',
+    borderRadius: 26,
+  },
+
+  nameShimmer: {
+    height: 24,
+    width: 150,
+    alignSelf: 'center',
+    marginTop: 8,
+  },
+
+  nameShimmerInner: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
   },
 
   avatar: {
@@ -184,6 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 12,
     marginVertical: 12,
+    height: 48
   },
   arrow: {
     width: 12,
