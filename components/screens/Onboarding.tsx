@@ -59,9 +59,7 @@ export default function Onboarding() {
   };
 
   const handleFinish = () => {
-    // Navigate to home or main app screen
     router.replace('/(auth)/login')
-    console.log('Onboarding finished');
     // Example: navigation.navigate('Home');
   };
 

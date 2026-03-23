@@ -5,6 +5,7 @@ import React from 'react';
 
 export default function Index() {
   const { loginUser, isLoading } = useAuth();
+  console.log("loginUser", loginUser)
 
   // Show onboarding screen for first-time users
   if (!loginUser && !isLoading) {

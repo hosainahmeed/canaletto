@@ -1,12 +1,14 @@
+import { useGetSingleProjectQuery } from '@/app/redux/services/projectApis'
 import { IMAGE, propertyDetailsIcon } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import EmptyCard from '@/components/share/EmptyCard'
 import InsightsDownSection from '@/components/share/InsightsDownSection'
 import MapModal from '@/components/share/MapModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -14,7 +16,9 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
-export default function NewProjectDetail({ id }: { id: string }) {
+export default function NewProjectDetail() {
+  const { id } = useLocalSearchParams()
+  const { data, isLoading } = useGetSingleProjectQuery(id as string, { skip: !id })
   const router = useRouter()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showLargerMap, setShowLargerMap] = useState(false)
@@ -23,19 +27,16 @@ export default function NewProjectDetail({ id }: { id: string }) {
 
   const propertyData = {
     id: '1',
-    name: 'The Wilds Project',
+    name: data?.data?.title,
     size: '1000 sqft',
-    rooms: 3,
-    type_of_use: 'Residential',
-    property_type: 'Villa',
-    total_units: 5,
+    rooms: data?.data?.totalRooms,
+    type_of_use: data?.data?.typeOfUse,
+    property_type: data?.data?.propertyType,
+    total_units: data?.data?.totalUnit,
     status: 'New Launch',
     payment_plan: '10 Years',
     location: 'Abu Dhabi, Yas Island',
-    image: [
-      'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg',
-      'https://dubaiproperties.org.in/wp-content/uploads/2023/01/luxury-property-in-dubai-scaled.jpg',
-    ],
+    image: data?.data?.images,
     lat: 24.4941,
     lng: 54.6077,
   }
@@ -62,14 +63,14 @@ export default function NewProjectDetail({ id }: { id: string }) {
   }
 
   const renderImageItem = ({ item }: { item: string }) => (
-    <View style={styles.imageContainer}>
+    <View style={styles.imageContainer} >
       <Image
-        source={{ uri: item }}
+        source={{ uri: item || "" }}
         style={styles.heroImage}
         contentFit="cover"
         transition={300}
       />
-    </View>
+    </View >
   )
 
   return (
@@ -89,12 +90,12 @@ export default function NewProjectDetail({ id }: { id: string }) {
         />
 
         {/* Image Carousel */}
-        <View style={styles.carouselWrapper}>
+        {propertyData?.image?.length > 0 ? <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData?.image}
+            data={propertyData?.image || []}
             renderItem={renderImageItem}
-            keyExtractor={(item, index) => `image-${index}`}
+            keyExtractor={(_, index) => `image-${index}`}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -108,7 +109,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
           {/* Pagination Dots */}
           {propertyData?.image.length > 1 && (
             <View style={styles.paginationContainer}>
-              {propertyData?.image.map((_, index) => (
+              {propertyData?.image.map((_: undefined, index: number) => (
                 <View
                   key={`dot-${index}`}
                   style={[
@@ -119,7 +120,7 @@ export default function NewProjectDetail({ id }: { id: string }) {
               ))}
             </View>
           )}
-        </View>
+        </View> : <EmptyCard color='rgba(168, 85, 247, 0.4)' title='No Image Available' />}
         <View style={{ backgroundColor: "rgba(168, 85, 247, 0.4)", padding: 8, borderRadius: 8, marginBottom: 16, width: "30%", justifyContent: "center", alignContent: "center", marginTop: 12, marginLeft: 12 }}>
           <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{propertyData?.status}</Text>
         </View>

@@ -8,8 +8,15 @@ const propertyApis = baseApis.injectEndpoints({
         method: 'GET',
       }),
       providesTags: ["property"]
+    }),
+    getSingleProperty: builder.query({
+      query: (id: string) => ({
+        url: `/project/get-single/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ["property"]
     })
   })
 })
 
-export const { useGetMyPropertyQuery } = propertyApis 
+export const { useGetMyPropertyQuery, useGetSinglePropertyQuery } = propertyApis 

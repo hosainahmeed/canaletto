@@ -149,7 +149,6 @@ export default function HomeScreen() {
   /* -------- DATA SOURCE -------- */
 
   const listData = isLoading ? skeletonData : data?.data ?? [];
-  console.log("property data", data)
   /* -------- RENDER -------- */
 
   return (

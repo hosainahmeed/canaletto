@@ -5,7 +5,7 @@ import HelpSection from '@/components/share/HelpSection'
 import ImageCarousel from '@/components/share/ImageCarousel'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
+import { useGetSinglePropertyQuery } from '../redux/services/propertyApis'
 
 // Conditional import for MapView to avoid crash
 let MapView: any, Marker: any
@@ -136,11 +137,15 @@ const MapComponent = ({
 
 /* ---------------- Main Screen ---------------- */
 
-export default function PropertyByID({ id }: { id: string }) {
+export default function PropertyByID() {
+  const { id } = useLocalSearchParams();
+  console.log(id)
   const router = useRouter()
   const { t } = useTranslation()
   const [showLargerMap, setShowLargerMap] = useState(false)
   const [loading] = useState(false)
+  const { data, isLoading } = useGetSinglePropertyQuery(id as string, { skip: !id })
+  console.log(data)
 
   const propertyData = {
     name: 'The Wilds Project',
