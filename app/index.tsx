@@ -5,13 +5,13 @@ import React from 'react';
 
 export default function Index() {
   const { loginUser, isLoading } = useAuth();
-  console.log("loginUser", loginUser)
-
+  console.log("Index screen", loginUser, isLoading)
   // Show onboarding screen for first-time users
-  if (!loginUser && !isLoading) {
+  if (!loginUser) {
     return <OnboardingScreen />;
   }
 
   // Redirect to authenticated tabs
   return <Redirect href="/(tabs)" />;
+  // return <OnboardingScreen />;
 }

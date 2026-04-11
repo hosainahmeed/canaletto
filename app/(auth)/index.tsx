@@ -1,11 +1,9 @@
-import Onboarding from '@/components/screens/Onboarding'
+import { Redirect } from 'expo-router'
 import React from 'react'
-import { StyleSheet } from 'react-native'
 
 export default function index() {
-  return (
-    <Onboarding />
-  )
+  // return (
+  //   <Onboarding />
+  // )
+  return <Redirect href="/(auth)/login" />
 }
-
-const styles = StyleSheet.create({})

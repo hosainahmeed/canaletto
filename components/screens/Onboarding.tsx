@@ -31,8 +31,8 @@ export default function Onboarding() {
     },
     {
       id: 2,
-      title: t("onboarding.discover_new_investment_gems"),
-      description: t("onboarding.looking_for_your_next_big_opportunity"),
+      title: t("onboarding.property_data_overview"),
+      description: t("onboarding.all_numbers_data_facts"),
     }
   ]
 
@@ -60,7 +60,6 @@ export default function Onboarding() {
 
   const handleFinish = () => {
     router.replace('/(auth)/login')
-    // Example: navigation.navigate('Home');
   };
 
   return (

@@ -36,26 +36,29 @@ export default React.memo(function UserProfileHeader() {
 
   return (
     <View style={styles.container}>
-      {data ? <View style={styles.userInfo}>
-        <View style={styles.avatarWrapper}>
-          {profileImage ? (
-            <Image
-              style={styles.avatar}
-              source={{ uri: profileImage }}
-            />
-          ) : (
-            <View style={[styles.avatarFallback, { backgroundColor: "#B08D59" }]}>
-              <Text style={styles.avatarLetter}>{firstLetter}</Text>
+      {data ?
+        <Pressable onPress={() => router.push("/Profile")}>
+          <View style={styles.userInfo}>
+            <View style={styles.avatarWrapper}>
+              {profileImage ? (
+                <Image
+                  style={styles.avatar}
+                  source={{ uri: profileImage }}
+                />
+              ) : (
+                <View style={[styles.avatarFallback, { backgroundColor: "#B08D59" }]}>
+                  <Text style={styles.avatarLetter}>{firstLetter}</Text>
+                </View>
+              )}
             </View>
-          )}
-        </View>
-        <View>
-          <Text style={styles.userName}>{name}</Text>
-          <Text style={styles.welcomeText}>
-            {t("message.welcome_to_csw")}
-          </Text>
-        </View>
-      </View>
+            <View>
+              <Text style={styles.userName}>{name}</Text>
+              <Text style={styles.welcomeText}>
+                {t("message.welcome_to_csw")}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
         :
         <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 2 }}>
           <View style={[styles.avatarWrapper, { backgroundColor: "#B08D59" }]}>

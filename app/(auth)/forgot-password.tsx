@@ -2,32 +2,55 @@ import { IMAGE } from '@/assets/images/image.index'
 import CustomInput from '@/components/CustomInput'
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import { useToast } from '@/components/toast/useToast'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Keyboard, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
+import { ActivityIndicator, Keyboard, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
+import { useForgotPasswordMutation } from '../redux/services/authApis'
 
 export default function ForgotPasswordScreen() {
   const { width, height } = useWindowDimensions();
-
+  const [forgotPassword, { isLoading: isForgotPasswordLoading }] = useForgotPasswordMutation()
+  const toast = useToast()
   const router = useRouter()
-  const [email, setEmail] = useState('hosaindev96@gmail.com');
+  const [email, setEmail] = useState('client3@yopmail.com');
   const [emailError, setEmailError] = useState('');
   const { t } = useTranslation()
   const handleBackToLogin = () => {
     router.push('/(auth)/login')
   }
 
-  const handleSendVerificationCode = () => {
-    router.push('/(auth)/verification-code')
+  const handleSendVerificationCode = async () => {
+    try {
+      if (!email) {
+        setEmailError('Email is required')
+        return
+      }
+      const res = await forgotPassword({ email }).unwrap()
+      if (!res?.success) {
+        throw new Error(res?.message || 'Failed to send verification code')
+      }
+      toast.success(res?.message || 'Verification code sent successfully')
+      if (!isForgotPasswordLoading && res?.success && email) {
+        router.push({
+          pathname: '/(auth)/verification-code',
+          params: {
+            email
+          }
+        })
+      }
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Failed to send verification code'
+      toast.error(errorMessage)
+    }
   }
 
   return (
     <SafeAreaViewWithSpacing>
       <StatusBar style="dark" />
-
       <KeyboardAvoider
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 32 : 0}
@@ -72,13 +95,19 @@ export default function ForgotPasswordScreen() {
               />
 
 
-              {/* Login Button */}
+              {/* Send Verification Code Button */}
               <TouchableOpacity
                 style={styles.loginButton}
-                onPress={() => handleSendVerificationCode()}
+                onPress={async () => {
+                  await handleSendVerificationCode()
+                }}
                 activeOpacity={0.8}
               >
-                <Text style={styles.loginButtonText}>{t("action.send_verification_code")}</Text>
+                {!isForgotPasswordLoading ?
+                  <Text style={styles.loginButtonText}>{t("action.send_verification_code")}</Text>
+                  :
+                  <ActivityIndicator color="#fff" />
+                }
               </TouchableOpacity>
               <Text
                 style={{

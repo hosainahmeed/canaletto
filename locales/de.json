@@ -44,13 +44,14 @@
     "title": "Bestätigen Sie Ihren OTP",
     "subtitle": "Geben Sie den 6-stelligen Bestätigungscode ein, der an Ihre E-Mail-Adresse gesendet wurde.",
     "didnt_receive_code": "Keinen Code erhalten?",
-    "resend_in": "Erneut senden in"
+    "resend_in": "Erneut senden in",
+    "resending": "Erneut senden"
   },
   "onboarding": {
     "welcome_to_your_real_estate_hub": "Willkommen in Ihrem Immobilien-Hub!",
     "ready_to_take_control_of_your_properties": "Bereit, die Kontrolle über Ihre Immobilien zu übernehmen? Ihre Investitionsdetails, Updates und alles, was Sie brauchen, finden Sie hier an einem Ort. Los geht's!",
-    "discover_new_investment_gems": "Entdecken Sie neue Investment-Perlen",
-    "looking_for_your_next_big_opportunity": "Auf der Suche nach Ihrer nächsten großen Chance? Entdecken Sie die neuesten Projekte und zeigen Sie mit einem Klick Ihr Interesse. Ihre nächste großartige Investition ist nur wenige Klicks entfernt!"
+    "property_data_overview": "Ihre Immobilie. Ihre Daten. Ihre Übersicht – alles in einer App.",
+    "all_numbers_data_facts": "Alle Zahlen, Daten und Fakten zu Ihrer Immobilie gebündelt in Ihrer Canaletto Sky App. Mit direktem Zugang zu Ihrem persönlichen Berater und aktuellen, digitalen Einblicken in Ihre Immobilie."
   },
   "new_password_set": {
     "title": "Neues Passwort festlegen",

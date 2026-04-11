@@ -8,6 +8,7 @@ import useUserDetails from '@/hooks/useUserDetails'
 import { FlashList } from "@shopify/flash-list"
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
@@ -85,14 +86,16 @@ export default function Profile() {
       <LogoutModal
         visible={isShowModal}
         onClose={() => setIsShowModal(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setIsShowModal(false)
+          await SecureStore.deleteItemAsync('accessToken')
           router.replace('/(auth)/login')
         }}
       />
     </SafeAreaViewWithSpacing>
   )
 }
+
 const ProfileHeader = memo(({ user }: any) => {
   return (
     <View style={styles.profileHeader}>

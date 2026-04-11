@@ -5,6 +5,7 @@ interface AuthContextType {
   loginUser: boolean;
   setLoginUser: (value: boolean) => void;
   isLoading: boolean;
+  error: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +24,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loginUser, setLoginUser] = useState(false);
-  const { data, isLoading } = useGetMyProfileQuery(undefined)
+  const { data, isLoading, error } = useGetMyProfileQuery(undefined)
 
   useEffect(() => {
     if (data?.success) {
@@ -34,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [data])
 
   return (
-    <AuthContext.Provider value={{ loginUser, setLoginUser, isLoading }}>
+    <AuthContext.Provider value={{ loginUser, setLoginUser, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );

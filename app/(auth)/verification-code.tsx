@@ -1,12 +1,14 @@
 import { IMAGE } from '@/assets/images/image.index'
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import { useToast } from '@/components/toast/useToast'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  ActivityIndicator,
   Dimensions,
   Platform,
   Pressable,
@@ -16,6 +18,7 @@ import {
   View,
 } from 'react-native'
 import { OtpInput } from 'react-native-otp-entry'
+import { useResendResetCodeMutation, useVerifyForgotOtpMutation } from '../redux/services/authApis'
 
 const { width, height } = Dimensions.get('window')
 
@@ -24,6 +27,10 @@ export default function VerificationCode() {
   const [otpCode, setOtpCode] = useState('')
   const [resendTimer, setResendTimer] = useState(30)
   const { t } = useTranslation()
+  const { email } = useLocalSearchParams<{ email?: string }>();
+  const toast = useToast()
+  const [verifyForgotOtp, { isLoading: isVerifying }] = useVerifyForgotOtpMutation()
+  const [resendResetCode, { isLoading: isResending }] = useResendResetCodeMutation()
 
   /* --------------- Timer Logic --------------- */
   useEffect(() => {
@@ -32,13 +39,45 @@ export default function VerificationCode() {
     return () => clearInterval(interval)
   }, [resendTimer])
 
-  const handleVerify = () => {
-    if (otpCode.length === 6) {
-      router.push('/new-password-set')
+  const handleVerify = async () => {
+    try {
+      if (otpCode.length === 6) {
+        const data = {
+          email: email,
+          resetCode: Number(otpCode)
+        }
+        const res = await verifyForgotOtp(data).unwrap()
+        if (!res?.success) {
+          throw new Error(res?.message || 'Failed to verify OTP')
+        }
+        toast.success(res?.message || 'OTP verified successfully')
+        router.push({
+          pathname: '/new-password-set',
+          params: { email: email || '' }
+        })
+      }
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Failed to verify OTP'
+      console.log('Verification error:', errorMessage)
+      toast.error(errorMessage)
     }
   }
 
-  const handleResend = () => {
+  const handleResend = async () => {
+    try {
+      const data = {
+        email: email,
+      }
+      const res = await resendResetCode(data).unwrap()
+      if (!res?.success) {
+        throw new Error(res?.message || 'Failed to resend OTP')
+      }
+      toast.success(res?.message || 'OTP resent successfully')
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Failed to resend OTP'
+      console.log('Resend error:', errorMessage)
+      toast.error(errorMessage)
+    }
     setResendTimer(30)
     setOtpCode('')
   }
@@ -97,7 +136,11 @@ export default function VerificationCode() {
                   </Text>
                 ) : (
                   <Pressable onPress={handleResend}>
-                    <Text style={styles.resendAction}>{t('action.resend')}</Text>
+                    {isResending ? (
+                      <Text style={styles.resendAction}>{t('verification_code.resending')}</Text>
+                    ) : (
+                      <Text style={styles.resendAction}>{t('action.resend')}</Text>
+                    )}
                   </Pressable>
                 )}
               </View>
@@ -108,7 +151,11 @@ export default function VerificationCode() {
                 style={[styles.button, otpCode.length < 6 && styles.buttonDisabled]}
                 disabled={otpCode.length < 6}
               >
-                <Text style={styles.buttonText}>{t('action.verify_code')}</Text>
+                {isVerifying ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>{t('action.verify_code')}</Text>
+                )}
               </Pressable>
               <Text
                 style={{

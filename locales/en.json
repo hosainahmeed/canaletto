@@ -27,8 +27,8 @@
   "onboarding": {
     "welcome_to_your_real_estate_hub": "Welcome to Your Real Estate Hub!",
     "ready_to_take_control_of_your_properties": "Ready to take control of your properties? Your investment details, updates, and everything you need are right here in one place. Let’s get started!",
-    "discover_new_investment_gems": "Discover New Investment Gems",
-    "looking_for_your_next_big_opportunity": "Looking for your next big opportunity? Check out the latest projects and express interest with a tap. Your next great investment is just a few clicks away!"
+    "property_data_overview": "Your property. Your Data. Your Overview -all in one App.",
+    "all_numbers_data_facts": "All numbers, data, and facts about your property consolidated in your Canaletto Sky App. With direct access to your personal advisor and up-to-date digital insights into your property"
   },
   "welcome": "Welcome!",
   "change_language": "Change Language",
@@ -59,7 +59,8 @@
     "title": "Verify Your OTP",
     "subtitle": "Enter the 6-digit verification code sent to your email address.",
     "didnt_receive_code": "Didn’t receive the code?",
-    "resend_in": "Resend in"
+    "resend_in": "Resend in",
+    "resending": "Resending"
   },
   "page_title": {
     "language_preferences": "Language Preferences",

@@ -1,9 +1,9 @@
 import { IMAGE } from '@/assets/images/image.index';
-import Checkbox from '@/components/Checkbox';
 import CustomInput from '@/components/CustomInput';
 import PasswordInput from '@/components/PasswordInput';
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider';
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing';
+import { useToast } from '@/components/toast/useToast';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -27,13 +27,13 @@ import { useSignInMutation } from '../redux/services/authApis';
 export default function LoginScreen() {
   const [signIn, { isLoading }] = useSignInMutation()
   const [email, setEmail] = useState('client3@yopmail.com');
-  const [password, setPassword] = useState('password');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [password, setPassword] = useState('12345678');
+  // const [rememberMe, setRememberMe] = useState(true);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const { width, height } = useWindowDimensions();
   const { t } = useTranslation()
-
+  const toast = useToast();
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -42,40 +42,48 @@ export default function LoginScreen() {
 
   const router = useRouter()
   const handleLogin = async () => {
-    // Dismiss keyboard
-    Keyboard.dismiss();
+    try {
+      // Dismiss keyboard
+      Keyboard.dismiss();
 
-    // Reset errors
-    setEmailError('');
-    setPasswordError('');
+      // Reset errors
+      setEmailError('');
+      setPasswordError('');
 
-    // Validation
-    let isValid = true;
+      // Validation
+      let isValid = true;
 
-    if (!email) {
-      setEmailError('Email is required');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email');
-      isValid = false;
-    }
-
-    if (!password) {
-      setPasswordError('Password is required');
-      isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      isValid = false;
-    }
-
-    if (isValid) {
-      const data = {
-        email,
-        password
+      if (!email) {
+        setEmailError('Email is required');
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        setEmailError('Please enter a valid email');
+        isValid = false;
       }
-      const res = await signIn(data).unwrap()
-      SecureStore.setItem("accessToken", res?.data?.accessToken)
-      router.push("/(tabs)")
+
+      if (!password) {
+        setPasswordError('Password is required');
+        isValid = false;
+      } else if (password.length < 6) {
+        setPasswordError('Password must be at least 6 characters');
+        isValid = false;
+      }
+
+      if (isValid) {
+        const data = {
+          email,
+          password
+        }
+        const res = await signIn(data).unwrap()
+        if (!res?.success) {
+          throw new Error(res?.message || 'Something went wrong while logging in!')
+        }
+        SecureStore.setItem("accessToken", res?.data?.accessToken)
+        toast.success("Login successful")
+        router.push("/(tabs)")
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || error?.message || 'Something went wrong while logging in!')
     }
   };
 
@@ -147,7 +155,7 @@ export default function LoginScreen() {
 
               {/* Remember Me & Forgot Password */}
               <View style={styles.optionsRow}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={styles.rememberMeContainer}
                   onPress={() => setRememberMe(!rememberMe)}
                   activeOpacity={0.7}
@@ -158,7 +166,8 @@ export default function LoginScreen() {
                     onPress={() => setRememberMe(!rememberMe)}
                   />
                   <Text style={styles.rememberMeText}>{t('login_screen.remember_me')}</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+                <View />
 
                 <TouchableOpacity onPress={handleForgotPassword}>
                   <Text style={styles.forgotPasswordText}>{t('login_screen.forgot_password')}</Text>
@@ -167,10 +176,10 @@ export default function LoginScreen() {
 
               {/* Login Button */}
               <TouchableOpacity
-                style={[styles.loginButton, { opacity: !rememberMe ? 0.7 : 1 }]}
+                style={[styles.loginButton]}
                 onPress={handleLogin}
                 activeOpacity={0.8}
-                disabled={!rememberMe}
+              // disabled={!rememberMe}
               >
                 {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>{t('action.login')}</Text>}
               </TouchableOpacity>
@@ -178,7 +187,7 @@ export default function LoginScreen() {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoider>
-    </SafeAreaViewWithSpacing>
+    </SafeAreaViewWithSpacing >
   );
 }
 

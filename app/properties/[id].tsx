@@ -145,23 +145,19 @@ export default function PropertyByID() {
   const [showLargerMap, setShowLargerMap] = useState(false)
   const [loading] = useState(false)
   const { data, isLoading } = useGetSinglePropertyQuery(id as string, { skip: !id })
-  console.log(data)
 
   const propertyData = {
-    name: 'The Wilds Project',
-    size: '1000 sqft',
-    rooms: 3,
-    type_of_use: 'Residential',
-    property_type: 'Villa',
-    total_units: 5,
-    payment_plan: '10 Years',
-    location: 'Abu Dhabi, Yas Island',
-    image: [
-      'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg',
-      'https://dubaiproperties.org.in/wp-content/uploads/2023/01/luxury-property-in-dubai-scaled.jpg',
-    ],
-    lat: 24.4941,
-    lng: 54.6077,
+    name: data?.data?.name,
+    size: data?.data?.size || '-',
+    rooms: data?.data?.totalRooms || "-",
+    type_of_use: data?.data?.type || '-',
+    property_type: data?.data?.type || '-',
+    total_units: data?.data?.units || "-",
+    payment_plan: data?.data?.paymentPlan || '-',
+    location: data?.data?.address || '-',
+    image: data?.data?.images || [],
+    lat: data?.data?.latitude,
+    lng: data?.data?.longitude,
   }
 
   const DETAILS = [
@@ -208,8 +204,8 @@ export default function PropertyByID() {
           />
 
           {/* Only render carousel if images exist */}
-          {Array.isArray(propertyData.image) && propertyData.image.length > 0 && (
-            <ImageCarousel images={propertyData.image} />
+          {Array.isArray(data?.data?.images) && data?.data?.images.length > 0 && (
+            <ImageCarousel images={data?.data?.images} />
           )}
 
           <View style={styles.titleWrapper}>

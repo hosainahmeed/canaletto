@@ -1,9 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert } from "react-native";
 
-const baseUrl = "https://rnj64vmh-9050.inc1.devtunnels.ms/api/v1";
+const baseUrl = "http://10.10.20.9:9050/api/v1";
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl,
@@ -11,8 +10,8 @@ const rawBaseQuery = fetchBaseQuery({
     const token = await SecureStore.getItemAsync("accessToken");
 
     if (!token) {
-      Alert.alert("Error", "No token found");
-      router.replace("/(auth)/login");
+      // Alert.alert("Error", "No token found");
+      router.replace("/");
       return headers;
     }
 

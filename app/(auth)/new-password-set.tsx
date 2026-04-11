@@ -2,9 +2,10 @@ import { IMAGE } from '@/assets/images/image.index'
 import PasswordInput from '@/components/PasswordInput'
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import { useToast } from '@/components/toast/useToast'
 import Button, { ButtonSize } from '@/components/ui/button'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +19,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
+import { useResetPasswordMutation } from '../redux/services/authApis'
 
 export default function NewPasswordSet() {
   const router = useRouter()
@@ -27,7 +29,9 @@ export default function NewPasswordSet() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [newPasswordError, setNewPasswordError] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
-
+  const { email } = useLocalSearchParams<{ email?: string }>();
+  const [resetPassword, { isLoading: isResettingPassword }] = useResetPasswordMutation()
+  const toast = useToast()
   const validate = () => {
     let valid = true
     setNewPasswordError('')
@@ -45,12 +49,33 @@ export default function NewPasswordSet() {
     return valid
   }
 
-  const handleUpdatePassword = () => {
-    Keyboard.dismiss()
-    if (!validate()) return
+  const handleUpdatePassword = async () => {
+    try {
+      Keyboard.dismiss()
+      if (!validate()) return
+      if (!email) {
+        throw new Error('Email is required')
+      }
+      const resetPasswordPayload = {
+        email,
+        password: newPassword,
+        confirmPassword
+      }
 
-    // 🔐 API call goes here
-    router.push('/(auth)/login') // redirect after update
+      const response = await resetPassword(resetPasswordPayload).unwrap()
+      if (!response?.success) {
+        throw new Error(response?.message || 'Failed to reset password')
+      }
+      toast.success(response?.message || 'Password reset successfully')
+
+      router.push({
+        pathname: '/(auth)/login',
+        params: { email: email || '' }
+      })
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Failed to reset password'
+      toast.error(errorMessage)
+    }
   }
 
   return (
@@ -105,11 +130,24 @@ export default function NewPasswordSet() {
                 returnKeyType="done"
                 onSubmitEditing={handleUpdatePassword}
               />
+              <Text
+                style={{
+                  marginTop: 12,
+                  alignSelf: "flex-end",
+                  fontSize: 14,
+                  color: '#3B82F6',
+                  fontWeight: '500',
+                  marginBottom: 10
+                }}
+                onPress={() => {
+                  router.push('/(auth)/login')
+                }}>{t('action.back_to_login')}</Text>
               <Button
                 title={t('new_password_set.update_password')}
                 onPress={handleUpdatePassword}
                 size={ButtonSize.LARGE}
                 disabled={!newPassword || !confirmPassword}
+                loading={isResettingPassword}
               />
             </View>
           </ScrollView>
