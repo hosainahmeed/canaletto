@@ -6,7 +6,7 @@ import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { t } from 'i18next'
 import React from 'react'
 import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
@@ -72,6 +72,7 @@ const TAB_WRAPPER_WIDTH = width - 20
 const TAB_GAP = 10
 const TAB_BUTTON_WIDTH = (TAB_WRAPPER_WIDTH - TAB_GAP) / 2
 export default function PaymentStaus() {
+  const { id } = useLocalSearchParams()
   const router = useRouter()
   const [activeButton, setActiveButton] = React.useState<'Payment Invoices' | 'Payment Plan'>('Payment Invoices')
   const [downloadingKey, setDownloadingKey] = React.useState<string | null>(null)

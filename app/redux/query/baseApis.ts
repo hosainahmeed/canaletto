@@ -8,7 +8,6 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl,
   prepareHeaders: async (headers: any) => {
     const token = await SecureStore.getItemAsync("accessToken");
-
     if (!token) {
       // Alert.alert("Error", "No token found");
       router.replace("/");
@@ -55,6 +54,7 @@ const baseApis = createApi({
     "privacyPolicy",
     "termsAndConditions",
     "notification",
+    "propertyFile"
   ],
   endpoints: () => ({}),
 });

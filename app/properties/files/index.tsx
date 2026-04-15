@@ -1,3 +1,4 @@
+import { useGetMyPropertyFilesQuery } from '@/app/redux/services/propertyFileApis'
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
@@ -6,58 +7,66 @@ import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import React from 'react'
-import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useMemo } from 'react'
+import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, Pressable, RefreshControl, Share, StyleSheet, Text, View } from 'react-native'
 
 
-type PropertyFile = {
-  id: string
-  name: string
-  pdfLink: string
-  date: string
-}
-
-const propertyFiles: PropertyFile[] = [
-  {
-    id: 'agreement',
-    name: 'Agreement.pdf',
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '08:14 AM 25 Jan 2025',
-  },
-  {
-    id: 'receipt',
-    name: 'Receipt.pdf',
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '08:14 AM 26 Jan 2025',
-  },
-  {
-    id: 'share',
-    name: 'Share.pdf',
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '08:14 AM 27 Jan 2025',
-  },
-]
 
 
 
 
 const { width } = Dimensions.get('window')
 
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const day = date.getDate();
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${formattedHours}:${formattedMinutes} ${ampm} ${day} ${month} ${year}`;
+};
+
+interface FileData {
+  id: string;
+  propertyId: string;
+  managerId: string;
+  name: string;
+  file_url: string;
+  createdAt: string;
+  updatedAt: string;
+  property: {
+    name: string;
+  };
+  manager: {
+    name: string;
+    profile_image: string;
+  };
+}
+
 export default function PropertyFiles() {
+  const { id } = useLocalSearchParams()
+  const { data, isLoading, refetch } = useGetMyPropertyFilesQuery(id as string, { skip: !id })
+  const propertyFileData: FileData[] = useMemo(() => data?.data?.data, [data])
   const router = useRouter()
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null)
 
-  const handleViewFile = (file: PropertyFile) => {
+  const handleViewFile = (file: FileData) => {
     router.push({
       pathname: '/properties/files/PdfViewer',
-      params: { pdfLink: file.pdfLink, title: file.name },
+      params: { pdfLink: file?.file_url, title: file.name },
     });
   };
 
 
 
-  const handleDownloadFile = React.useCallback(async (file: PropertyFile) => {
+  const handleDownloadFile = React.useCallback(async (file: FileData) => {
     try {
       setDownloadingId(file.id)
       const fileName = `file-${file.id}.pdf`
@@ -67,8 +76,8 @@ export default function PropertyFiles() {
         throw new Error('No writable directory available')
       }
 
-      const tempFileUri = `${tempDir}${file.pdfLink.split('/').pop() || fileName}`
-      const { uri: downloadedUri } = await FileSystem.downloadAsync(file.pdfLink, tempFileUri)
+      const tempFileUri = `${tempDir}${file?.file_url.split('/').pop() || fileName}`
+      const { uri: downloadedUri } = await FileSystem.downloadAsync(file?.file_url, tempFileUri)
 
       if (Platform.OS === 'android') {
         const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
@@ -131,8 +140,10 @@ export default function PropertyFiles() {
         }
       />
       <PropertyFileList
-        data={propertyFiles}
+        data={propertyFileData}
         emptyIcon={IMAGE.empty}
+        isLoading={isLoading}
+        refetch={refetch}
         emptyColor="#3B82F6"
         emptyTitle="No files available"
         onViewFile={handleViewFile}
@@ -152,21 +163,25 @@ const PropertyFileList = ({
   onViewFile,
   onDownloadFile,
   downloadingId,
+  isLoading,
+  refetch
 }: {
-  data: PropertyFile[]
+  data: FileData[]
   emptyIcon: any
   emptyColor: string
   emptyTitle: string
-  onViewFile: (file: PropertyFile) => void
-  onDownloadFile: (file: PropertyFile) => void
-  downloadingId: string | null
+  onViewFile: (file: FileData) => void
+  onDownloadFile: (file: FileData) => void
+  downloadingId: string | null,
+  isLoading: boolean,
+  refetch: any
 }) => {
   return (
     <FlatList
       data={data}
-      keyExtractor={(item) => item?.pdfLink + item?.date}
+      keyExtractor={(item) => item?.id}
       contentContainerStyle={{ paddingVertical: 12 }}
-      renderItem={({ item, index }) => (
+      renderItem={({ item }) => (
         <Card style={styles.fileCard}>
           <View style={styles.fileLeft}>
             <Image source={IMAGE.pdfIcon} style={styles.pdfIcon} />
@@ -175,20 +190,31 @@ const PropertyFileList = ({
                 {item?.name}
               </Text>
               <Text style={styles.fileDate}>
-                {item?.date}
+                {formatDate(item?.createdAt)}
               </Text>
             </View>
           </View>
 
           <View style={styles.fileActions}>
-            <Pressable onPress={() => onViewFile(item)}>
-              <Image source={IMAGE.eye} style={styles.actionIcon} />
+            <Pressable
+              onPress={() => onViewFile(item)}
+              disabled={!item?.file_url}
+              style={!item?.file_url && styles.disabledButton}
+            >
+              <Image
+                source={IMAGE.eye}
+                style={[styles.actionIcon, !item?.file_url && styles.disabledIcon]}
+              />
             </Pressable>
-            <Pressable onPress={() => onDownloadFile(item)}>
+            <Pressable
+              onPress={() => onDownloadFile(item)}
+              disabled={!item?.file_url}
+              style={!item?.file_url && styles.disabledButton}
+            >
               {downloadingId !== item?.id ? (
                 <Image
                   source={IMAGE.download}
-                  style={styles.actionIcon}
+                  style={[styles.actionIcon, !item?.file_url && styles.disabledIcon]}
                 />
               ) : (
                 <View style={[styles.downloadingText, { justifyContent: "center", alignItems: "center" }]}>
@@ -201,6 +227,7 @@ const PropertyFileList = ({
       )}
       ListHeaderComponentStyle={{ marginTop: 12 }}
       ListFooterComponent={<HelpSection />}
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => refetch()} />}
       ListEmptyComponent={
         <EmptyCard
           icon={emptyIcon}
@@ -260,5 +287,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#6B7280',
     marginTop: 4,
+  },
+
+  disabledButton: {
+    opacity: 0.5,
+  },
+
+  disabledIcon: {
+    opacity: 0.5,
   },
 })

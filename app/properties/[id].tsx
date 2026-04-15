@@ -139,7 +139,6 @@ const MapComponent = ({
 
 export default function PropertyByID() {
   const { id } = useLocalSearchParams();
-  console.log(id)
   const router = useRouter()
   const { t } = useTranslation()
   const [showLargerMap, setShowLargerMap] = useState(false)
@@ -147,6 +146,7 @@ export default function PropertyByID() {
   const { data, isLoading } = useGetSinglePropertyQuery(id as string, { skip: !id })
 
   const propertyData = {
+    id: data?.data?.id,
     name: data?.data?.name,
     size: data?.data?.size || '-',
     rooms: data?.data?.totalRooms || "-",
@@ -259,7 +259,12 @@ export default function PropertyByID() {
               <Pressable
                 key={item.label}
                 style={styles.propertyInfoPressable}
-                onPress={() => router.push(item?.route as any)}
+                onPress={() => router.push({
+                  pathname: item?.route as any,
+                  params: {
+                    id: propertyData.id,
+                  }
+                })}
               >
                 <Card style={[
                   styles.propertyInfoCard,
