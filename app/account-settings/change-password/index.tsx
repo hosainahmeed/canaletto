@@ -1,16 +1,19 @@
+import { useChangePasswordMutation } from '@/app/redux/services/authApis'
 import PasswordInput from '@/components/PasswordInput'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 
 export default function ChangePassword() {
   const router = useRouter()
   const { t } = useTranslation()
   const { width } = useWindowDimensions()
+  const toast = useToast()
 
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -19,7 +22,7 @@ export default function ChangePassword() {
   const [oldPasswordError, setOldPasswordError] = useState('')
   const [newPasswordError, setNewPasswordError] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
-
+  const [changePassword, { isLoading, error }] = useChangePasswordMutation()
   const validate = () => {
     let valid = true
 
@@ -45,11 +48,30 @@ export default function ChangePassword() {
     return valid
   }
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     if (!validate()) return
 
-    // 🔐 API call goes here
-    console.log('Password updated')
+    try {
+      const payLoadData = {
+        oldPassword,
+        newPassword,
+        confirmNewPassword: confirmPassword
+      }
+      const res = await changePassword(payLoadData).unwrap()
+      if (!res?.success) {
+        throw new Error(res?.message)
+      }
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      toast.success(res?.message || 'Password changed successfully!')
+
+      setTimeout(() => {
+        router.back()
+      }, 1500)
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || 'Failed to change password. Please try again.')
+    }
   }
 
   return (
@@ -92,11 +114,12 @@ export default function ChangePassword() {
           returnKeyType="done"
           onSubmitEditing={handleUpdatePassword}
         />
-
+        {error?.data?.message && <Text style={{ color: 'red', marginBottom: 4 }}>{error?.data?.message}</Text>}
         <Button
           title={t('action.update_password')}
           onPress={handleUpdatePassword}
-          disabled={!oldPassword || !newPassword || !confirmPassword}
+          disabled={!oldPassword || !newPassword || !confirmPassword || isLoading}
+          loading={isLoading}
         />
       </View>
     </SafeAreaViewWithSpacing>

@@ -42,7 +42,6 @@ export default React.memo(function PropertyCard({ property, isTablet }: Property
 
   const cardWidth = isTablet ? width / 2 - 20 : width - 20;
   const imageHeight = isTablet ? 220 : 180;
-
   return (
     <View style={[styles.card, { width: cardWidth }]}>
       <View style={[styles.imageContainer, { height: imageHeight }]}>

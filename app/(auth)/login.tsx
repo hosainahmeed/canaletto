@@ -26,7 +26,7 @@ import { useSignInMutation } from '../redux/services/authApis';
 
 export default function LoginScreen() {
   const [signIn, { isLoading }] = useSignInMutation()
-  const [email, setEmail] = useState('client3@yopmail.com');
+  const [email, setEmail] = useState('client@yopmail.com');
   const [password, setPassword] = useState('12345678');
   // const [rememberMe, setRememberMe] = useState(true);
   const [emailError, setEmailError] = useState('');
@@ -64,8 +64,8 @@ export default function LoginScreen() {
       if (!password) {
         setPasswordError('Password is required');
         isValid = false;
-      } else if (password.length < 6) {
-        setPasswordError('Password must be at least 6 characters');
+      } else if (password.length < 8) {
+        setPasswordError('Password must be at least 8 characters');
         isValid = false;
       }
 

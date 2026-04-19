@@ -58,7 +58,6 @@ export default function VerificationCode() {
       }
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.message || 'Failed to verify OTP'
-      console.log('Verification error:', errorMessage)
       toast.error(errorMessage)
     }
   }
@@ -75,7 +74,6 @@ export default function VerificationCode() {
       toast.success(res?.message || 'OTP resent successfully')
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.message || 'Failed to resend OTP'
-      console.log('Resend error:', errorMessage)
       toast.error(errorMessage)
     }
     setResendTimer(30)

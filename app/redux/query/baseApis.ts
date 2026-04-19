@@ -9,7 +9,6 @@ const rawBaseQuery = fetchBaseQuery({
   prepareHeaders: async (headers: any) => {
     const token = await SecureStore.getItemAsync("accessToken");
     if (!token) {
-      // Alert.alert("Error", "No token found");
       router.replace("/");
       return headers;
     }
@@ -54,7 +53,10 @@ const baseApis = createApi({
     "privacyPolicy",
     "termsAndConditions",
     "notification",
-    "propertyFile"
+    "propertyFile",
+    "invoice",
+    "paymentPlan",
+    "construction"
   ],
   endpoints: () => ({}),
 });

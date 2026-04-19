@@ -1,15 +1,15 @@
+import { useGetInvoiceByPropertyIdQuery, useGetPaymentPlansByPropertyIdQuery } from '@/app/redux/services/paymentInvoicePlanApis'
 import { IMAGE } from '@/assets/images/image.index'
-import Card from '@/components/cards/Card'
+import { InvoiceList } from '@/components/payment-status/InvoiceList'
+import { PaymentPlanList } from '@/components/payment-status/PaymentPlanList'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
-import EmptyCard from '@/components/share/EmptyCard'
-import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
-import * as FileSystem from 'expo-file-system/legacy'
-import { Image } from 'expo-image'
+import { useFileDownload } from '@/hooks/useFileDownload'
+import { Invoice, PaymentPlan } from '@/types'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { t } from 'i18next'
 import React from 'react'
-import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -17,12 +17,6 @@ import Animated, {
 } from 'react-native-reanimated'
 
 
-type Invoice = {
-  id: string
-  pdfLink: string
-  date: string
-  status: 'pending' | 'paid'
-}
 
 const pendingInvoices: Invoice[] = [
   {
@@ -45,28 +39,6 @@ const pendingInvoices: Invoice[] = [
   },
 ]
 
-const paidInvoices: Invoice[] = [
-  {
-    id: "1",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-15',
-    status: 'paid',
-  },
-  {
-    id: "13",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-16',
-    status: 'paid',
-  },
-  {
-    id: "1234",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-17',
-    status: 'paid',
-  },
-]
-
-
 const { width } = Dimensions.get('window')
 const TAB_WRAPPER_WIDTH = width - 20
 const TAB_GAP = 10
@@ -75,7 +47,14 @@ export default function PaymentStaus() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
   const [activeButton, setActiveButton] = React.useState<'Payment Invoices' | 'Payment Plan'>('Payment Invoices')
-  const [downloadingKey, setDownloadingKey] = React.useState<string | null>(null)
+
+  const { data: invoices, isLoading: isLoadingInvoices } = useGetInvoiceByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Invoices' })
+  console.log('invoices', invoices)
+  const { data: paymentPlans, isLoading: isLoadingPaymentPlans } = useGetPaymentPlansByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Plan' })
+
+  // console.log('invoices', invoices)
+
+  const { downloadingKey, downloadFile } = useFileDownload()
   const TABS = ['Payment Invoices', 'Payment Plan'] as const
 
   const indicatorX = useSharedValue(0)
@@ -93,68 +72,38 @@ export default function PaymentStaus() {
     router.push(`/properties/payment-status/invoice-details/${invoice.id}`)
   }, [router])
 
+  const handleViewPaymentPlan = React.useCallback((paymentPlan: PaymentPlan) => {
+    router.push({
+      pathname: '/properties/files/PdfViewer',
+      params: { pdfLink: paymentPlan?.file_url, title: paymentPlan.name },
+    });
+  }, [router])
+
   const handleDownloadInvoice = React.useCallback(async (invoice: Invoice, index: number) => {
-    try {
-      const invoiceKey = `${invoice.pdfLink}-${invoice.date}-${index}`
-      setDownloadingKey(invoiceKey)
-      const fileName = `invoice-${index + 1}.pdf`
-
-      const tempDir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory
-      if (!tempDir) {
-        throw new Error('No writable directory available')
-      }
-
-      const tempFileUri = `${tempDir}${invoice.pdfLink.split('/').pop() || fileName}`
-      const { uri: downloadedUri } = await FileSystem.downloadAsync(invoice.pdfLink, tempFileUri)
-
-      if (Platform.OS === 'android') {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
-
-        if (!permissions.granted) {
-          Alert.alert('Permission needed', 'Please choose a folder to save the invoice.')
-          await FileSystem.deleteAsync(tempFileUri, { idempotent: true })
-          return
-        }
-
-        const directoryUri = permissions.directoryUri
-        const targetUri = await FileSystem.StorageAccessFramework.createFileAsync(
-          directoryUri,
-          fileName,
-          'application/pdf'
-        )
-
-        const base64 = await FileSystem.readAsStringAsync(downloadedUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        })
-
-        await FileSystem.StorageAccessFramework.writeAsStringAsync(targetUri, base64, {
-          encoding: FileSystem.EncodingType.Base64,
-        })
-
-        await FileSystem.deleteAsync(tempFileUri, { idempotent: true })
-        Alert.alert('Download complete', 'Saved to the folder you selected.')
-        return
-      }
-
-      const docsDir = FileSystem.documentDirectory ?? FileSystem.cacheDirectory
-      if (!docsDir) {
-        throw new Error('No documents directory available')
-      }
-
-      const finalDir = docsDir.endsWith('/') ? docsDir : `${docsDir}/`
-      const finalPath = `${finalDir}${fileName}`
-      await FileSystem.copyAsync({ from: downloadedUri, to: finalPath })
-
-      await Share.share({ url: finalPath, message: `Invoice saved: ${fileName}` })
-
-      await FileSystem.deleteAsync(tempFileUri, { idempotent: true })
-    } catch (error) {
-      console.error('Invoice download failed', error)
-      Alert.alert('Download failed', 'Please check your connection and try again.')
-    } finally {
-      setDownloadingKey(null)
+    const invoiceKey = `${invoice.pdfLink}-${invoice.date}-${index}`
+    const fileName = `invoice-${index + 1}.pdf`
+    const fileItem = {
+      id: invoice.id,
+      name: fileName,
+      file_url: invoice.pdfLink,
+      createdAt: invoice.date,
+      updatedAt: invoice.date
     }
-  }, [])
+    await downloadFile(fileItem, fileName, invoiceKey)
+  }, [downloadFile])
+
+  const handleDownloadPaymentPlan = React.useCallback(async (paymentPlan: PaymentPlan, index: number) => {
+    const paymentPlanKey = `${paymentPlan.file_url}-${paymentPlan.createdAt}-${index}`
+    const fileName = `${paymentPlan.name}.pdf`
+    const fileItem = {
+      id: paymentPlan.id,
+      name: paymentPlan.name,
+      file_url: paymentPlan.file_url,
+      createdAt: paymentPlan.createdAt,
+      updatedAt: paymentPlan.updatedAt
+    }
+    await downloadFile(fileItem, fileName, paymentPlanKey)
+  }, [downloadFile])
 
   return (
     <SafeAreaViewWithSpacing>
@@ -197,21 +146,22 @@ export default function PaymentStaus() {
 
       {activeButton === 'Payment Invoices' ? (
         <InvoiceList
-          data={pendingInvoices}
+          data={invoices?.data || []}
           emptyIcon={IMAGE.emptyGreen}
+          isLoading={isLoadingInvoices}
           emptyColor="#22C55E"
           emptyTitle={t('message.no_pending_payment_invoice_available')}
           onViewInvoice={handleViewInvoice}
           downloadingKey={downloadingKey}
         />
       ) : (
-        <InvoiceList
-          data={paidInvoices}
-          emptyIcon={IMAGE.emptyPurple}
-          emptyColor="#A855F7"
-          emptyTitle={t('message.no_paid_payment_invoice_available')}
-          onViewInvoice={handleViewInvoice}
-          onDownloadInvoice={handleDownloadInvoice}
+        <PaymentPlanList
+          data={paymentPlans?.data?.data || []}
+          emptyIcon={IMAGE.emptyGreen}
+          emptyColor="#22C55E"
+          emptyTitle={t('message.no_paid_payment_plan_available')}
+          onViewInvoice={handleViewPaymentPlan}
+          onDownloadInvoice={handleDownloadPaymentPlan}
           downloadingKey={downloadingKey}
         />
       )}
@@ -220,86 +170,7 @@ export default function PaymentStaus() {
   )
 }
 
-const InvoiceList = ({
-  data,
-  emptyIcon,
-  emptyColor,
-  emptyTitle,
-  onViewInvoice,
-  onDownloadInvoice,
-  downloadingKey,
-}: {
-  data: Invoice[]
-  emptyIcon: any
-  emptyColor: string
-  emptyTitle: string
-  onViewInvoice: (invoice: Invoice) => void
-  onDownloadInvoice?: (invoice: Invoice, index: number) => void
-  downloadingKey: string | null
-}) => {
-  const router = useRouter()
-  return (
-    <FlatList
-      data={data}
-      keyExtractor={(item) => item.pdfLink + item.date + item.status}
-      contentContainerStyle={{ paddingVertical: 12 }}
-      renderItem={({ item, index }) => {
-        const invoiceKey = `${item.pdfLink}-${item.date}-${index}`
 
-        return (
-          <Card style={styles.invoiceCard}>
-            <View style={styles.invoiceLeft}>
-              <Image source={IMAGE.pdfIcon} style={styles.pdfIcon} />
-              <View>
-                <Text style={styles.invoiceTitle}>
-                  Invoice {index + 1}.pdf
-                </Text>
-                <Text style={styles.invoiceDate}>
-                  Due Date: {item.date}
-                </Text>
-                <Text
-                  style={[
-                    styles.invoiceStatus,
-                    { color: item.status === 'paid' ? '#22C55E' : '#F59E0B' },
-                  ]}
-                >
-                  {item.status.toUpperCase()}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.invoiceActions}>
-              <Pressable onPress={() => onViewInvoice(item)}>
-                <Image source={IMAGE.eye} style={styles.actionIcon} />
-              </Pressable>
-              {onDownloadInvoice && <Pressable onPress={() => onDownloadInvoice?.(item, index)}>
-                {downloadingKey !== invoiceKey ? (
-                  <Image
-                    source={IMAGE.download}
-                    style={styles.actionIcon}
-                  />
-                ) : (
-                  <View style={[styles.downloadingText, { justifyContent: "center", alignItems: "center" }]}>
-                    <ActivityIndicator size="small" />
-                  </View>
-                )}
-              </Pressable>}
-            </View>
-          </Card>
-        )
-      }}
-      ListFooterComponent={<HelpSection title='Add Invoice' description='Upload your invoice issued by the CSW team.' icon={IMAGE.add_invoice}
-        onPress={() => router.push('/properties/payment-status/add-invoice')} />}
-      ListEmptyComponent={
-        <EmptyCard
-          icon={emptyIcon}
-          color={emptyColor}
-          title={emptyTitle}
-        />
-      }
-    />
-  )
-}
 
 const styles = StyleSheet.create({
   tabWrapper: {

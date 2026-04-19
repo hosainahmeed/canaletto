@@ -13,7 +13,6 @@ export default React.memo(function UserProfileHeader() {
   const router = useRouter()
   const { t } = useTranslation()
   const { data, isLoading } = useGetMyProfileQuery(undefined)
-
   const name = data?.data?.name || ""
   const profileImage = data?.data?.profile_image
   const firstLetter = name?.charAt(0)?.toUpperCase()

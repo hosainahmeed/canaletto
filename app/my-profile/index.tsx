@@ -36,21 +36,21 @@ export default function MyProfile() {
       icon: ProfileIcons.user,
       title: t('my_profile.name'),
       value: userDetails?.name || "----",
-      onPress: () => console.log('Name pressed'),
+      onPress: () => { },
     },
     {
       id: 'email',
       icon: ProfileIcons.mail,
       title: t('my_profile.email'),
       value: userDetails?.email || "----",
-      onPress: () => console.log('Email pressed'),
+      onPress: () => { },
     },
     {
       id: 'phone',
       icon: ProfileIcons.phone,
       title: t('my_profile.phone'),
       value: userDetails?.phone || "+ XXX XX XXX XXXX",
-      onPress: () => console.log('Phone pressed'),
+      onPress: () => { },
     },
   ], [userDetails, t])
 

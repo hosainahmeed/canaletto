@@ -73,7 +73,7 @@ const AnimatedToastItem = ({ toast, onClose }: { toast: ToastItem; onClose: (id:
       <Text numberOfLines={3} style={styles.text}>{toast.message}</Text>
       <HugeiconsIcon
         onPress={handleClose}
-        icon={CancelIcon} size="22" color="#fff" />
+        icon={CancelIcon} size="22" color="#111" />
     </Animated.View>
   );
 };
@@ -103,18 +103,18 @@ const styles = StyleSheet.create({
   toast: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#D4A574",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 10,
     marginVertical: 5,
     width: "90%",
     // shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    // shadowOpacity: 0.2,
+    // shadowRadius: 5,
     elevation: 5,
   },
   text: {
-    color: "#fff",
+    color: "#111",
     marginLeft: 10,
     fontSize: 14,
     flex: 1,

@@ -1,12 +1,13 @@
+import { useGetConsructionStatusQuery } from '@/app/redux/services/constructionApis'
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect } from 'react'
-import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import Animated, {
   Easing,
   FadeInUp,
@@ -18,33 +19,61 @@ import Animated, {
 const { width } = Dimensions.get('window')
 const TARGET_PROGRESS = 68
 
+export interface ConstructionData {
+  id: string;
+  propertyId: string;
+  planning: string;
+  foundation: string;
+  structure: string;
+  roofing: string;
+  finishing: string;
+  completed: string;
+  progressPercentage: number;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  computedProgress: number;
+}
+
 export default function Construction() {
   const router = useRouter()
+  const { id } = useLocalSearchParams()
 
+  const { data, isLoading, refetch } = useGetConsructionStatusQuery(id as string, { skip: !id })
+  const constructionDatas: ConstructionData = React.useMemo(() => data?.data || {} as ConstructionData, [data?.data]);
   const constructionData = [
-    { title: 'Planning', description: 'Architecture and approvals', status: 'Complete' },
-    { title: 'Foundation', description: 'Piling and base structure', status: 'Complete' },
-    { title: 'Structure', description: 'Main building construction', status: 'Ongoing' },
-    { title: 'Utilities', description: 'Electrical, plumbing, HVAC', status: 'Upcoming' },
-    { title: 'Finishing', description: 'Tiles, paint, fittings', status: 'Upcoming' },
-    { title: 'Handover', description: 'Final inspection & delivery', status: 'Upcoming' },
+    { title: 'Planning', description: 'Architecture and approvals', status: constructionDatas?.planning || "N/A" },
+    { title: 'Foundation', description: 'Piling and base structure', status: constructionDatas?.foundation || "N/A" },
+    { title: 'Structure', description: 'Main building construction', status: constructionDatas?.structure || "N/A" },
+    { title: 'Utilities', description: 'Electrical, plumbing, HVAC', status: constructionDatas?.roofing || "N/A" },
+    { title: 'Finishing', description: 'Tiles, paint, fittings', status: constructionDatas?.finishing || "N/A" },
+    { title: 'Handover', description: 'Final inspection & delivery', status: constructionDatas?.completed || "N/A" },
   ]
 
   /** Progress animation */
   const progress = useSharedValue(0)
   const progressText = useSharedValue(0)
+  const actualProgress = React.useMemo(() => constructionDatas?.progressPercentage || 0, [constructionDatas?.progressPercentage])
 
   useEffect(() => {
-    progress.value = withTiming(TARGET_PROGRESS, {
-      duration: 1600,
-      easing: Easing.out(Easing.cubic),
-    })
+    // Reset to 0 first, then animate to actual progress
+    progress.value = 0
+    progressText.value = 0
 
-    progressText.value = withTiming(TARGET_PROGRESS, {
-      duration: 1600,
-      easing: Easing.out(Easing.cubic),
-    })
-  }, [])
+    // Animate to actual progress after a short delay
+    setTimeout(() => {
+      progress.value = withTiming(actualProgress, {
+        duration: 1600,
+        easing: Easing.out(Easing.cubic),
+      })
+
+      progressText.value = withTiming(actualProgress, {
+        duration: 1600,
+        easing: Easing.out(Easing.cubic),
+      })
+    }, 100)
+  }, [actualProgress, data])
 
   const progressStyle = useAnimatedStyle(() => ({
     width: `${progress.value}%`,
@@ -56,11 +85,11 @@ export default function Construction() {
 
   const renderItem = useCallback(({ item, index }: any) => {
     const statusColor =
-      item.status === 'Complete'
+      item.status === 'COMPLETED'
         ? '#22C55E'
-        : item.status === 'Ongoing'
-          ? '#3B82F6'
-          : '#A855F7'
+        : item.status === 'UPCOMING'
+          ? '#A855F7'
+          : '#3B82F6'
 
     return (
       <Animated.View entering={FadeInUp.delay(index * 60)}>
@@ -76,7 +105,7 @@ export default function Construction() {
         </Card>
       </Animated.View>
     )
-  }, [])
+  }, [data?.data])
 
   return (
     <SafeAreaViewWithSpacing>
@@ -94,6 +123,14 @@ export default function Construction() {
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
+            tintColor="#D4B785"
+            colors={["#D4B785"]}
+          />
+        }
         ListHeaderComponent={
           <Card style={styles.headerCard}>
             <View style={styles.constructionHeader}>
@@ -101,7 +138,7 @@ export default function Construction() {
               <View>
                 <Text style={styles.headerTitle}>Your Construction Progress</Text>
                 <Text style={styles.subtitle}>
-                  Estimated Completion • 14 January 2028
+                  {constructionDatas?.endDate ? `Estimated Completion • ${new Date(constructionDatas.endDate).toLocaleDateString()}` : 'Estimated Completion • TBD'}
                 </Text>
               </View>
             </View>
@@ -112,7 +149,7 @@ export default function Construction() {
               </View>
 
               <Animated.Text style={[styles.metaValue, progressTextStyle]}>
-                {Math.round(progressText.value)}%
+                {Math.round(actualProgress)}%
               </Animated.Text>
             </View>
           </Card>

@@ -180,7 +180,6 @@ export default function PropertyByID() {
     if (router.canGoBack()) router.back()
     else router.replace('/')
   }, [router])
-
   if (loading) {
     return (
       <SafeAreaViewWithSpacing>

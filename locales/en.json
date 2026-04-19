@@ -113,7 +113,8 @@
     "no_data_found": "No data found",
     "welcome_to_csw": "Welcome to CSW",
     "no_paid_payment_invoice_available": "No paid payment invoice available",
-    "no_pending_payment_invoice_available": "No pending payment invoice available"
+    "no_pending_payment_invoice_available": "No pending payment invoice available",
+    "no_paid_payment_plan_available": "No paid payment plan available"
   },
   "insights": {
     "market_updates": "Market Updates",

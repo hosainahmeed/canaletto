@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { FlatList, StyleSheet, Text } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, Text } from 'react-native'
 
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing, {
   SafeAreaEdge,
 } from '@/components/safe-area/SafeAreaViewWithSpacing'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { useLegalAndCompanyInfoQuery } from '../redux/services/settingApis'
 
 type LegalItem = {
   title: string
@@ -15,38 +16,38 @@ type LegalItem = {
 
 export default function LegalCompanyInfo() {
   const router = useRouter()
+  const { data, isLoading, refetch } = useLegalAndCompanyInfoQuery(undefined)
 
-  const companyLegalData: LegalItem[] = [
+  const companyLegalData: LegalItem[] = data?.data ? [
     {
       title: 'Company Name',
-      value: 'Canaletto Sky Real Estate LLC',
+      value: data?.data?.name || 'N/A',
     },
     {
       title: 'Registered Office Address',
-      value:
-        'Office 1204, Business Bay Tower\nBusiness Bay, Dubai, United Arab Emirates',
+      value: data?.data?.officeAddress || 'N/A',
     },
     {
       title: 'Trade License Number',
-      value: 'TL-9876543',
+      value: data?.data?.tradeLicenseNumber || 'N/A',
     },
     {
       title: 'Issuing Authority',
-      value: 'Dubai Department of Economy and Tourism (DET)',
+      value: data?.data?.issuingAuthority || 'N/A',
     },
     {
       title: 'Business Activity',
-      value: 'Real Estate Development and Property Investment Services',
+      value: data?.data?.businessActivity || 'N/A',
     },
     {
       title: 'Phone Number',
-      value: '+971 4 123 4567',
+      value: data?.data?.phoneNumber || 'N/A',
     },
     {
       title: 'Official Website',
-      value: 'https://www.canalettosky.com',
+      value: data?.data?.websiteLink || 'N/A',
     },
-  ]
+  ] : []
 
   const renderItem = ({ item }: { item: LegalItem }) => (
     <Card style={styles.card}>
@@ -68,6 +69,7 @@ export default function LegalCompanyInfo() {
       />
 
       <FlatList
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
         data={companyLegalData}
         keyExtractor={(item) => item.title}
         renderItem={renderItem}

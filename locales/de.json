@@ -114,7 +114,8 @@
     "no_data_found": "Keine Daten gefunden",
     "welcome_to_csw": "Willkommen bei CSW",
     "no_paid_payment_invoice_available": "Keine bezahlten Zahlungsrechnungen verfügbar",
-    "no_pending_payment_invoice_available": "Keine ausstehenden Zahlungsrechnungen verfügbar"
+    "no_pending_payment_invoice_available": "Keine ausstehenden Zahlungsrechnungen verfügbar",
+    "no_paid_payment_plan_available": "Keine bezahlten Zahlungspläne verfügbar"
   },
   "insights": {
     "market_updates": "Marktaktualisierungen",

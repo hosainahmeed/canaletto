@@ -1,12 +1,22 @@
 import baseApis from '../query/baseApis';
 
-baseApis.injectEndpoints({
+const paymentInvoicePlanApis = baseApis.injectEndpoints({
   endpoints: (builder) => ({
-    get: builder.query({
-      query: () => ({
-        url: "",
+    getInvoiceByPropertyId: builder.query({
+      query: (id: string) => ({
+        url: `/payment-invoice/get-all/${id}`,
         method: "GET"
-      })
+      }),
+      providesTags: ["invoice"]
+    }),
+    getPaymentPlansByPropertyId: builder.query({
+      query: (id: string) => ({
+        url: `/payment-plan/get-all/${id}`,
+        method: "GET"
+      }),
+      providesTags: ["paymentPlan"]
     })
   })
 })
+
+export const { useGetInvoiceByPropertyIdQuery, useGetPaymentPlansByPropertyIdQuery } = paymentInvoicePlanApis

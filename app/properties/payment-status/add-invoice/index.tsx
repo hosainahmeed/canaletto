@@ -73,7 +73,12 @@ export default function AddInvoice() {
     }
 
     Alert.alert('Success', 'Invoice added successfully')
-    router.back()
+    console.log('Invoice added successfully', {
+      invoiceAmount,
+      paymentStatus,
+      paymentDue,
+    })
+    // router.back()
   }
 
   return (
@@ -119,9 +124,9 @@ export default function AddInvoice() {
           visible={isPaymentStatusModalVisible}
           onClose={() => setIsPaymentStatusModalVisible(false)}
           filterOptions={[
-            { label: 'Open', value: 'Open' },
-            { label: 'Partially Paid', value: 'Partially Paid' },
-            { label: 'Paid', value: 'Paid' },
+            { label: 'Open', value: 'OPEN' },
+            { label: 'Partially Paid', value: 'PARTIALLY_PAID' },
+            { label: 'Paid', value: 'PAID' },
           ]}
           selectedValue={paymentStatus}
           setSelectedValue={setPaymentStatus}
@@ -170,6 +175,7 @@ export default function AddInvoice() {
         <View style={styles.modalOverlay}>
           <View style={styles.dateModal}>
             <DateTimePicker
+              timeZoneOffsetInMinutes={0}
               value={activeDate === 'invoice' ? invoiceDate : dueDate}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
@@ -300,7 +306,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    // backgroundColor: 'rgba(0,0,0,0.3)',
   },
   dateModal: {
     backgroundColor: '#FFF',
