@@ -1,3 +1,4 @@
+import { useGetSinglePropertyQuery } from '@/app/redux/services/propertyApis'
 import { ProfileIcons } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
@@ -5,9 +6,9 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button, { ButtonType } from '@/components/ui/button'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
-import { Alert, Dimensions, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, FlatList, Linking, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 const { width } = Dimensions.get('window')
 type MenuItem = {
   icon: string
@@ -18,31 +19,41 @@ type MenuItem = {
 
 export default function AssignedAgent() {
   const router = useRouter()
+  const { id } = useLocalSearchParams()
+  const { data: propertyData, isLoading, refetch } = useGetSinglePropertyQuery(id as string, { skip: !id })
+  if (isLoading) {
+    return (
+      <SafeAreaViewWithSpacing>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size={"small"} />
+        </View>
+      </SafeAreaViewWithSpacing>
+    )
+  }
   const userData = {
-    name: 'Roberts Junior',
-    profile_image:
-      'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
-    phone: "+ 971 50 XXX XXXX",
-    email: "robert @canaletto.com",
+    name: propertyData?.data?.manager?.name || 'Roberts Junior',
+    profile_image: propertyData?.data?.manager?.profile_image || 'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+    phone: propertyData?.data?.manager?.phone || "+ 971 50 XXX XXXX",
+    email: propertyData?.data?.manager?.email || "robert @canaletto.com",
   }
   const MenuItemData = [
     {
       icon: ProfileIcons.user,
       title: 'Designation',
       value: "Project Manager",
-      onPress: () => console.log('Name pressed'),
+      onPress: () => { },
     },
     {
       icon: ProfileIcons.mail,
       title: 'Email',
-      value: "robert @canaletto.com ",
-      onPress: () => console.log('Email pressed'),
+      value: propertyData?.data?.manager?.email || "robert @canaletto.com ",
+      onPress: () => { },
     },
     {
       icon: ProfileIcons.phone,
       title: 'Phone / WhatsApp',
-      value: "+ 971 50 XXX XXXX",
-      onPress: () => console.log('Phone pressed'),
+      value: propertyData?.data?.manager?.phone || "+ 971 50 XXX XXXX",
+      onPress: () => { },
     },
   ]
 
@@ -52,7 +63,7 @@ export default function AssignedAgent() {
       return
     }
 
-    const phoneNumber = userData.phone.replace(/\s+/g, '')
+    const phoneNumber = userData?.phone?.replace(/\s+/g, '')
     const telUrl = `tel:${phoneNumber}`
 
     try {
@@ -78,9 +89,29 @@ export default function AssignedAgent() {
         titleFontFamily="Montserrat-Italic"
         titleStyle={styles.headerTitle}
       />
-      <ProfileHeader user={userData} />
-      {
-        MenuItemData.map((item, index) => (
+      <FlatList
+        data={MenuItemData}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
+        ListHeaderComponent={<ProfileHeader user={userData} />}
+        ListFooterComponent={() => (
+          <View style={{ flexDirection: "row", marginTop: 12, gap: 10, width: width - 20, marginHorizontal: "auto" }}>
+            <Button
+              style={{ flex: 1, borderRadius: 12 }}
+              icon={<Ionicons name="call-outline" size={20} color="#B08D59" />}
+              type={ButtonType.OUTLINE}
+              onPress={handleCallAgent}
+              title='Call now'
+            />
+            <Button
+              style={{ flex: 1, borderRadius: 12 }}
+              icon={<Ionicons name="chatbubbles-outline" size={20} color="#fff" />}
+              type={ButtonType.PRIMARY}
+              onPress={() => Linking.openURL(`https://mail.google.com/mail/?view=cm&fs=1&to=${userData?.email}`)}
+              title='Message'
+            />
+          </View>
+        )}
+        renderItem={({ item, index }) => (
           <MenuItemRow
             key={index}
             icon={item.icon}
@@ -88,24 +119,10 @@ export default function AssignedAgent() {
             value={item.value}
             onPress={item.onPress}
           />
-        ))
-      }
-      <View style={{ flexDirection: "row", marginTop: 12, gap: 10, width: width - 20, marginHorizontal: "auto" }}>
-        <Button
-          style={{ flex: 1, borderRadius: 12 }}
-          icon={<Ionicons name="call-outline" size={20} color="#B08D59" />}
-          type={ButtonType.OUTLINE}
-          onPress={handleCallAgent}
-          title='Call now'
-        />
-        <Button
-          style={{ flex: 1, borderRadius: 12 }}
-          icon={<Ionicons name="chatbubbles-outline" size={20} color="#fff" />}
-          type={ButtonType.PRIMARY}
-          onPress={() => Linking.openURL(`https://mail.google.com/mail/?view=cm&fs=1&to=${userData.email}`)}
-          title='Message'
-        />
-      </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+
     </SafeAreaViewWithSpacing>
   )
 }

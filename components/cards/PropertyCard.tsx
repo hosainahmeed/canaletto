@@ -1,4 +1,5 @@
 import { IMAGE } from '@/assets/images/image.index';
+import FallbackImage from '@/utils/FallbackImage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -45,7 +46,8 @@ export default React.memo(function PropertyCard({ property, isTablet }: Property
   return (
     <View style={[styles.card, { width: cardWidth }]}>
       <View style={[styles.imageContainer, { height: imageHeight }]}>
-        <Image source={{ uri: property?.images[0] }} style={styles.image} resizeMode="cover" />
+        <FallbackImage url={property?.images[0]} style={styles.image} resizeMode="cover" />
+        {/* <Image source={{ uri: property?.images[0] }} style={styles.image} resizeMode="cover" /> */}
       </View>
 
       <View style={styles.contentContainer}>

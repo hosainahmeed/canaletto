@@ -6,7 +6,7 @@ import FilterHeader from '@/components/share/FilterHeader'
 import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 
@@ -14,6 +14,7 @@ const { width } = Dimensions.get('window')
 
 export default function SiteUpdates() {
   const router = useRouter()
+  const { id } = useLocalSearchParams()
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton

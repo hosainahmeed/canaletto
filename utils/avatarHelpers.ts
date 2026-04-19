@@ -16,14 +16,14 @@ export function getAvatarInitials(name: string, maxLetters: number = 2): string 
   // Clean the name and split into words
   const cleanName = name.trim()
   const words = cleanName.split(/\s+/).filter(word => word.length > 0)
-  
+
   if (words.length === 0) {
     return 'U'
   }
 
   // Get first letter of first word
   let initials = words[0][0].toUpperCase()
-  
+
   // If there are more words and we want more letters, add first letter of last word
   if (words.length > 1 && maxLetters > 1) {
     initials += words[words.length - 1][0].toUpperCase()
@@ -41,7 +41,7 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') {
     return false
   }
-  
+
   // Check for common invalid patterns
   const invalidPatterns = [
     'null',
@@ -50,10 +50,10 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
     'default',
     'placeholder'
   ]
-  
+
   const lowerUrl = url.toLowerCase().trim()
-  return !invalidPatterns.some(pattern => lowerUrl.includes(pattern)) && 
-         lowerUrl.startsWith('http')
+  return !invalidPatterns.some(pattern => lowerUrl.includes(pattern)) &&
+    lowerUrl.startsWith('http')
 }
 
 /**
@@ -66,7 +66,7 @@ export function getAvatarSource(imageUrl: string | null | undefined, name: strin
   if (isValidImageUrl(imageUrl)) {
     return { uri: imageUrl }
   }
-  
+
   // Return null to trigger initials fallback
   return null
 }

@@ -14,18 +14,18 @@ import HelpSection from "@/components/share/HelpSection";
 import SectionHeader from "@/components/share/SectionHeader";
 import UserProfileHeader from "@/components/share/UserProfileHeader";
 
+import { useGetHomeDataQuery } from '../redux/services/homeDataApis';
 import { useGetMyPropertyQuery } from "../redux/services/propertyApis";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-
   const { data, isLoading } = useGetMyPropertyQuery(undefined);
-
+  console.log(data)
+  const { data: homeData } = useGetHomeDataQuery(undefined);
   const isTablet = width >= 720;
   const numColumns = isTablet ? 2 : 1;
-
   /* -------- SKELETON DATA -------- */
 
   const skeletonData = useMemo(() => Array.from({ length: 4 }), []);
@@ -100,7 +100,7 @@ export default function HomeScreen() {
 
           <GradientCard
             iconType="green"
-            title="Dubai Property Market Shows Strong Q1 Growth"
+            title={homeData?.data?.legalUpdate?.title || ""}
             subTitle="Legal Updates"
             onPress={goLegalUpdate}
           />
@@ -117,7 +117,7 @@ export default function HomeScreen() {
           <GradientCard
             iconType="pink"
             color={['#A855F780', '#FAFAFA', '#FAFAFA']}
-            title="Dubai Property Market Shows Strong Q1 Growth"
+            title={homeData?.data?.project?.title || ""}
             subTitle="New Projects"
             onPress={goLegalUpdate}
           />
@@ -134,7 +134,7 @@ export default function HomeScreen() {
           <GradientCard
             iconType="blue"
             color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
-            title="Dubai Property Market Shows Strong Q1 Growth"
+            title={homeData?.data?.marketUpdate?.title || ""}
             subTitle="Market Updates"
             onPress={goLegalUpdate}
           />

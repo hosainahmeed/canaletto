@@ -87,3 +87,7 @@ export const propertyDetailsIcon = {
 export const modalIcon = {
   success: require("./modal-icons/success-icon.png")
 }
+
+export const placeholderImage = {
+  housePlaceholder: require("./../images/propertyPlaceholder.avif")
+} as const
