@@ -152,10 +152,10 @@ export default {
     extra: {
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       eas: {
-        projectId: "86b86b79-e827-41ef-8442-f4b43f176ce0",
+        projectId: process.env.EXPO_PROJECT_ID,
       },
     },
 
-    owner: "eas-hosain-2",
+    owner: process.env.EXPO_OWNER,
   },
 };

@@ -22,8 +22,9 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const { data, isLoading } = useGetMyPropertyQuery(undefined);
-  console.log(data)
+
   const { data: homeData } = useGetHomeDataQuery(undefined);
+
   const isTablet = width >= 720;
   const numColumns = isTablet ? 2 : 1;
   /* -------- SKELETON DATA -------- */
@@ -42,10 +43,9 @@ export default function HomeScreen() {
     [router]
   );
 
-  const goLegalUpdate = useCallback(
-    () => router.push("/legal-updates/legal-update-detail/1"),
-    [router]
-  );
+  const navigateToDetails = useCallback((id: number) => {
+    router.push(`/legal-updates/legal-update-detail/${id}`);
+  }, [router]);
 
   /* -------- PROPERTY ITEM -------- */
 
@@ -102,7 +102,7 @@ export default function HomeScreen() {
             iconType="green"
             title={homeData?.data?.legalUpdate?.title || ""}
             subTitle="Legal Updates"
-            onPress={goLegalUpdate}
+            onPress={() => navigateToDetails(homeData?.data?.legalUpdate?.id)}
           />
         </View>
 
@@ -119,7 +119,7 @@ export default function HomeScreen() {
             color={['#A855F780', '#FAFAFA', '#FAFAFA']}
             title={homeData?.data?.project?.title || ""}
             subTitle="New Projects"
-            onPress={goLegalUpdate}
+            onPress={() => navigateToDetails(homeData?.data?.project?.id)}
           />
         </View>
 
@@ -136,14 +136,14 @@ export default function HomeScreen() {
             color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
             title={homeData?.data?.marketUpdate?.title || ""}
             subTitle="Market Updates"
-            onPress={goLegalUpdate}
+            onPress={() => navigateToDetails(homeData?.data?.marketUpdate?.id)}
           />
         </View>
 
         <HelpSection />
       </>
     ),
-    [t, goInsights, goLegalUpdate]
+    [t, goInsights, navigateToDetails]
   );
 
   /* -------- DATA SOURCE -------- */
