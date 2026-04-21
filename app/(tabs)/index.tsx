@@ -31,11 +31,11 @@ export default function HomeScreen() {
   } = useGetHomeDataQuery(undefined);
 
   // Debug logging
-  console.log('Home data state:', {
-    data: homeData,
-    isLoading: isHomeDataLoading,
-    error: homeDataError
-  });
+  // console.log('Home data state:', {
+  //   data: homeData,
+  //   isLoading: isHomeDataLoading,
+  //   error: homeDataError
+  // });
 
   if (homeDataError) {
     console.error('Error fetching home data:', homeDataError);

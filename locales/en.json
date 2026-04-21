@@ -164,7 +164,20 @@
   "support": {
     "title": "Canaletto Sky World Support",
     "description": "Our support team is available 24/7 to assist you",
-    "status": "Active"
+    "status": "Active",
+    "modal": {
+      "title": "Contact Support",
+      "description": "Describe your issue and our support team will get back to you soon.",
+      "placeholder": "Please describe your issue in detail...",
+      "cancel": "Cancel",
+      "submit": "Create Room",
+      "creating_room": "Creating Room...",
+      "room_created": "Support room created successfully! You can now chat with our support team.",
+      "success": "Support ticket created successfully!",
+      "error": {
+        "empty": "Please describe your issue before submitting."
+      }
+    }
   },
   "tabs": {
     "home": "Home",

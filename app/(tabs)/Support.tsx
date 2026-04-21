@@ -1,18 +1,66 @@
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import Button, { ButtonType } from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { useChatContext } from '../context/ChatContext'
+import { useTicketCreateMutation } from '../redux/services/supportTicketApis'
 
 export default function Support() {
   const router = useRouter()
   const { t } = useTranslation()
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
   const { width: screenWidth } = useWindowDimensions()
+  const [createTicket, { isLoading }] = useTicketCreateMutation()
+  const [issue, setIssue] = useState<string>("")
+  const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
+  const toast = useToast()
+  const { isConnected, joinTicketRoom } = useChatContext()
+
+  const handlerCreateTicketForSupport = async () => {
+    if (!issue.trim()) {
+      toast.error(t("support.modal.error.empty") || "Please describe your issue before submitting.");
+      return;
+    }
+
+    try {
+      setIsCreatingRoom(true);
+      const res = await createTicket({ issue: issue.trim() }).unwrap()
+      if (!res?.success) {
+        throw new Error(res?.message)
+      }
+
+
+      if (res?.data?.id && isConnected) {
+        joinTicketRoom(res.data.id);
+      }
+
+      toast.success(t("support.modal.room_created") || "Support room created successfully! You can now chat with our support team.")
+      setIssue("");
+      setModalVisible(false);
+
+      setTimeout(() => {
+        // router.push(`/chat/${res?.data?.id}`);
+        router.push({
+          pathname: '/chat/[id]',
+          params: { id: res?.data?.id }
+        })
+      }, 1000);
+
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || "Something went wrong while creating support ticket";
+      toast.error(errorMessage)
+    } finally {
+      setIsCreatingRoom(false);
+    }
+  }
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
@@ -28,7 +76,7 @@ export default function Support() {
         titleStyle={styles.headerTitle}
         title="Support"
       />
-      <TouchableOpacity activeOpacity={0.9} onPress={() => router.push('/chat/1')}>
+      <TouchableOpacity activeOpacity={0.9} onPress={() => setModalVisible(!modalVisible)}>
         <Card style={[styles.card, { width: screenWidth - 12 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
             <Image source={IMAGE.moon} style={styles.icon} />
@@ -47,6 +95,55 @@ export default function Support() {
           </View>
         </Card>
       </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t("support.modal.title") || "Contact Support"}</Text>
+              <TouchableOpacity onPress={() => setModalVisible(!modalVisible)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* <Text style={styles.modalDescription}>
+              {t("support.modal.description") || "Describe your issue and we'll create a support room for you to chat with our team."}
+            </Text> */}
+
+            <TextInput
+              style={styles.textInput}
+              placeholder={t("support.modal.placeholder") || "Please describe your issue in detail..."}
+              placeholderTextColor="#999"
+              multiline={true}
+              numberOfLines={4}
+              value={issue}
+              onChangeText={setIssue}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalButtons}>
+              <Button
+                onPress={() => setModalVisible(!modalVisible)}
+                title={t("support.modal.cancel") || "Cancel"}
+                type={ButtonType.OUTLINE}
+                style={styles.cancelButton}
+              />
+              <Button
+                onPress={handlerCreateTicketForSupport}
+                title={isCreatingRoom ? (t("support.modal.creating_room") || "Creating Room...") : (t("support.modal.submit") || "Create Room")}
+                loading={isLoading || isCreatingRoom}
+                disabled={!issue.trim() || isLoading || isCreatingRoom}
+                style={styles.submitButton}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaViewWithSpacing>
   )
 }
@@ -55,6 +152,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontStyle: 'italic',
     fontFamily: 'Montserrat-Italic',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   card: {
     padding: 10,
@@ -118,5 +220,89 @@ const styles = StyleSheet.create({
   chatIcon: {
     width: 24,
     height: 24,
+  },
+  modalView: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: 'stretch',
+
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+
+    // Android elevation
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+    color: '#1A1A1A',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+  },
+  modalDescription: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+    color: '#1A1A1A',
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  submitButton: {
+    flex: 1,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
   },
 })

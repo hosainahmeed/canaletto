@@ -1,8 +1,8 @@
+import { useChatContext } from '@/app/context/ChatContext'
 import { Ionicons } from '@expo/vector-icons'
-import * as ImagePicker from 'expo-image-picker'
+import { useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  ActivityIndicator,
   Animated,
   FlatList,
   Platform,
@@ -11,30 +11,25 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import ImagePickerModal from '../share/ImagePickerModal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type MessageStatus = 'sending' | 'sent' | 'delivered' | 'failed'
-
 interface MessageItemProps {
-  _id: number | string
-  message: string
+  id: string,
+  ticketId: string,
+  senderId: string,
+  senderRole: string,
+  message: string,
+  attachments: string,
+  senderName: string,
+  senderProfileImage: string,
+  isSeen: boolean,
+  seenAt: null | Date,
   createdAt: Date
-  isMyMessage: boolean
-  user: {
-    _id: number
-    name: string
-    avatar: string
-  }
-  image?: string
-  status?: MessageStatus   // only for my messages
-  isOptimistic?: boolean   // true while awaiting server confirmation
 }
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ME = {
@@ -44,28 +39,11 @@ const ME = {
     'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
 }
 
-const SUPPORT = {
-  _id: 2,
-  name: 'Support',
-  avatar:
-    'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
-}
-
-/** Simulate sending to a server – replace with your real API call. */
-async function sendMessageToServer(msg: MessageItemProps): Promise<MessageItemProps> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulate 5 % failure rate so you can test error handling
-      if (Math.random() < 0.05) reject(new Error('Network error'))
-      else resolve({ ...msg, status: 'delivered', isOptimistic: false })
-    }, 800)
-  })
-}
 
 // ─── MessageItem ──────────────────────────────────────────────────────────────
 
 const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
-  const isMine = message.isMyMessage
+  const isMine = message.senderRole === 'client' // Assuming client is the current user
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(8)).current
 
@@ -77,17 +55,15 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
   }, [])
 
   const time = message.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const isOptimistic = message.isOptimistic
+  const isOptimistic = false // Remove optimistic logic for now
 
   const statusIcon = () => {
     if (!isMine) return null
-    switch (message.status) {
-      case 'sending': return <ActivityIndicator size={10} color="#FFFFFF88" style={styles.statusIcon} />
-      case 'sent': return <Ionicons name="checkmark" size={12} color="#FFFFFF88" style={styles.statusIcon} />
-      case 'delivered': return <Ionicons name="checkmark-done" size={12} color="#FFFFFF" style={styles.statusIcon} />
-      case 'failed': return <Ionicons name="alert-circle" size={13} color="#FF6B6B" style={styles.statusIcon} />
-      default: return null
+    // Show seen status instead of message status
+    if (message.isSeen) {
+      return <Ionicons name="checkmark-done" size={12} color="#FFFFFF" style={styles.statusIcon} />
     }
+    return <Ionicons name="checkmark" size={12} color="#FFFFFF88" style={styles.statusIcon} />
   }
 
   return (
@@ -103,12 +79,11 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
           styles.bubble,
           isMine ? styles.myBubble : styles.otherBubble,
           isOptimistic && styles.optimisticBubble,
-          message.status === 'failed' && styles.failedBubble,
         ]}
       >
-        {message.image && (
+        {message.attachments && (
           <RNImage
-            source={{ uri: message.image }}
+            source={{ uri: message.attachments }}
             style={[styles.messageImage, isOptimistic && { opacity: 0.7 }]}
             resizeMode="cover"
           />
@@ -122,9 +97,6 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
           {statusIcon()}
         </View>
 
-        {message.status === 'failed' && isMine && (
-          <Text style={styles.failedLabel}>Failed to send · Tap to retry</Text>
-        )}
       </View>
     </Animated.View>
   )
@@ -169,134 +141,63 @@ const TypingIndicator = () => {
 
 // ─── ChatInterface ────────────────────────────────────────────────────────────
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  chatData: MessageItemProps[]
+}
+
+export default function ChatInterface({ chatData }: ChatInterfaceProps) {
+  const { id } = useLocalSearchParams()
+  console.log("idsssss", id)
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
+  const { sendMessage } = useChatContext()
   const [imageModalVisible, setImageModalVisible] = useState(false)
   const [imageUri, setImageUri] = useState<string | null>(null)
-  const [isTyping, setIsTyping] = useState(false)   // remote typing indicator
 
   const listRef = useRef<FlatList>(null)
 
-  const [data, setData] = useState<MessageItemProps[]>([
-    {
-      _id: 1,
-      message: 'Hey! How are you doing?',
-      createdAt: new Date(),
-      isMyMessage: true,
-      user: ME,
-      status: 'delivered',
-    },
-    {
-      _id: 2,
-      message: "I'm good! What about you?",
-      createdAt: new Date(),
-      isMyMessage: false,
-      user: SUPPORT,
-    },
-  ])
-
-  // Scroll to bottom when new messages arrive
+  // Use chatData from props instead of local state
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: true })
-  }, [data])
+  }, [chatData])
 
   // ── Optimistic send ──────────────────────────────────────────────────────
 
-  const sendMessage = useCallback(async () => {
+  const sendMessageHandler = useCallback(async () => {
     if (!message.trim() && !imageUri) return
 
     const tempId = `temp_${Date.now()}`
     const optimisticMsg: MessageItemProps = {
-      _id: tempId,
+      id: tempId,
+      ticketId: 'current-ticket-id', // This should come from props or context
+      senderId: 'current-user-id', // This should come from auth context
+      senderRole: 'client',
       message: message.trim(),
-      createdAt: new Date(),
-      isMyMessage: true,
-      user: ME,
-      image: imageUri ?? undefined,
-      status: 'sending',
-      isOptimistic: true,
+      attachments: imageUri ?? '',
+      senderName: 'Me',
+      senderProfileImage: ME.avatar,
+      isSeen: false,
+      seenAt: null,
+      createdAt: new Date()
     }
+    if (id) {
+      return;
+    }
+    const messagePayloadData = {
+      ticketId: id, // This should come from props or context
+      message: message.trim(),
+      attachments: imageUri ? [imageUri] : []
+    }
+    // sendMessage(messagePayloadData, id)
 
-    // 1. Immediately add to UI
-    setData((prev) => [...prev, optimisticMsg])
+    // For now, just clear the input since we're using chatData from props
     setMessage('')
     setInputHeight(40)
     setImageUri(null)
 
-    // 2. Send to server
-    try {
-      const confirmed = await sendMessageToServer(optimisticMsg)
-      setData((prev) =>
-        prev.map((m) => (m._id === tempId ? { ...confirmed, _id: tempId } : m))
-      )
-
-      // Simulate remote typing + reply (demo only – remove in production)
-      simulateBotReply()
-    } catch {
-      // 3. On failure, mark message as failed
-      setData((prev) =>
-        prev.map((m) =>
-          m._id === tempId ? { ...m, status: 'failed', isOptimistic: false } : m
-        )
-      )
-    }
+    // TODO: Implement actual message sending with socket/API
+    console.log('Message to send:', optimisticMsg)
   }, [message, imageUri])
-
-  /** Demo: shows typing indicator then sends a bot reply */
-  const simulateBotReply = () => {
-    setTimeout(() => {
-      setIsTyping(true)
-      setTimeout(() => {
-        setIsTyping(false)
-        const reply: MessageItemProps = {
-          _id: Date.now(),
-          message: 'Got it! Let me look into that for you 👀',
-          createdAt: new Date(),
-          isMyMessage: false,
-          user: SUPPORT,
-        }
-        setData((prev) => [...prev, reply])
-      }, 2000)
-    }, 600)
-  }
-
-  // ── Retry failed message ─────────────────────────────────────────────────
-
-  const retryMessage = useCallback(async (msg: MessageItemProps) => {
-    setData((prev) =>
-      prev.map((m) => (m._id === msg._id ? { ...m, status: 'sending', isOptimistic: true } : m))
-    )
-    try {
-      const confirmed = await sendMessageToServer(msg)
-      setData((prev) =>
-        prev.map((m) => (m._id === msg._id ? { ...confirmed, _id: msg._id } : m))
-      )
-    } catch {
-      setData((prev) =>
-        prev.map((m) => (m._id === msg._id ? { ...m, status: 'failed', isOptimistic: false } : m))
-      )
-    }
-  }, [])
-
-  // ── Image picking ────────────────────────────────────────────────────────
-
-  const pickFromGallery = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (status !== 'granted') return
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    })
-    if (!result.canceled) setImageUri(result.assets[0].uri)
-  }
-
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync()
-    if (status !== 'granted') return
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 })
-    if (!result.canceled) setImageUri(result.assets[0].uri)
-  }
 
   const handleImageSelected = (uri: string) => {
     setImageUri(uri)
@@ -307,32 +208,27 @@ export default function ChatInterface() {
 
   const renderItem = useCallback(
     ({ item }: { item: MessageItemProps }) => (
-      <TouchableOpacity
-        activeOpacity={item.status === 'failed' ? 0.6 : 1}
-        onPress={() => item.status === 'failed' && retryMessage(item)}
-      >
-        <MessageItem message={item} />
-      </TouchableOpacity>
+      <MessageItem message={item} />
     ),
-    [retryMessage]
+    []
   )
 
   const canSend = message.trim().length > 0 || !!imageUri
 
   return (
-    <KeyboardAwareScrollView bottomOffset={62} contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       {/* Message List */}
       <View style={styles.listWrapper}>
         <FlatList
           ref={listRef}
-          data={[...data].reverse()}
+          data={[...chatData].reverse()}
           inverted
-          keyExtractor={(item) => item._id.toString()}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={isTyping ? <TypingIndicator /> : null}
+          // ListHeaderComponent={isTyping ? <TypingIndicator /> : null}
           removeClippedSubviews={Platform.OS === 'android'}
           maxToRenderPerBatch={10}
           windowSize={15}
@@ -372,7 +268,7 @@ export default function ChatInterface() {
           />
 
           <TouchableOpacity
-            onPress={sendMessage}
+            onPress={sendMessageHandler}
             disabled={!canSend}
             style={[styles.sendButton, canSend && styles.sendButtonActive]}
             hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
@@ -387,7 +283,7 @@ export default function ChatInterface() {
         onClose={() => setImageModalVisible(false)}
         onImageSelected={handleImageSelected}
       />
-    </KeyboardAwareScrollView>
+    </View>
   )
 }
 
