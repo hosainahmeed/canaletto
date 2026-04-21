@@ -44,6 +44,7 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
 
   // AsyncStorage availability flag
   const isAsyncStorageAvailableRef = useRef<boolean>(true)
+  const hasLoggedAsyncStorageWarning = useRef<boolean>(false)
 
   // Check AsyncStorage availability
   const checkAsyncStorageAvailability = useCallback(async (): Promise<boolean> => {
@@ -51,7 +52,10 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
       await AsyncStorage.getItem('test_key')
       return true
     } catch (error) {
-      console.warn('AsyncStorage not available, using memory cache:', error)
+      if (!hasLoggedAsyncStorageWarning.current) {
+        console.warn('AsyncStorage not available, using memory cache:', error)
+        hasLoggedAsyncStorageWarning.current = true
+      }
       isAsyncStorageAvailableRef.current = false
       return false
     }
@@ -65,14 +69,17 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
         location: locationData,
         timestamp: Date.now()
       }
-      
+
       // Try AsyncStorage if available
       if (isAsyncStorageAvailableRef.current) {
         await AsyncStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(locationData))
         await AsyncStorage.setItem(LOCATION_TIMESTAMP_KEY, Date.now().toString())
       }
     } catch (error) {
-      console.warn('Failed to save location to AsyncStorage, using memory cache:', error)
+      if (!hasLoggedAsyncStorageWarning.current) {
+        console.warn('Failed to save location to AsyncStorage, using memory cache:', error)
+        hasLoggedAsyncStorageWarning.current = true
+      }
       // Fallback to memory cache is already handled above
       isAsyncStorageAvailableRef.current = false
     }
@@ -88,17 +95,17 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
         return memoryCache.location
       }
     }
-    
+
     // Try AsyncStorage if available
     if (isAsyncStorageAvailableRef.current) {
       try {
         const cachedData = await AsyncStorage.getItem(LOCATION_CACHE_KEY)
         const cachedTimestamp = await AsyncStorage.getItem(LOCATION_TIMESTAMP_KEY)
-        
+
         if (cachedData && cachedTimestamp) {
           const timestamp = parseInt(cachedTimestamp, 10)
           const now = Date.now()
-          
+
           // Check if cache is still valid
           if (now - timestamp <= cacheTime) {
             const locationData: LocationData = JSON.parse(cachedData)
@@ -111,11 +118,14 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
           }
         }
       } catch (error) {
-        console.warn('Failed to load from AsyncStorage, using memory cache:', error)
+        if (!hasLoggedAsyncStorageWarning.current) {
+          console.warn('Failed to load from AsyncStorage, using memory cache:', error)
+          hasLoggedAsyncStorageWarning.current = true
+        }
         isAsyncStorageAvailableRef.current = false
       }
     }
-    
+
     return null
   }, [cacheTime])
 
@@ -124,14 +134,17 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
     try {
       // Clear memory cache
       memoryCacheRef.current = { location: null, timestamp: null }
-      
+
       // Clear AsyncStorage if available
       if (isAsyncStorageAvailableRef.current) {
         await AsyncStorage.removeItem(LOCATION_CACHE_KEY)
         await AsyncStorage.removeItem(LOCATION_TIMESTAMP_KEY)
       }
     } catch (error) {
-      console.warn('Failed to clear AsyncStorage cache:', error)
+      if (!hasLoggedAsyncStorageWarning.current) {
+        console.warn('Failed to clear AsyncStorage cache:', error)
+        hasLoggedAsyncStorageWarning.current = true
+      }
       isAsyncStorageAvailableRef.current = false
     }
   }, [])
@@ -197,7 +210,7 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
 
   const getUserLocation = useCallback(async () => {
     if (isFetchingRef.current) return
-    
+
     isFetchingRef.current = true
     setLoading(true)
     setError(null)
@@ -205,7 +218,7 @@ export default function useLocation(options: UseLocationOptions = {}): UseLocati
     try {
       // Check if we already have permission
       let permissionGranted = hasPermission
-      
+
       if (!permissionGranted) {
         permissionGranted = await requestPermission()
       }

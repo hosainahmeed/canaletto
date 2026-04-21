@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const propertyFileApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getMyPropertyFiles: builder.query({
       query: (id: string) => ({
@@ -20,3 +21,5 @@ const propertyFileApis = baseApis.injectEndpoints({
 })
 
 export const { useGetMyPropertyFilesQuery, useLazyGrtSinglePropertyFileQuery } = propertyFileApis
+
+export default propertyFileApis

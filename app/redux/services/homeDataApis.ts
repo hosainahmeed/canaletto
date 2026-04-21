@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const homeDataApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getHomeData: builder.query({
       query: () => ({
@@ -12,3 +13,5 @@ const homeDataApis = baseApis.injectEndpoints({
 })
 
 export const { useGetHomeDataQuery } = homeDataApis
+
+export default homeDataApis

@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 export const settingApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (build) => ({
     legalAndCompanyInfo: build.query({
       query: () => ({
@@ -24,3 +25,5 @@ export const settingApis = baseApis.injectEndpoints({
 })
 
 export const { useLegalAndCompanyInfoQuery, useGetPrivacyPolicyQuery, useGetTermsAndConditionsQuery } = settingApis
+
+export default settingApis

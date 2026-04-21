@@ -298,6 +298,11 @@ export default function ChatInterface() {
     if (!result.canceled) setImageUri(result.assets[0].uri)
   }
 
+  const handleImageSelected = (uri: string) => {
+    setImageUri(uri)
+    setImageModalVisible(false)
+  }
+
   // ── Render ───────────────────────────────────────────────────────────────
 
   const renderItem = useCallback(
@@ -380,8 +385,7 @@ export default function ChatInterface() {
       <ImagePickerModal
         visible={imageModalVisible}
         onClose={() => setImageModalVisible(false)}
-        onCamera={takePhoto}
-        onGallery={pickFromGallery}
+        onImageSelected={handleImageSelected}
       />
     </KeyboardAwareScrollView>
   )

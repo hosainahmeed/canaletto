@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const constructionApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getConsructionStatus: builder.query({
       query: (id: string) => ({
@@ -13,3 +14,5 @@ const constructionApis = baseApis.injectEndpoints({
 })
 
 export const { useGetConsructionStatusQuery } = constructionApis
+
+export default constructionApis

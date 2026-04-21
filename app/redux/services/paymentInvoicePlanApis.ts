@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const paymentInvoicePlanApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getInvoiceByPropertyId: builder.query({
       query: (id: string) => ({
@@ -20,3 +21,5 @@ const paymentInvoicePlanApis = baseApis.injectEndpoints({
 })
 
 export const { useGetInvoiceByPropertyIdQuery, useGetPaymentPlansByPropertyIdQuery } = paymentInvoicePlanApis
+
+export default paymentInvoicePlanApis

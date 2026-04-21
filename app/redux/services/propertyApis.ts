@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const propertyApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getMyProperty: builder.query({
       query: () => ({
@@ -19,4 +20,6 @@ const propertyApis = baseApis.injectEndpoints({
   })
 })
 
-export const { useGetMyPropertyQuery, useGetSinglePropertyQuery } = propertyApis 
+export const { useGetMyPropertyQuery, useGetSinglePropertyQuery } = propertyApis
+
+export default propertyApis 

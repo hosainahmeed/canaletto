@@ -23,7 +23,23 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { data, isLoading } = useGetMyPropertyQuery(undefined);
 
-  const { data: homeData } = useGetHomeDataQuery(undefined);
+  const {
+    data: homeData,
+    isLoading: isHomeDataLoading,
+    error: homeDataError,
+    refetch: refetchHomeData
+  } = useGetHomeDataQuery(undefined);
+
+  // Debug logging
+  console.log('Home data state:', {
+    data: homeData,
+    isLoading: isHomeDataLoading,
+    error: homeDataError
+  });
+
+  if (homeDataError) {
+    console.error('Error fetching home data:', homeDataError);
+  }
 
   const isTablet = width >= 720;
   const numColumns = isTablet ? 2 : 1;
@@ -100,9 +116,9 @@ export default function HomeScreen() {
 
           <GradientCard
             iconType="green"
-            title={homeData?.data?.legalUpdate?.title || ""}
+            title={homeData?.legalUpdate?.title || ""}
             subTitle="Legal Updates"
-            onPress={() => navigateToDetails(homeData?.data?.legalUpdate?.id)}
+            onPress={() => navigateToDetails(homeData?.legalUpdate?.id)}
           />
         </View>
 
@@ -117,9 +133,9 @@ export default function HomeScreen() {
           <GradientCard
             iconType="pink"
             color={['#A855F780', '#FAFAFA', '#FAFAFA']}
-            title={homeData?.data?.project?.title || ""}
+            title={homeData?.project?.title || ""}
             subTitle="New Projects"
-            onPress={() => navigateToDetails(homeData?.data?.project?.id)}
+            onPress={() => navigateToDetails(homeData?.project?.id)}
           />
         </View>
 
@@ -134,9 +150,9 @@ export default function HomeScreen() {
           <GradientCard
             iconType="blue"
             color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
-            title={homeData?.data?.marketUpdate?.title || ""}
+            title={homeData?.marketUpdate?.title || ""}
             subTitle="Market Updates"
-            onPress={() => navigateToDetails(homeData?.data?.marketUpdate?.id)}
+            onPress={() => navigateToDetails(homeData?.marketUpdate?.id)}
           />
         </View>
 
@@ -166,7 +182,10 @@ export default function HomeScreen() {
         ListHeaderComponent={ListHeader}
         ListFooterComponent={ListFooter}
         refreshControl={
-          <RefreshControl refreshing={isLoading} />
+          <RefreshControl
+            refreshing={isLoading || isHomeDataLoading}
+            onRefresh={refetchHomeData}
+          />
         }
       />
     </SafeAreaViewWithSpacing>

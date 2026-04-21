@@ -1,6 +1,7 @@
 import baseApis from "../query/baseApis";
 
 const authApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     signIn: builder.mutation({
       query: (data) => ({
@@ -87,4 +88,6 @@ export const {
   useVerifyResetOtpMutation,
   useResendResetCodeMutation,
 } = authApis
+
+export default authApis
 

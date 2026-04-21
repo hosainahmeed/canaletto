@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const projectApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getAlProject: builder.query({
       query: () => ({
@@ -20,3 +21,5 @@ const projectApis = baseApis.injectEndpoints({
 })
 
 export const { useGetAlProjectQuery, useGetSingleProjectQuery } = projectApis
+
+export default projectApis

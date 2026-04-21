@@ -1,6 +1,7 @@
 import baseApis from '../query/baseApis';
 
 const userApis = baseApis.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getMyProfile: builder.query({
       query: () => ({
@@ -12,3 +13,5 @@ const userApis = baseApis.injectEndpoints({
 })
 
 export const { useGetMyProfileQuery } = userApis
+
+export default userApis
