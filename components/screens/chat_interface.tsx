@@ -1,8 +1,11 @@
 import { useChatContext } from '@/app/context/ChatContext'
+import { useSupportMessageQuery } from '@/app/redux/services/supportMessageRoomApis'
+import { useGetMyProfileQuery } from '@/app/redux/services/userApis'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   Animated,
   FlatList,
   Platform,
@@ -15,22 +18,20 @@ import {
 } from 'react-native'
 import ImagePickerModal from '../share/ImagePickerModal'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface MessageItemProps {
   id: string,
   ticketId: string,
   senderId: string,
   senderRole: string,
   message: string,
-  attachments: string,
+  attachments: string[],
   senderName: string,
   senderProfileImage: string,
   isSeen: boolean,
   seenAt: null | Date,
   createdAt: Date
 }
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 const ME = {
   _id: 1,
@@ -39,11 +40,8 @@ const ME = {
     'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
 }
 
-
-// ─── MessageItem ──────────────────────────────────────────────────────────────
-
 const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
-  const isMine = message.senderRole === 'client' // Assuming client is the current user
+  const isMine = message?.senderRole?.toUpperCase() === 'CLIENT'
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(8)).current
 
@@ -54,12 +52,12 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
     ]).start()
   }, [])
 
-  const time = message.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const isOptimistic = false // Remove optimistic logic for now
+  const time = message?.createdAt ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+  const isOptimistic = false
 
   const statusIcon = () => {
     if (!isMine) return null
-    // Show seen status instead of message status
+
     if (message.isSeen) {
       return <Ionicons name="checkmark-done" size={12} color="#FFFFFF" style={styles.statusIcon} />
     }
@@ -81,9 +79,9 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
           isOptimistic && styles.optimisticBubble,
         ]}
       >
-        {message.attachments && (
+        {message.attachments && message.attachments.length > 0 && (
           <RNImage
-            source={{ uri: message.attachments }}
+            source={{ uri: message?.attachments[0] }}
             style={[styles.messageImage, isOptimistic && { opacity: 0.7 }]}
             resizeMode="cover"
           />
@@ -102,66 +100,83 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
   )
 })
 
-// ─── TypingIndicator ──────────────────────────────────────────────────────────
 
-const TypingIndicator = () => {
-  const dot1 = useRef(new Animated.Value(0)).current
-  const dot2 = useRef(new Animated.Value(0)).current
-  const dot3 = useRef(new Animated.Value(0)).current
+// const TypingIndicator = () => {
+//   const dot1 = useRef(new Animated.Value(0)).current
+//   const dot2 = useRef(new Animated.Value(0)).current
+//   const dot3 = useRef(new Animated.Value(0)).current
 
-  useEffect(() => {
-    const pulse = (dot: Animated.Value, delay: number) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(dot, { toValue: -5, duration: 300, useNativeDriver: true }),
-          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
-          Animated.delay(600),
-        ])
-      )
-    const a1 = pulse(dot1, 0)
-    const a2 = pulse(dot2, 150)
-    const a3 = pulse(dot3, 300)
-    a1.start(); a2.start(); a3.start()
-    return () => { a1.stop(); a2.stop(); a3.stop() }
-  }, [])
+//   useEffect(() => {
+//     const pulse = (dot: Animated.Value, delay: number) =>
+//       Animated.loop(
+//         Animated.sequence([
+//           Animated.delay(delay),
+//           Animated.timing(dot, { toValue: -5, duration: 300, useNativeDriver: true }),
+//           Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
+//           Animated.delay(600),
+//         ])
+//       )
+//     const a1 = pulse(dot1, 0)
+//     const a2 = pulse(dot2, 150)
+//     const a3 = pulse(dot3, 300)
+//     a1.start(); a2.start(); a3.start()
+//     return () => { a1.stop(); a2.stop(); a3.stop() }
+//   }, [])
 
-  const dotStyle = (anim: Animated.Value) => [styles.dot, { transform: [{ translateY: anim }] }]
+//   const dotStyle = (anim: Animated.Value) => [styles.dot, { transform: [{ translateY: anim }] }]
 
-  return (
-    <View style={styles.messageRow}>
-      <View style={[styles.bubble, styles.otherBubble, styles.typingBubble]}>
-        <Animated.View style={dotStyle(dot1)} />
-        <Animated.View style={dotStyle(dot2)} />
-        <Animated.View style={dotStyle(dot3)} />
-      </View>
-    </View>
-  )
-}
+//   return (
+//     <View style={styles.messageRow}>
+//       <View style={[styles.bubble, styles.otherBubble, styles.typingBubble]}>
+//         <Animated.View style={dotStyle(dot1)} />
+//         <Animated.View style={dotStyle(dot2)} />
+//         <Animated.View style={dotStyle(dot3)} />
+//       </View>
+//     </View>
+//   )
+// }
 
-// ─── ChatInterface ────────────────────────────────────────────────────────────
-
-interface ChatInterfaceProps {
-  chatData: MessageItemProps[]
-}
-
-export default function ChatInterface({ chatData }: ChatInterfaceProps) {
+export default function ChatInterface() {
   const { id } = useLocalSearchParams()
-  console.log("idsssss", id)
+  const { data: chatDataFromApi, isLoading, refetch } = useSupportMessageQuery(id as string, { skip: !id })
+  const { data: profileData } = useGetMyProfileQuery(undefined)
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
-  const { sendMessage } = useChatContext()
+  const { sendMessage, onNewMessage, onTicketUpdated } = useChatContext()
   const [imageModalVisible, setImageModalVisible] = useState(false)
   const [imageUri, setImageUri] = useState<string | null>(null)
 
   const listRef = useRef<FlatList>(null)
 
-  // Use chatData from props instead of local state
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: true })
-  }, [chatData])
+  }, [chatDataFromApi])
 
-  // ── Optimistic send ──────────────────────────────────────────────────────
+  useEffect(() => {
+    // Listen for new messages
+    const handleNewMessage = (newMessage: any) => {
+      console.log('New message received:', newMessage)
+      // Refetch the messages to get the latest data
+      refetch()
+    }
+
+    const handleTicketUpdated = (updatedTicket: any) => {
+      console.log('Ticket updated:', updatedTicket)
+      // Refetch the messages to get the latest data
+      refetch()
+    }
+
+    // Set up event listeners
+    onNewMessage(handleNewMessage)
+    onTicketUpdated(handleTicketUpdated)
+
+    // Cleanup listeners when component unmounts
+    return () => {
+      // Note: Socket cleanup is handled in ChatContext
+    }
+  }, [onNewMessage, onTicketUpdated, refetch])
+
+
 
   const sendMessageHandler = useCallback(async () => {
     if (!message.trim() && !imageUri) return
@@ -169,34 +184,32 @@ export default function ChatInterface({ chatData }: ChatInterfaceProps) {
     const tempId = `temp_${Date.now()}`
     const optimisticMsg: MessageItemProps = {
       id: tempId,
-      ticketId: 'current-ticket-id', // This should come from props or context
-      senderId: 'current-user-id', // This should come from auth context
+      ticketId: id as string,
+      senderId: profileData?.data?.id || 'current-user-id',
       senderRole: 'client',
       message: message.trim(),
-      attachments: imageUri ?? '',
+      attachments: imageUri ? [imageUri] : [],
       senderName: 'Me',
       senderProfileImage: ME.avatar,
       isSeen: false,
       seenAt: null,
       createdAt: new Date()
     }
-    if (id) {
+    if (!id) {
+      console.log('No ticket ID available, cannot send message');
       return;
     }
     const messagePayloadData = {
-      ticketId: id, // This should come from props or context
+      ticketId: id,
       message: message.trim(),
       attachments: imageUri ? [imageUri] : []
     }
-    // sendMessage(messagePayloadData, id)
 
-    // For now, just clear the input since we're using chatData from props
+
+    await sendMessage(messagePayloadData?.ticketId as string, messagePayloadData?.message as string, messagePayloadData?.attachments as string[])
     setMessage('')
     setInputHeight(40)
     setImageUri(null)
-
-    // TODO: Implement actual message sending with socket/API
-    console.log('Message to send:', optimisticMsg)
   }, [message, imageUri])
 
   const handleImageSelected = (uri: string) => {
@@ -204,7 +217,7 @@ export default function ChatInterface({ chatData }: ChatInterfaceProps) {
     setImageModalVisible(false)
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────
+
 
   const renderItem = useCallback(
     ({ item }: { item: MessageItemProps }) => (
@@ -214,21 +227,23 @@ export default function ChatInterface({ chatData }: ChatInterfaceProps) {
   )
 
   const canSend = message.trim().length > 0 || !!imageUri
-
+  if (isLoading) {
+    return <ActivityIndicator />
+  }
   return (
     <View style={styles.container}>
       {/* Message List */}
       <View style={styles.listWrapper}>
         <FlatList
           ref={listRef}
-          data={[...chatData].reverse()}
+          data={chatDataFromApi?.data}
           inverted
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
-          // ListHeaderComponent={isTyping ? <TypingIndicator /> : null}
+
           removeClippedSubviews={Platform.OS === 'android'}
           maxToRenderPerBatch={10}
           windowSize={15}
@@ -287,7 +302,7 @@ export default function ChatInterface({ chatData }: ChatInterfaceProps) {
   )
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAFAFA' },
@@ -320,7 +335,7 @@ const styles = StyleSheet.create({
   myTime: { color: '#FFFFFFAA' },
   statusIcon: { marginLeft: 1 },
   failedLabel: { fontSize: 11, color: '#EF4444', marginTop: 4 },
-  // ── Input ──
+
   inputWrapper: {
     paddingHorizontal: 10,
     paddingTop: 8,
@@ -357,7 +372,7 @@ const styles = StyleSheet.create({
   sendButtonActive: {
     backgroundColor: '#D4B785',
   },
-  // ── Image preview ──
+
   imagePreviewContainer: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,7 +3,6 @@ import ChatInterface from '@/components/screens/chat_interface'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
-import { useSupportMessageQuery } from '../redux/services/supportMessageRoomApis'
 
 export default function Chat() {
   const router = useRouter()
@@ -16,12 +15,6 @@ export default function Chat() {
     }
     return null
   }
-  console.log("id", id)
-  const { data, isLoading, isError, isSuccess, error } = useSupportMessageQuery(id as string)
-  console.log("data", data)
-  console.log("isError", isError)
-  console.log("isSuccess", isSuccess)
-  console.log(error?.data?.errorMessages)
   /*
   {
       "success": true,
@@ -51,7 +44,7 @@ export default function Chat() {
         titleStyle={{ fontStyle: 'italic', fontFamily: 'Montserrat-Italic' }}
         title="CSW Support"
       />
-      {isSuccess && <ChatInterface chatData={data?.data || []} />}
+      <ChatInterface />
     </SafeAreaViewWithSpacing>
   )
 }

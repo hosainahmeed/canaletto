@@ -8,7 +8,9 @@ interface ChatContextType {
   joinTicketRoom: (ticketId: string) => void;
   disconnectSocket: () => void;
   initializeSocket: () => void;
-  sendMessage: (ticketId: string, message: string, attachments?: string[]) => void;
+  sendMessage: (ticketId: string, message: string, attachments?: string[]) => Promise<void>;
+  onNewMessage: (callback: (message: any) => void) => void;
+  onTicketUpdated: (callback: (ticket: any) => void) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -43,7 +45,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         socket.disconnect();
       }
 
-      const newSocket = io('http://10.10.20.9:3500', {
+      const newSocket = io('http://10.10.20.9:9050', {
         auth: {
           token: token
         },
@@ -81,7 +83,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
-  const sendMessage = (ticketId: string, message: string, attachments?: string[]) => {
+  const sendMessage = async (ticketId: string, message: string, attachments?: string[]) => {
+    console.log("Sending message:", ticketId, message, attachments);
+
     if (socket && isConnected) {
       socket.emit('send-message', {
         ticketId,
@@ -91,6 +95,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       console.log('Sent message:', message);
     } else {
       console.log('Socket not connected, cannot send message');
+    }
+  };
+
+  const onNewMessage = (callback: (message: any) => void) => {
+    if (socket) {
+      socket.on('receive-message', callback);
+    }
+  };
+
+  const onTicketUpdated = (callback: (ticket: any) => void) => {
+    if (socket) {
+      socket.on('ticket-updated', callback);
     }
   };
 
@@ -118,7 +134,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     joinTicketRoom,
     disconnectSocket,
     initializeSocket,
-    sendMessage
+    sendMessage,
+    onNewMessage,
+    onTicketUpdated
   };
 
   return (

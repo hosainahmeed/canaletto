@@ -1,17 +1,19 @@
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import SectionHeader from '@/components/share/SectionHeader'
 import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button, { ButtonType } from '@/components/ui/button'
+import { MyTicket } from '@/types/myTicketType'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { FlatList, Modal, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import { useChatContext } from '../context/ChatContext'
-import { useTicketCreateMutation } from '../redux/services/supportTicketApis'
+import { useMyTicketsQuery, useTicketCreateMutation } from '../redux/services/supportTicketApis'
 
 export default function Support() {
   const router = useRouter()
@@ -23,6 +25,7 @@ export default function Support() {
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const toast = useToast()
   const { isConnected, joinTicketRoom } = useChatContext()
+  const { data: myTickets, isLoading: isMyTicketsLoading, refetch } = useMyTicketsQuery(undefined)
 
   const handlerCreateTicketForSupport = async () => {
     if (!issue.trim()) {
@@ -76,25 +79,83 @@ export default function Support() {
         titleStyle={styles.headerTitle}
         title="Support"
       />
-      <TouchableOpacity activeOpacity={0.9} onPress={() => setModalVisible(!modalVisible)}>
-        <Card style={[styles.card, { width: screenWidth - 12 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
-            <Image source={IMAGE.moon} style={styles.icon} />
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>• {t("support.status")}</Text>
-            </View>
-          </View>
-          <View style={styles.contentWrapper}>
+
+      <FlatList
+        ListHeaderComponent={() => (
+          <>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => setModalVisible(!modalVisible)}>
+              <Card style={[styles.card, { width: screenWidth - 12 }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
+                  <Image source={IMAGE.moon} style={styles.icon} />
+                  <View style={styles.badgeContainer}>
+                    <Text style={styles.badgeText}>• {t("support.status")}</Text>
+                  </View>
+                </View>
+                <View style={styles.contentWrapper}>
+                  <View>
+                    <Text style={styles.title}>{t("support.title")}</Text>
+                    <Text style={styles.subtitle}>{t("support.description")}</Text>
+                  </View>
+                  <LinearGradient style={styles.iconWrapper} colors={["#D4B785", "#B08D59"]}>
+                    <Image style={styles.chatIcon} source={IMAGE.support_icon_fill} />
+                  </LinearGradient>
+                </View>
+              </Card>
+            </TouchableOpacity>
+
+            <View style={{ height: 12 }} />
             <View>
-              <Text style={styles.title}>{t("support.title")}</Text>
-              <Text style={styles.subtitle}>{t("support.description")}</Text>
+              <SectionHeader title="My Support Tickets" />
             </View>
-            <LinearGradient style={styles.iconWrapper} colors={["#D4B785", "#B08D59"]}>
-              <Image style={styles.chatIcon} source={IMAGE.support_icon_fill} />
-            </LinearGradient>
+          </>
+        )}
+        data={myTickets?.data?.data as MyTicket[]}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              router.push({
+                pathname: '/chat/[id]',
+                params: { id: item.id }
+              })
+            }}
+          >
+            <Card style={[styles.card, { width: screenWidth - 12, marginBottom: 8 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: "space-between", gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                  <Image source={{ uri: item?.supportMember?.profile_image ?? "https://krita-artists.org/uploads/default/original/3X/6/e/6eba1089278dd4cfa35eb34bfffaad96ee331da4.jpeg" }} style={styles.icon} />
+                  <View>
+                    <Text style={[styles.supportName, { color: '#1A1A1A' }]} numberOfLines={1}>{item?.supportMember?.name || "Support"}</Text>
+                    <Text style={[styles.subtitle, { fontSize: 10, color: '#999' }]} numberOfLines={1}>
+                      {new Date(item?.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={[styles.statusBadge, { backgroundColor: item.status === 'open' ? '#22c55e' : item.status === 'closed' ? '#ef4444' : '#f59e0b' }]}>
+                    <Text style={styles.statusText}>{item.status}</Text>
+                  </View>
+                  {item.unseenCount > 0 && (
+                    <View style={styles.unseenBadge}>
+                      <Text style={styles.unseenBadgeText}>{item.unseenCount}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+              <Text style={[styles.subtitle, { marginTop: 4 }]} numberOfLines={2}>{item?.issue ?? "You can now start a conversation with our support team"}</Text>
+            </Card>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <Text style={styles.subtitle}>No support tickets found</Text>
           </View>
-        </Card>
-      </TouchableOpacity>
+        }
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item?.id || ''}
+        refreshControl={<RefreshControl refreshing={isMyTicketsLoading} onRefresh={() => refetch()} />}
+      />
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -170,6 +231,10 @@ const styles = StyleSheet.create({
   icon: {
     width: 64,
     height: 64,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e6cda4a3",
   },
   badgeContainer: {
     backgroundColor: 'rgba(34, 197, 94, 0.4)',
@@ -208,6 +273,13 @@ const styles = StyleSheet.create({
     wordWrap: 'wrap',
     width: '90%',
     color: '#B0B0B0',
+  },
+  supportName: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+    color: '#1A1A1A',
   },
   iconWrapper: {
     width: 48,
@@ -304,5 +376,43 @@ const styles = StyleSheet.create({
   },
   buttonOpen: {
     backgroundColor: '#F194FF',
+  },
+  unseenBadge: {
+    backgroundColor: '#ef4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    marginTop: 4,
+  },
+  unseenBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+  },
+  statusContainer: {
+    alignItems: 'flex-start',
+    marginTop: 8,
+  },
+  statusBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 40,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 8,
+    fontWeight: '600',
+    fontFamily: 'Nunito-Italic',
+    fontStyle: 'italic',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 })
