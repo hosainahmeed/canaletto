@@ -13,7 +13,7 @@ export const supportTicketApis = baseApis.injectEndpoints({
       query: (data: { issue: string, propertyId?: string }) => ({
         url: '/support-ticket/create',
         method: 'POST',
-        body: data
+        body: data,
       }),
     }),
   }),

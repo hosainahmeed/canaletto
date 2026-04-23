@@ -1,3 +1,4 @@
+import { ChatMessage, SupportTicket } from '@/app/types/chat';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -9,8 +10,8 @@ interface ChatContextType {
   disconnectSocket: () => void;
   initializeSocket: () => void;
   sendMessage: (ticketId: string, message: string, attachments?: string[]) => Promise<void>;
-  onNewMessage: (callback: (message: any) => void) => void;
-  onTicketUpdated: (callback: (ticket: any) => void) => void;
+  onNewMessage: (callback: (message: ChatMessage) => void) => () => void;
+  onTicketUpdated: (callback: (ticket: SupportTicket) => void) => () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -53,23 +54,19 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       });
 
       newSocket.on('connect', () => {
-        console.log('Socket connected successfully');
         setIsConnected(true);
       });
 
       newSocket.on('disconnect', () => {
-        console.log('Socket disconnected');
         setIsConnected(false);
       });
 
       newSocket.on('connect_error', (error: any) => {
-        console.error('Socket connection error:', error);
         setIsConnected(false);
       });
 
       setSocket(newSocket);
     } catch (error: any) {
-      console.error('Error initializing socket:', error);
       setIsConnected(false);
     }
   };
@@ -77,37 +74,45 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const joinTicketRoom = (ticketId: string) => {
     if (socket && isConnected) {
       socket.emit('join-ticket', { ticketId });
-      console.log('Joined ticket room:', ticketId);
-    } else {
-      console.log('Socket not connected, cannot join ticket room');
     }
   };
 
-  const sendMessage = async (ticketId: string, message: string, attachments?: string[]) => {
-    console.log("Sending message:", ticketId, message, attachments);
-
-    if (socket && isConnected) {
-      socket.emit('send-message', {
-        ticketId,
-        message,
-        ...(attachments && { attachments })
-      });
-      console.log('Sent message:', message);
-    } else {
-      console.log('Socket not connected, cannot send message');
+  const sendMessage = async (ticketId: string, message: string, attachments?: string[]): Promise<void> => {
+    if (!socket) {
+      throw new Error('Socket not initialized');
     }
+
+    if (!isConnected) {
+      throw new Error('Socket not connected');
+    }
+
+    // Just emit the message and return immediately
+    // The real message will come through the socket event
+    socket.emit('send-message', {
+      ticketId,
+      message,
+      ...(attachments && { attachments })
+    });
   };
 
   const onNewMessage = (callback: (message: any) => void) => {
     if (socket) {
       socket.on('receive-message', callback);
+      return () => {
+        socket.off('receive-message', callback);
+      };
     }
+    return () => { };
   };
 
   const onTicketUpdated = (callback: (ticket: any) => void) => {
     if (socket) {
       socket.on('ticket-updated', callback);
+      return () => {
+        socket.off('ticket-updated', callback);
+      };
     }
+    return () => { };
   };
 
   const disconnectSocket = () => {
@@ -119,10 +124,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // Initialize socket on component mount
     initializeSocket();
-
-    // Cleanup on unmount
     return () => {
       disconnectSocket();
     };

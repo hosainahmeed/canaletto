@@ -8,7 +8,7 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl,
   prepareHeaders: async (headers: any) => {
     const token = await SecureStore.getItemAsync("accessToken");
-    console.log(token)
+    // console.log(token)
     if (!token) {
       router.replace("/");
       return headers;

@@ -9,7 +9,7 @@ import { MyTicket } from '@/types/myTicketType'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, Modal, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import { useChatContext } from '../context/ChatContext'
@@ -26,6 +26,10 @@ export default function Support() {
   const toast = useToast()
   const { isConnected, joinTicketRoom } = useChatContext()
   const { data: myTickets, isLoading: isMyTicketsLoading, refetch } = useMyTicketsQuery(undefined)
+
+  useEffect(() => {
+    refetch()
+  }, [])
 
   const handlerCreateTicketForSupport = async () => {
     if (!issue.trim()) {
@@ -63,6 +67,8 @@ export default function Support() {
       setIsCreatingRoom(false);
     }
   }
+
+
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton

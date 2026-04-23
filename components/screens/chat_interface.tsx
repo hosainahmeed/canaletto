@@ -1,4 +1,3 @@
-import { useChatContext } from '@/app/context/ChatContext'
 import { useSupportMessageQuery } from '@/app/redux/services/supportMessageRoomApis'
 import { useGetMyProfileQuery } from '@/app/redux/services/userApis'
 import { Ionicons } from '@expo/vector-icons'
@@ -16,6 +15,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
+import { useChatContext } from '../../app/context/ChatContext'
+import { ChatMessage } from '../../app/types/chat'
 import ImagePickerModal from '../share/ImagePickerModal'
 
 interface MessageItemProps {
@@ -30,14 +31,6 @@ interface MessageItemProps {
   isSeen: boolean,
   seenAt: null | Date,
   createdAt: Date
-}
-
-
-const ME = {
-  _id: 1,
-  name: 'Me',
-  avatar:
-    'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
 }
 
 const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
@@ -100,51 +93,29 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
   )
 })
 
-
-// const TypingIndicator = () => {
-//   const dot1 = useRef(new Animated.Value(0)).current
-//   const dot2 = useRef(new Animated.Value(0)).current
-//   const dot3 = useRef(new Animated.Value(0)).current
-
-//   useEffect(() => {
-//     const pulse = (dot: Animated.Value, delay: number) =>
-//       Animated.loop(
-//         Animated.sequence([
-//           Animated.delay(delay),
-//           Animated.timing(dot, { toValue: -5, duration: 300, useNativeDriver: true }),
-//           Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
-//           Animated.delay(600),
-//         ])
-//       )
-//     const a1 = pulse(dot1, 0)
-//     const a2 = pulse(dot2, 150)
-//     const a3 = pulse(dot3, 300)
-//     a1.start(); a2.start(); a3.start()
-//     return () => { a1.stop(); a2.stop(); a3.stop() }
-//   }, [])
-
-//   const dotStyle = (anim: Animated.Value) => [styles.dot, { transform: [{ translateY: anim }] }]
-
-//   return (
-//     <View style={styles.messageRow}>
-//       <View style={[styles.bubble, styles.otherBubble, styles.typingBubble]}>
-//         <Animated.View style={dotStyle(dot1)} />
-//         <Animated.View style={dotStyle(dot2)} />
-//         <Animated.View style={dotStyle(dot3)} />
-//       </View>
-//     </View>
-//   )
-// }
-
 export default function ChatInterface() {
   const { id } = useLocalSearchParams()
   const { data: chatDataFromApi, isLoading, refetch } = useSupportMessageQuery(id as string, { skip: !id })
   const { data: profileData } = useGetMyProfileQuery(undefined)
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
-  const { sendMessage, onNewMessage, onTicketUpdated } = useChatContext()
+  const { sendMessage, onNewMessage } = useChatContext()
   const [imageModalVisible, setImageModalVisible] = useState(false)
   const [imageUri, setImageUri] = useState<string | null>(null)
+  const [chatMessages, setChatMessages] = useState<any[]>([])
+
+  useEffect(() => {
+    if (id) {
+      refetch()
+    }
+  }, [id])
+
+
+  useEffect(() => {
+    if (chatDataFromApi) {
+      setChatMessages(chatDataFromApi.data || [])
+    }
+  }, [chatDataFromApi])
 
   const listRef = useRef<FlatList>(null)
 
@@ -153,64 +124,34 @@ export default function ChatInterface() {
   }, [chatDataFromApi])
 
   useEffect(() => {
-    // Listen for new messages
-    const handleNewMessage = (newMessage: any) => {
-      console.log('New message received:', newMessage)
-      // Refetch the messages to get the latest data
-      refetch()
+    const handleNewMessage = (message: ChatMessage) => {
+      setChatMessages(prev => [message, ...prev])
+      listRef.current?.scrollToOffset({ offset: 0, animated: true })
     }
 
-    const handleTicketUpdated = (updatedTicket: any) => {
-      console.log('Ticket updated:', updatedTicket)
-      // Refetch the messages to get the latest data
-      refetch()
-    }
+    const unsubscribe = onNewMessage(handleNewMessage)
 
-    // Set up event listeners
-    onNewMessage(handleNewMessage)
-    onTicketUpdated(handleTicketUpdated)
-
-    // Cleanup listeners when component unmounts
     return () => {
-      // Note: Socket cleanup is handled in ChatContext
+      unsubscribe()
     }
-  }, [onNewMessage, onTicketUpdated, refetch])
-
-
+  }, [id, onNewMessage]);
 
   const sendMessageHandler = useCallback(async () => {
     if (!message.trim() && !imageUri) return
-
-    const tempId = `temp_${Date.now()}`
-    const optimisticMsg: MessageItemProps = {
-      id: tempId,
-      ticketId: id as string,
-      senderId: profileData?.data?.id || 'current-user-id',
-      senderRole: 'client',
-      message: message.trim(),
-      attachments: imageUri ? [imageUri] : [],
-      senderName: 'Me',
-      senderProfileImage: ME.avatar,
-      isSeen: false,
-      seenAt: null,
-      createdAt: new Date()
-    }
-    if (!id) {
-      console.log('No ticket ID available, cannot send message');
-      return;
-    }
-    const messagePayloadData = {
-      ticketId: id,
-      message: message.trim(),
-      attachments: imageUri ? [imageUri] : []
-    }
-
-
-    await sendMessage(messagePayloadData?.ticketId as string, messagePayloadData?.message as string, messagePayloadData?.attachments as string[])
     setMessage('')
     setInputHeight(40)
     setImageUri(null)
-  }, [message, imageUri])
+
+    try {
+      await sendMessage(id as string, message.trim(), imageUri ? [imageUri] : [])
+      setMessage('')
+      setInputHeight(40)
+      setImageUri(null)
+    } catch (error) {
+      console.error('Failed to send message:', error)
+
+    }
+  }, [message, imageUri, id, profileData, sendMessage])
 
   const handleImageSelected = (uri: string) => {
     setImageUri(uri)
@@ -219,11 +160,10 @@ export default function ChatInterface() {
 
 
 
-  const renderItem = useCallback(
+  const renderItem = (
     ({ item }: { item: MessageItemProps }) => (
       <MessageItem message={item} />
-    ),
-    []
+    )
   )
 
   const canSend = message.trim().length > 0 || !!imageUri
@@ -236,14 +176,13 @@ export default function ChatInterface() {
       <View style={styles.listWrapper}>
         <FlatList
           ref={listRef}
-          data={chatDataFromApi?.data}
+          data={chatMessages}
           inverted
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item?.id?.toString() || ''}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
-
           removeClippedSubviews={Platform.OS === 'android'}
           maxToRenderPerBatch={10}
           windowSize={15}
@@ -291,6 +230,7 @@ export default function ChatInterface() {
             <Ionicons name="send" size={16} color={canSend ? '#FFF' : '#9CA3AF'} />
           </TouchableOpacity>
         </View>
+        <View style={{ height: 20 }} />
       </View>
 
       <ImagePickerModal

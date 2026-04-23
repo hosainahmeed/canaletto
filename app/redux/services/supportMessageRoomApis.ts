@@ -7,7 +7,6 @@ export const supportMessageRoomApis = baseApis.injectEndpoints({
       query: (id) => ({
         url: `/support-message/get/${id}`,
         method: 'GET',
-        keepalive: true,
       }),
     }),
   }),
