@@ -16,29 +16,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-
-
-const pendingInvoices: Invoice[] = [
-  {
-    id: "1",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-15',
-    status: 'pending',
-  },
-  {
-    id: "13",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-16',
-    status: 'pending',
-  },
-  {
-    id: "123",
-    pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-    date: '2025-10-17',
-    status: 'pending',
-  },
-]
-
 const { width } = Dimensions.get('window')
 const TAB_WRAPPER_WIDTH = width - 20
 const TAB_GAP = 10
@@ -48,9 +25,9 @@ export default function PaymentStaus() {
   const router = useRouter()
   const [activeButton, setActiveButton] = React.useState<'Payment Invoices' | 'Payment Plan'>('Payment Invoices')
 
-  const { data: invoices, isLoading: isLoadingInvoices } = useGetInvoiceByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Invoices' })
+  const { data: invoices, isLoading: isLoadingInvoices, refetch: refetchInvoices } = useGetInvoiceByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Invoices' })
   console.log('invoices', invoices)
-  const { data: paymentPlans, isLoading: isLoadingPaymentPlans } = useGetPaymentPlansByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Plan' })
+  const { data: paymentPlans, isLoading: isLoadingPaymentPlans, refetch: refetchPaymentPlans } = useGetPaymentPlansByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Plan' })
 
   // console.log('invoices', invoices)
 
@@ -69,7 +46,10 @@ export default function PaymentStaus() {
   }))
 
   const handleViewInvoice = React.useCallback((invoice: Invoice) => {
-    router.push(`/properties/payment-status/invoice-details/${invoice.id}`)
+    router.push({
+      pathname: '/properties/payment-status/invoice-details/[id]',
+      params: { id: invoice?.id },
+    })
   }, [router])
 
   const handleViewPaymentPlan = React.useCallback((paymentPlan: PaymentPlan) => {
@@ -80,27 +60,27 @@ export default function PaymentStaus() {
   }, [router])
 
   const handleDownloadInvoice = React.useCallback(async (invoice: Invoice, index: number) => {
-    const invoiceKey = `${invoice.pdfLink}-${invoice.date}-${index}`
+    const invoiceKey = `${invoice?.id}-${index}`
     const fileName = `invoice-${index + 1}.pdf`
     const fileItem = {
-      id: invoice.id,
+      id: invoice?.id,
       name: fileName,
-      file_url: invoice.pdfLink,
-      createdAt: invoice.date,
-      updatedAt: invoice.date
+      file_url: invoice?.document_url,
+      createdAt: invoice?.createdAt,
+      updatedAt: invoice?.updatedAt
     }
     await downloadFile(fileItem, fileName, invoiceKey)
   }, [downloadFile])
 
   const handleDownloadPaymentPlan = React.useCallback(async (paymentPlan: PaymentPlan, index: number) => {
-    const paymentPlanKey = `${paymentPlan.file_url}-${paymentPlan.createdAt}-${index}`
-    const fileName = `${paymentPlan.name}.pdf`
+    const paymentPlanKey = `${paymentPlan?.file_url}-${paymentPlan?.createdAt}-${index}`
+    const fileName = `${paymentPlan?.name}.pdf`
     const fileItem = {
-      id: paymentPlan.id,
-      name: paymentPlan.name,
-      file_url: paymentPlan.file_url,
-      createdAt: paymentPlan.createdAt,
-      updatedAt: paymentPlan.updatedAt
+      id: paymentPlan?.id,
+      name: paymentPlan?.name,
+      file_url: paymentPlan?.file_url,
+      createdAt: paymentPlan?.createdAt,
+      updatedAt: paymentPlan?.updatedAt
     }
     await downloadFile(fileItem, fileName, paymentPlanKey)
   }, [downloadFile])
@@ -153,6 +133,7 @@ export default function PaymentStaus() {
           emptyTitle={t('message.no_pending_payment_invoice_available')}
           onViewInvoice={handleViewInvoice}
           downloadingKey={downloadingKey}
+          refetch={refetchInvoices}
         />
       ) : (
         <PaymentPlanList

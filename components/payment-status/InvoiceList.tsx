@@ -3,10 +3,12 @@ import Card from '@/components/cards/Card'
 import EmptyCard from '@/components/share/EmptyCard'
 import HelpSection from '@/components/share/HelpSection'
 import { Invoice } from '@/types'
+import { convertStatus } from '@/utils/convertStatus'
+import { formatDate } from '@/utils/dateUtils'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
-import { ActivityIndicator, Dimensions, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
 const { width } = Dimensions.get('window')
 
@@ -18,7 +20,8 @@ export const InvoiceList = ({
   onViewInvoice,
   onDownloadInvoice,
   downloadingKey,
-  isLoading
+  isLoading,
+  refetch
 }: {
   data: Invoice[]
   emptyIcon: any
@@ -29,16 +32,17 @@ export const InvoiceList = ({
   downloadingKey: string | null
   isLoading?: boolean
   refetch?: () => void
-  isRefetching?: boolean
+  isRefetching?: boolean,
 }) => {
   const router = useRouter()
+  const { id } = useLocalSearchParams()
   return (
     <FlatList
       data={data}
-      keyExtractor={(item) => item.pdfLink + item.date + item.status}
+      keyExtractor={(item) => item?.id}
       contentContainerStyle={{ paddingVertical: 12 }}
       renderItem={({ item, index }) => {
-        const invoiceKey = `${item.pdfLink}-${item.date}-${index}`
+        const invoiceKey = `${item?.id}-${index}`
         return (
           <>
             {isLoading ? (
@@ -52,15 +56,15 @@ export const InvoiceList = ({
                       Invoice {index + 1}.pdf
                     </Text>
                     <Text style={styles.invoiceDate}>
-                      Due Date: {item.date}
+                      Due Date: {formatDate(item?.dueDate)}
                     </Text>
                     <Text
                       style={[
                         styles.invoiceStatus,
-                        { color: item.status === 'paid' ? '#22C55E' : '#F59E0B' },
+                        { color: item?.status === 'PAID' ? '#22C55E' : '#F59E0B' },
                       ]}
                     >
-                      {item.status.toUpperCase()}
+                      {convertStatus(item?.status)}
                     </Text>
                   </View>
                 </View>
@@ -88,7 +92,12 @@ export const InvoiceList = ({
         )
       }}
       ListFooterComponent={<HelpSection title='Add Invoice' description='Upload your invoice issued by the CSW team.' icon={IMAGE.add_invoice}
-        onPress={() => router.push('/properties/payment-status/add-invoice')} />}
+        onPress={() => router.push({
+          pathname: '/properties/payment-status/add-invoice',
+          params: {
+            id: id
+          }
+        } as any)} />}
       ListEmptyComponent={
         <EmptyCard
           icon={emptyIcon}
@@ -96,6 +105,7 @@ export const InvoiceList = ({
           title={emptyTitle}
         />
       }
+      refreshControl={<RefreshControl refreshing={isLoading as boolean} onRefresh={() => refetch?.()} />}
     />
   )
 }

@@ -1,12 +1,14 @@
+import { useCreateInvoiceMutation } from '@/app/redux/services/invoiceApis'
 import CustomInput from '@/components/CustomInput'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import FilterModal from '@/components/share/FilterModal'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
+import { convertStatus } from '@/utils/convertStatus'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import * as ImagePicker from 'expo-image-picker'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -32,14 +34,17 @@ export default function AddInvoice() {
   const { t } = useTranslation()
   const router = useRouter()
   const { width } = useWindowDimensions()
-
+  const { id } = useLocalSearchParams()
+  const [createInvoice, { isLoading }] = useCreateInvoiceMutation()
+  console.log(id)
   const [invoiceDate, setInvoiceDate] = useState(new Date())
   const [dueDate, setDueDate] = useState(new Date())
-  const [activeDate, setActiveDate] = useState<'invoice' | 'due' | null>(null)
+  const [paymentDate, setPaymentDate] = useState(new Date())
+  const [activeDate, setActiveDate] = useState<'invoice' | 'due' | 'payment' | null>(null)
 
   const [invoiceAmount, setInvoiceAmount] = useState('')
   const [paymentStatus, setPaymentStatus] = useState('')
-  const [paymentDue, setPaymentDue] = useState('')
+
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null)
   const [isPaymentStatusModalVisible, setIsPaymentStatusModalVisible] = useState(false)
 
@@ -66,18 +71,45 @@ export default function AddInvoice() {
     }
   }
 
-  const handleSubmit = () => {
-    if (!invoiceAmount || !paymentStatus || !paymentDue) {
-      Alert.alert('Error', 'Please fill all required fields')
-      return
-    }
+  const handleSubmit = async () => {
+    try {
+      if (!invoiceAmount || !paymentStatus || !paymentDate) {
+        Alert.alert('Error', 'Please fill all required fields')
+        return
+      }
+      const data = {
+        propertyId: id as string,
+        invoiceDate: new Date(invoiceDate),
+        dueDate: new Date(dueDate),
+        amount: parseFloat(invoiceAmount),
+        paymentDate: new Date(paymentDate),
+        status: paymentStatus,
+      }
 
-    Alert.alert('Success', 'Invoice added successfully')
-    console.log('Invoice added successfully', {
-      invoiceAmount,
-      paymentStatus,
-      paymentDue,
-    })
+      const formData = new FormData()
+      formData.append('data', JSON.stringify(data))
+      if (uploadedFile instanceof File) {
+        formData.append('invoice_document', uploadedFile)
+      }
+      // formData.append('invoice_document', uploadedFile?.uri || '')
+
+      const response = await createInvoice(formData).unwrap()
+      if (!response) {
+        throw new Error(response?.message || 'Failed to add invoice')
+      }
+
+
+      Alert.alert('Success', response?.message || 'Invoice added successfully')
+      setInvoiceAmount('')
+      setPaymentStatus('')
+      setPaymentDate(new Date())
+      setDueDate(new Date())
+      setInvoiceDate(new Date())
+      setUploadedFile(null)
+    } catch (error: any) {
+      Alert.alert('Error', error?.data?.message || error?.message || 'Failed to add invoice')
+      console.log(error)
+    }
     // router.back()
   }
 
@@ -104,6 +136,10 @@ export default function AddInvoice() {
           {formatDate(dueDate)}
         </InputCard>
 
+        <InputCard label="Payment Date" onPress={() => setActiveDate('payment')}>
+          {formatDate(paymentDate)}
+        </InputCard>
+
         <CustomInput
           label="Invoice Amount"
           value={invoiceAmount}
@@ -117,8 +153,9 @@ export default function AddInvoice() {
           label="Payment Status"
           onPress={() => setIsPaymentStatusModalVisible(true)}
         >
-          {paymentStatus || 'Select payment status'}
+          {convertStatus(paymentStatus) || 'Select payment status'}
         </InputCard>
+
 
         <FilterModal
           visible={isPaymentStatusModalVisible}
@@ -132,13 +169,8 @@ export default function AddInvoice() {
           setSelectedValue={setPaymentStatus}
         />
 
-        <CustomInput
-          label="Payment Due"
-          value={paymentDue}
-          onChangeText={setPaymentDue}
-          placeholder="Enter due amount"
-          keyboardType="numeric"
-        />
+
+
 
         {/* Upload */}
         <View style={styles.section}>
@@ -167,7 +199,7 @@ export default function AddInvoice() {
           )}
         </View>
 
-        <Button onPress={handleSubmit} style={{ borderRadius: 12 }} title="Add Invoice" />
+        <Button onPress={handleSubmit} style={{ borderRadius: 12 }} title={isLoading ? "Adding..." : "Add Invoice"} />
       </ScrollView>
 
       {/* iOS-style Date Picker Modal */}
@@ -176,14 +208,16 @@ export default function AddInvoice() {
           <View style={styles.dateModal}>
             <DateTimePicker
               timeZoneOffsetInMinutes={0}
-              value={activeDate === 'invoice' ? invoiceDate : dueDate}
+              value={activeDate === 'invoice' ? invoiceDate : activeDate === 'due' ? dueDate : paymentDate}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={(_, date) => {
                 if (date) {
                   activeDate === 'invoice'
                     ? setInvoiceDate(date)
-                    : setDueDate(date)
+                    : activeDate === 'due'
+                      ? setDueDate(date)
+                      : setPaymentDate(date)
                 }
               }}
             />

@@ -37,7 +37,10 @@ export default function ({
               label={item.label}
               value={item.value}
               selected={selectedValue}
-              onPress={() => setSelectedValue(item.value)}
+              onPress={() => {
+                setSelectedValue(item.value)
+                onClose?.()
+              }}
               isLast={index === filterOptions.length - 1}
             />
           ))}

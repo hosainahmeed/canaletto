@@ -6,13 +6,13 @@ import { FlashList } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet } from 'react-native'
+import { RefreshControl, StyleSheet } from 'react-native'
 import { useGetMyPropertyQuery } from '../redux/services/propertyApis'
 
 export default function PropertyScreen() {
   const router = useRouter()
   const { t } = useTranslation()
-  const { data, isLoading } = useGetMyPropertyQuery(undefined)
+  const { data, isLoading, refetch } = useGetMyPropertyQuery(undefined)
 
   const renderSmimmer = () => {
     return (
@@ -44,6 +44,7 @@ export default function PropertyScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
         style={styles.container}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => refetch()} />}
       />
     </SafeAreaViewWithSpacing>
   )

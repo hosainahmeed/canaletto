@@ -4,9 +4,10 @@ export const supportMessageRoomApis = baseApis.injectEndpoints({
   overrideExisting: true,
   endpoints: (build) => ({
     supportMessage: build.query({
-      query: (id) => ({
+      query: ({ id, limit }) => ({
         url: `/support-message/get/${id}`,
         method: 'GET',
+        params: { limit },
       }),
     }),
   }),

@@ -24,12 +24,18 @@ export default function Support() {
   const [issue, setIssue] = useState<string>("")
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const toast = useToast()
-  const { isConnected, joinTicketRoom } = useChatContext()
-  const { data: myTickets, isLoading: isMyTicketsLoading, refetch } = useMyTicketsQuery(undefined)
-
+  const { isConnected, joinTicketRoom, onTicketUpdated } = useChatContext()
+  const [pageSize, setPageSize] = useState(8)
+  const { data: myTickets, isLoading: isMyTicketsLoading, refetch, isFetching } = useMyTicketsQuery({ limit: pageSize })
   useEffect(() => {
-    refetch()
-  }, [])
+    if (onTicketUpdated) {
+      onTicketUpdated(() => {
+        if (refetch) {
+          refetch()
+        }
+      })
+    }
+  }, [onTicketUpdated])
 
   const handlerCreateTicketForSupport = async () => {
     if (!issue.trim()) {
@@ -131,21 +137,19 @@ export default function Support() {
                   <Image source={{ uri: item?.supportMember?.profile_image || "https://krita-artists.org/uploads/default/original/3X/6/e/6eba1089278dd4cfa35eb34bfffaad96ee331da4.jpeg" }} style={styles.icon} />
                   <View>
                     <Text style={[styles.supportName, { color: '#1A1A1A', fontWeight: "800" }]} numberOfLines={1}>{item?.supportMember?.name || "Support"}</Text>
-                    <Text style={[styles.subtitle, { fontSize: 10, color: '#999', width: "100%" }]} numberOfLines={1}>
-                      {new Date(item?.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </Text>
-                    <Text style={[styles.subtitle, { marginTop: 4 }]} numberOfLines={1}>{item?.lastMessage || "You can now start a conversation with our support team"}</Text>
+
+                    <Text style={[styles.subtitle, { marginTop: 6, width: "90%" }]} numberOfLines={1}>{item?.lastMessage || "You can now start a conversation with our support team"}</Text>
                   </View>
                 </View>
-                <View style={{ alignItems: 'flex-start' }}>
-                  {/* <View style={[styles.statusBadge, { backgroundColor: item.status === 'open' ? '#22c55e' : item.status === 'closed' ? '#ef4444' : '#f59e0b' }]}>
-                    <Text style={styles.statusText}>{item?.status?.toLocaleUpperCase() === "IN_PROGRESS" ? "In Progress" : item?.status?.toLocaleUpperCase() === "CLOSED" ? "Closed" : "Open"}</Text>
-                  </View> */}
-                  {/* {item.unseenCount > 0 && (
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={[styles.subtitle, { fontSize: 10, color: '#999', width: "100%" }]} numberOfLines={1}>
+                    {new Date(item?.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </Text>
+                  {item.unseenCount > 0 && (
                     <View style={styles.unseenBadge}>
                       <Text style={styles.unseenBadgeText}>{item.unseenCount}</Text>
                     </View>
-                  )} */}
+                  )}
                 </View>
               </View>
             </Card>
@@ -156,9 +160,15 @@ export default function Support() {
             <Text style={styles.subtitle}>No support tickets found</Text>
           </View>
         }
+        onEndReached={() => {
+          if (myTickets?.data?.meta?.total && myTickets?.data?.meta?.total > pageSize) {
+            setPageSize(pageSize + 4)
+          }
+        }}
+        onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item?.id || ''}
-        refreshControl={<RefreshControl refreshing={isMyTicketsLoading} onRefresh={() => refetch()} />}
+        refreshControl={<RefreshControl refreshing={isMyTicketsLoading || isFetching} onRefresh={() => refetch()} />}
       />
 
       <Modal
@@ -383,7 +393,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F194FF',
   },
   unseenBadge: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#e6cda4f1',
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -393,7 +403,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   unseenBadgeText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 10,
     fontWeight: '700',
     fontFamily: 'Nunito-Italic',

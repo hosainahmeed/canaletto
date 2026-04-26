@@ -95,7 +95,7 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
 
 export default function ChatInterface() {
   const { id } = useLocalSearchParams()
-  const { data: chatDataFromApi, isLoading, refetch } = useSupportMessageQuery(id as string, { skip: !id })
+  const { data: chatDataFromApi, isLoading, refetch } = useSupportMessageQuery({ id: id as string }, { skip: !id })
   const { data: profileData } = useGetMyProfileQuery(undefined)
   const [message, setMessage] = useState('')
   const [inputHeight, setInputHeight] = useState(40)
@@ -113,7 +113,7 @@ export default function ChatInterface() {
 
   useEffect(() => {
     if (chatDataFromApi) {
-      setChatMessages(chatDataFromApi.data || [])
+      setChatMessages(chatDataFromApi?.data || [])
     }
   }, [chatDataFromApi])
 
@@ -236,7 +236,11 @@ export default function ChatInterface() {
       <ImagePickerModal
         visible={imageModalVisible}
         onClose={() => setImageModalVisible(false)}
-        onImageSelected={handleImageSelected}
+        onUploadComplete={(data) => {
+          // Handle the uploaded file data here
+          console.log('Uploaded file data:', data)
+        }}
+        optimasticUpload={true}
       />
     </View>
   )

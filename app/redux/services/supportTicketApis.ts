@@ -4,9 +4,10 @@ export const supportTicketApis = baseApis.injectEndpoints({
   overrideExisting: true,
   endpoints: (build) => ({
     myTickets: build.query({
-      query: () => ({
+      query: (params) => ({
         url: '/support-ticket/my-tickets',
         method: 'GET',
+        params
       }),
     }),
     ticketCreate: build.mutation({

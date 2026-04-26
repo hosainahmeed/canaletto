@@ -1,8 +1,15 @@
 export interface Invoice {
   id: string
-  pdfLink: string
-  date: string
-  status: 'pending' | 'paid'
+  propertyId: string
+  clientId: string
+  invoiceDate: string
+  dueDate: string
+  amount: number
+  status: 'OPEN' | 'PARTIALLY_PAID' | 'PAID'
+  paymentDate: string
+  document_url: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface PaymentPlan {

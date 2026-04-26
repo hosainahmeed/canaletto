@@ -12,6 +12,7 @@ interface ChatContextType {
   sendMessage: (ticketId: string, message: string, attachments?: string[]) => Promise<void>;
   onNewMessage: (callback: (message: ChatMessage) => void) => () => void;
   onTicketUpdated: (callback: (ticket: SupportTicket) => void) => () => void;
+  markSeen: (ticketId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -77,6 +78,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
+  const markSeen = async (ticketId: string) => {
+    if (!socket) {
+      throw new Error('Socket not initialized');
+    }
+
+    if (!isConnected) {
+      throw new Error('Socket not connected');
+    }
+
+    socket.emit('mark-seen', { ticketId });
+  };
+
   const sendMessage = async (ticketId: string, message: string, attachments?: string[]): Promise<void> => {
     if (!socket) {
       throw new Error('Socket not initialized');
@@ -138,7 +151,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     initializeSocket,
     sendMessage,
     onNewMessage,
-    onTicketUpdated
+    onTicketUpdated,
+    markSeen
   };
 
   return (

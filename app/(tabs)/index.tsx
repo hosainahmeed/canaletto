@@ -26,20 +26,8 @@ export default function HomeScreen() {
   const {
     data: homeData,
     isLoading: isHomeDataLoading,
-    error: homeDataError,
     refetch: refetchHomeData
   } = useGetHomeDataQuery(undefined);
-
-  // Debug logging
-  // console.log('Home data state:', {
-  //   data: homeData,
-  //   isLoading: isHomeDataLoading,
-  //   error: homeDataError
-  // });
-
-  if (homeDataError) {
-    console.error('Error fetching home data:', homeDataError);
-  }
 
   const isTablet = width >= 720;
   const numColumns = isTablet ? 2 : 1;
@@ -100,15 +88,13 @@ export default function HomeScreen() {
     ),
     [t, goProperty]
   );
-
   /* -------- FOOTER -------- */
-
   const ListFooter = useMemo(
     () => (
       <>
         <View>
           <SectionHeader
-            title="Legal Updates"
+            title={t("page_title.legal_updates")}
             icon={IMAGE.legal}
             action={() => router.push("/legal-updates")}
             actionText={t("action.view_all")}
@@ -116,15 +102,15 @@ export default function HomeScreen() {
 
           <GradientCard
             iconType="green"
-            title={homeData?.legalUpdate?.title || ""}
+            title={homeData?.data?.legalUpdate?.title || "N/A"}
             subTitle="Legal Updates"
-            onPress={() => navigateToDetails(homeData?.legalUpdate?.id)}
+            onPress={() => navigateToDetails(homeData?.data?.legalUpdate?.id)}
           />
         </View>
 
         <View>
           <SectionHeader
-            title="New Projects"
+            title={t("page_title.new_projects")}
             icon={IMAGE.newProjectIcon}
             action={() => router.push("/new-projects")}
             actionText={t("action.view_all")}
@@ -133,15 +119,15 @@ export default function HomeScreen() {
           <GradientCard
             iconType="pink"
             color={['#A855F780', '#FAFAFA', '#FAFAFA']}
-            title={homeData?.project?.title || ""}
+            title={homeData?.data?.project?.title || "N/A"}
             subTitle="New Projects"
-            onPress={() => navigateToDetails(homeData?.project?.id)}
+            onPress={() => navigateToDetails(homeData?.data?.project?.id)}
           />
         </View>
 
         <View>
           <SectionHeader
-            title="Latest Insights"
+            title={t("page_title.latest_insights")}
             icon={IMAGE.insights_icon}
             action={goInsights}
             actionText={t("action.view_all")}
@@ -150,16 +136,16 @@ export default function HomeScreen() {
           <GradientCard
             iconType="blue"
             color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
-            title={homeData?.marketUpdate?.title || ""}
+            title={homeData?.data?.marketUpdate?.title || "N/A"}
             subTitle="Market Updates"
-            onPress={() => navigateToDetails(homeData?.marketUpdate?.id)}
+            onPress={() => navigateToDetails(homeData?.data?.marketUpdate?.id)}
           />
         </View>
 
         <HelpSection />
       </>
     ),
-    [t, goInsights, navigateToDetails]
+    [t, goInsights, navigateToDetails, homeData]
   );
 
   /* -------- DATA SOURCE -------- */

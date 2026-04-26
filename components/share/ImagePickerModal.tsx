@@ -1,25 +1,36 @@
+import { useUploadFileMutation } from '@/app/redux/services/uploadApis'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import React, { useEffect, useState } from 'react'
 import {
-  Alert, Linking, Modal, Platform, Pressable,
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
   StyleSheet,
-  Text
+  Text,
 } from 'react-native'
 
 type Props = {
   visible: boolean
   onClose: () => void
-  onImageSelected: (uri: string) => void
+  onUploadComplete?: (data: any) => void
+  keyName?: string
+  optimasticUpload?: boolean
 }
 
 export default function ImagePickerModal({
   visible,
   onClose,
-  onImageSelected,
+  onUploadComplete,
+  keyName,
+  optimasticUpload = false,
 }: Props) {
   const [hasCamera, setHasCamera] = useState(true)
   const [isCheckingPermission, setIsCheckingPermission] = useState(false)
+
+  const [uploadFileMutation, { isLoading }] = useUploadFileMutation()
 
   useEffect(() => {
     checkCameraAvailability()
@@ -29,13 +40,16 @@ export default function ImagePickerModal({
     try {
       const result = await ImagePicker.getCameraPermissionsAsync()
       setHasCamera(result.granted !== false)
-    } catch (error) {
-      console.log('Camera not available:', error)
+    } catch {
       setHasCamera(false)
     }
   }
 
-  const showPermissionAlert = (title: string, message: string, settingsAction?: () => void) => {
+  const showPermissionAlert = (
+    title: string,
+    message: string,
+    settingsAction?: () => void
+  ) => {
     Alert.alert(
       title,
       message,
@@ -44,30 +58,81 @@ export default function ImagePickerModal({
           { text: 'Cancel', style: 'cancel' },
           { text: 'Settings', onPress: settingsAction },
         ]
-        : [{ text: 'OK', style: 'default' }]
+        : [{ text: 'OK' }]
     )
+  }
+
+  const getFileTypeKey = (uri: string) => {
+    const ext = uri.split('.').pop()?.toLowerCase()
+
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) {
+      return 'chat_images'
+    } else if (['mp4', 'mov', 'avi', 'mkv'].includes(ext || '')) {
+      return 'chat_videos'
+    } else {
+      return 'chat_files'
+    }
+  }
+
+  const getMimeType = (uri: string) => {
+    const ext = uri.split('.').pop()?.toLowerCase()
+
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg'
+      case 'png':
+        return 'image/png'
+      case 'mp4':
+        return 'video/mp4'
+      case 'mov':
+        return 'video/quicktime'
+      default:
+        return 'application/octet-stream'
+    }
+  }
+
+  const uploadFile = async (uri: string) => {
+    try {
+      const formData = new FormData()
+
+      const finalKey = keyName || getFileTypeKey(uri)
+      const fileData = {
+        uri,
+        name: `file.${uri.split('.').pop()}`,
+        type: getMimeType(uri),
+      } as any
+
+      if (!optimasticUpload) {
+        onUploadComplete?.(fileData)
+        return
+      }
+
+      formData.append(finalKey, fileData)
+      const res = await uploadFileMutation(formData).unwrap()
+      onUploadComplete?.(res)
+      onClose()
+    } catch (error) {
+      console.error('Upload error:', error)
+      Alert.alert('Upload Failed', 'Something went wrong while uploading.')
+    }
   }
 
   const requestCameraPermission = async () => {
     try {
       setIsCheckingPermission(true)
-      const { status } = await ImagePicker.requestCameraPermissionsAsync()
+      const { status } =
+        await ImagePicker.requestCameraPermissionsAsync()
 
       if (status === 'granted') {
         launchCamera()
-      } else if (status === 'denied') {
+      } else {
         showPermissionAlert(
           'Camera Permission Required',
-          'Please grant camera permission to take photos. You can enable this in Settings.',
+          'Enable camera access from settings.',
           () => Linking.openSettings()
         )
       }
-    } catch (error) {
-      console.error('Camera permission error:', error)
-      showPermissionAlert(
-        'Camera Error',
-        'Unable to access camera. The device may not have a camera or there was an error.'
-      )
     } finally {
       setIsCheckingPermission(false)
     }
@@ -76,23 +141,18 @@ export default function ImagePickerModal({
   const requestGalleryPermission = async () => {
     try {
       setIsCheckingPermission(true)
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync()
 
       if (status === 'granted') {
-        launchImageLibrary()
-      } else if (status === 'denied') {
+        launchGallery()
+      } else {
         showPermissionAlert(
           'Gallery Permission Required',
-          'Please grant gallery permission to select photos. You can enable this in Settings.',
+          'Enable gallery access from settings.',
           () => Linking.openSettings()
         )
       }
-    } catch (error) {
-      console.error('Gallery permission error:', error)
-      showPermissionAlert(
-        'Gallery Error',
-        'Unable to access gallery. Please try again later.'
-      )
     } finally {
       setIsCheckingPermission(false)
     }
@@ -101,50 +161,42 @@ export default function ImagePickerModal({
   const launchCamera = async () => {
     try {
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['images'],
-        quality: 0.8,
+        mediaTypes: ["images", "videos"],
+        quality: 1,
         allowsEditing: true,
       })
 
-      if (!result.canceled && result.assets[0]) {
-        onImageSelected(result.assets[0].uri)
-        onClose()
+      if (!result.canceled && result.assets?.[0]) {
+        uploadFile(result.assets[0].uri)
       }
-    } catch (error) {
-      console.error('Camera launch error:', error)
-      showPermissionAlert(
-        'Camera Error',
-        'Failed to launch camera. The device may not have a camera.'
-      )
+    } catch {
+      showPermissionAlert('Camera Error', 'Failed to open camera.')
     }
   }
 
-  const launchImageLibrary = async () => {
+  const launchGallery = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: 0.8,
+        mediaTypes: ["images", "videos"],
+        quality: 1,
         allowsEditing: true,
+        selectionLimit: 5,
+        videoQuality: 1,
       })
 
-      if (!result.canceled && result.assets[0]) {
-        onImageSelected(result.assets[0].uri)
-        onClose()
+      if (!result.canceled && result.assets?.[0]) {
+        uploadFile(result.assets[0].uri)
       }
-    } catch (error) {
-      console.error('Gallery launch error:', error)
-      showPermissionAlert(
-        'Gallery Error',
-        'Failed to open gallery. Please try again.'
-      )
+    } catch {
+      showPermissionAlert('Gallery Error', 'Failed to open gallery.')
     }
   }
 
   const handleCameraPress = () => {
     if (!hasCamera) {
       showPermissionAlert(
-        'Camera Not Available',
-        'This device does not have a camera or the camera is not available.'
+        'No Camera',
+        'This device does not support camera.'
       )
       return
     }
@@ -154,6 +206,7 @@ export default function ImagePickerModal({
   const handleGalleryPress = () => {
     requestGalleryPermission()
   }
+
   return (
     <Modal
       visible={visible}
@@ -162,8 +215,8 @@ export default function ImagePickerModal({
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={() => { }}>
-          <Text style={styles.title}>Update Profile Picture</Text>
+        <Pressable style={styles.sheet}>
+          <Text style={styles.title}>Upload File</Text>
 
           <ActionButton
             icon="camera-outline"
@@ -179,13 +232,7 @@ export default function ImagePickerModal({
             disabled={isCheckingPermission}
           />
 
-          <Pressable
-            onPress={onClose}
-            style={({ pressed }) => [
-              styles.cancelBtn,
-              pressed && Platform.OS === 'ios' && styles.pressed,
-            ]}
-          >
+          <Pressable style={styles.cancelBtn} onPress={onClose}>
             <Text style={styles.cancelText}>Cancel</Text>
           </Pressable>
         </Pressable>
@@ -199,20 +246,14 @@ const ActionButton = ({
   label,
   onPress,
   disabled = false,
-}: {
-  icon: any
-  label: string
-  onPress: () => void
-  disabled?: boolean
-}) => (
+}: any) => (
   <Pressable
     onPress={onPress}
     disabled={disabled}
-    android_ripple={{ color: '#00000010' }}
     style={({ pressed }) => [
       styles.actionRow,
       disabled && styles.disabledAction,
-      pressed && Platform.OS === 'ios' && !disabled && styles.pressed,
+      pressed && Platform.OS === 'ios' && styles.pressed,
     ]}
   >
     <Ionicons
@@ -220,7 +261,9 @@ const ActionButton = ({
       size={22}
       color={disabled ? '#9CA3AF' : '#D4B785'}
     />
-    <Text style={[styles.actionText, disabled && styles.disabledText]}>{label}</Text>
+    <Text style={[styles.actionText, disabled && styles.disabledText]}>
+      {label}
+    </Text>
   </Pressable>
 )
 
@@ -230,40 +273,29 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'flex-end',
   },
-
   sheet: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
   },
-
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     textAlign: 'center',
     marginBottom: 16,
+    color: '#6B7280',
   },
-
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingVertical: 14,
   },
-
   actionText: {
     fontSize: 16,
     fontWeight: '500',
   },
-
   cancelBtn: {
     marginTop: 12,
     paddingVertical: 14,
@@ -271,21 +303,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#F3F4F6',
   },
-
   cancelText: {
     fontSize: 15,
     color: '#EF4444',
     fontWeight: '600',
   },
-
   pressed: {
     opacity: 0.6,
   },
-
   disabledAction: {
     opacity: 0.5,
   },
-
   disabledText: {
     color: '#9CA3AF',
   },

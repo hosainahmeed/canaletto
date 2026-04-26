@@ -1,9 +1,14 @@
+import { useDeleteInvoiceMutation, useGetInvoidByIdQuery } from '@/app/redux/services/invoiceApis'
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import MessageModal from '@/components/share/MessageModal'
+import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button, { ButtonSize, ButtonType } from '@/components/ui/button'
+import { Invoice } from '@/types'
+import { convertStatus } from '@/utils/convertStatus'
+import { formatDate } from '@/utils/dateUtils'
 import { AlertSquareIcon, Delete02FreeIcons } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react-native'
 import * as FileSystem from 'expo-file-system/legacy'
@@ -11,127 +16,37 @@ import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Dimensions, FlatList, Modal, Platform, Pressable, Share, StyleSheet, Text, ToastAndroid, View } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, FlatList, Modal, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 const { width } = Dimensions.get('window')
 
-type Invoice = {
-  id: string
-  pdfLink: string
-  date: string
-  status: 'pending' | 'paid'
-  invoice_amount: string,
-  due_date: string,
-  payment_date: string
-}
-
-// Mock data - in a real app, this would come from an API based on the ID
-const getInvoiceById = (id: string): Invoice | null => {
-  const allInvoices: Invoice[] = [
-    {
-      id: "1",
-      pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-      date: '2025-10-15',
-      status: 'pending',
-      invoice_amount: '$12,500',
-      due_date: '2025-10-15',
-      payment_date: '20-08-2025'
-    },
-    {
-      id: "13",
-      pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-      date: '2025-10-16',
-      status: 'pending',
-      invoice_amount: '$12,500',
-      due_date: '2025-10-16',
-      payment_date: '20-08-2025'
-    },
-    {
-      id: "123",
-      pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-      date: '2025-10-17',
-      status: 'pending',
-      invoice_amount: '$12,500',
-      due_date: '2025-10-17',
-      payment_date: '20-08-2025'
-    },
-    {
-      id: "1234",
-      pdfLink: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-      date: '2025-10-17',
-      status: 'paid',
-      invoice_amount: '$12,500',
-      due_date: '2025-10-17',
-      payment_date: '20-08-2025'
-    },
-  ]
-
-  return allInvoices.find(invoice => invoice.id === id) || null
-}
-
 export default function InvoiceDetails() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const [isLoading, setIsLoading] = React.useState(true)
+  const { data: invoiceData, isLoading } = useGetInvoidByIdQuery(id as string, { skip: !id })
+  const [deleteInvoice] = useDeleteInvoiceMutation()
   const [downloading, setDownloading] = React.useState(false)
   const [showPdfModal, setShowPdfModal] = React.useState(false)
   const [selectedInvoice, setSelectedInvoice] = React.useState<Invoice | null>(null)
-  const [invoice, setInvoice] = React.useState<Invoice | null>(null)
   const { t } = useTranslation()
   const [isVisible, setIsVisible] = React.useState(false)
-
-  React.useEffect(() => {
-    const loadInvoice = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        const invoiceData = getInvoiceById(id || '')
-        if (invoiceData) {
-          setInvoice(invoiceData)
-        } else {
-          Alert.alert('Error', 'Invoice not found')
-          router.back()
-        }
-      } catch (error) {
-        console.error('Error loading invoice:', error)
-        Alert.alert('Error', 'Failed to load invoice')
-        router.back()
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadInvoice()
-  }, [id, router])
-
-  const handleShare = async () => {
-    if (!invoice) return
-
-    try {
-      await Share.share({
-        message: `Check out this invoice: ${invoice.pdfLink}`,
-        url: invoice.pdfLink,
-      })
-    } catch (error) {
-      console.error('Share failed:', error)
-    }
-  }
+  const toast = useToast()
 
   const handleModalDownload = async () => {
     if (!selectedInvoice) return
 
     try {
       setDownloading(true)
-      const fileName = `invoice-${selectedInvoice.id}.pdf`
+      const fileName = `invoice-${selectedInvoice?.id}.pdf`
 
       const tempDir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory
       if (!tempDir) {
         throw new Error('No writable directory available')
       }
 
-      const tempFileUri = `${tempDir}${selectedInvoice.pdfLink.split('/').pop() || fileName}`
-      const { uri: downloadedUri } = await FileSystem.downloadAsync(selectedInvoice.pdfLink, tempFileUri)
+      const tempFileUri = `${tempDir}${selectedInvoice?.document_url.split('/').pop() || fileName}`
+      const { uri: downloadedUri } = await FileSystem.downloadAsync(selectedInvoice?.document_url, tempFileUri)
 
       if (Platform.OS === 'android') {
         const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
@@ -198,7 +113,7 @@ export default function InvoiceDetails() {
     )
   }
 
-  if (!invoice) {
+  if (!invoiceData?.data) {
     return (
       <SafeAreaViewWithSpacing>
         <View style={styles.errorContainer}>
@@ -210,25 +125,44 @@ export default function InvoiceDetails() {
   const cardData = [
     {
       title: "Invoice Date",
-      value: invoice?.date
+      value: formatDate(invoiceData?.data?.invoiceDate)
     },
     {
       title: "Due Date",
-      value: invoice?.due_date
+      value: formatDate(invoiceData?.data?.dueDate)
     },
     {
       title: "Invoice Amount",
-      value: invoice?.invoice_amount
+      value: invoiceData?.data?.amount
     },
     {
       title: "Payment Status",
-      value: invoice?.status
+      value: convertStatus(invoiceData?.data?.status)
     },
     {
       title: "Payment Date",
-      value: invoice?.payment_date
+      value: formatDate(invoiceData?.data?.paymentDate)
     }
   ]
+
+  const handleDeleteInvoice = async () => {
+    try {
+      const result = await deleteInvoice(invoiceData?.data?.id).unwrap()
+      if (!result?.success) {
+        throw new Error(result?.message || 'Failed to delete invoice')
+      }
+      toast.success(result?.message || 'Invoice deleted successfully')
+      setIsVisible(false)
+      router.back()
+    } catch (error: any) {
+      console.error('Delete invoice failed', error)
+      const errorMessage = error?.data?.message || error?.message || 'Failed to delete invoice'
+      toast.error(errorMessage)
+      setIsVisible(false)
+    } finally {
+      setIsVisible(false)
+    }
+  }
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
@@ -264,25 +198,25 @@ export default function InvoiceDetails() {
                   <View style={styles.invoiceLeft}>
                     <Image source={IMAGE.pdfIcon} style={styles.pdfIcon} />
                     <View>
-                      <Text style={styles.invoiceTitle}>
-                        Invoice {invoice?.id}.pdf
+                      <Text numberOfLines={1} style={styles.invoiceTitle}>
+                        Invoice {invoiceData?.data?.id?.slice(-4)}.pdf
                       </Text>
-                      <Text style={styles.invoiceDate}>
-                        Due Date: {invoice?.date}
+                      <Text numberOfLines={1} style={styles.invoiceDate}>
+                        Due Date: {formatDate(invoiceData?.data?.invoiceDate)}
                       </Text>
                       <Text
                         style={[
                           styles.invoiceStatus,
-                          { color: invoice?.status === 'paid' ? '#22C55E' : '#F59E0B' },
+                          { color: invoiceData?.data?.status === 'paid' ? '#22C55E' : '#F59E0B' },
                         ]}
                       >
-                        {invoice?.status?.toUpperCase()}
+                        {invoiceData?.data?.status?.toUpperCase()}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.invoiceActions}>
-                    <Pressable onPress={() => handleViewInvoice(invoice)}>
+                    <Pressable onPress={() => handleViewInvoice(invoiceData?.data)}>
                       <Image source={IMAGE.eye} style={styles.actionIcon} />
                     </Pressable>
                     <Pressable onPress={() => handleModalDownload()}>
@@ -314,9 +248,8 @@ export default function InvoiceDetails() {
           visible={isVisible}
           onClose={() => setIsVisible(false)}
           onConfirm={() => {
-            const message = Platform.OS === "android" ? 'Invoice deleted successfully' : 'Invoice deleted successfully.';
-            ToastAndroid.show(message, ToastAndroid.SHORT);
-            setIsVisible(false)
+            handleDeleteInvoice()
+
           }}
           actionType='danger'
           message={{
@@ -357,7 +290,7 @@ export default function InvoiceDetails() {
 
             {selectedInvoice && (
               <WebView
-                source={{ uri: selectedInvoice.pdfLink }}
+                source={{ uri: selectedInvoice?.document_url }}
                 style={styles.modalWebView}
                 startInLoadingState={true}
                 renderLoading={() => (

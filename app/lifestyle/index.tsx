@@ -29,7 +29,7 @@ export default function Lifestyle() {
       iconType='brand'
       color={['#B08D5980', '#FAFAFA', '#FAFAFA']}
       title={item.title}
-      subTitle={item.subTitle}
+      subTitle={t('page_title.lifestyle')}
       onPress={() => router.push(`/lifestyle/lifestyle-detail/${item.id}` as any)}
     />
   )

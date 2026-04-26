@@ -139,6 +139,7 @@ const MapComponent = ({
 
 export default function PropertyByID() {
   const { id } = useLocalSearchParams();
+  console.log(id)
   const router = useRouter()
   const { t } = useTranslation()
   const [showLargerMap, setShowLargerMap] = useState(false)
