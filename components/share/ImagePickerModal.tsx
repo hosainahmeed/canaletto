@@ -18,6 +18,7 @@ type Props = {
   onUploadComplete?: (data: any) => void
   keyName?: string
   optimasticUpload?: boolean
+  showLocalPreview?: (fileData: any) => void
 }
 
 export default function ImagePickerModal({
@@ -26,6 +27,7 @@ export default function ImagePickerModal({
   onUploadComplete,
   keyName,
   optimasticUpload = false,
+  showLocalPreview
 }: Props) {
   const [hasCamera, setHasCamera] = useState(true)
   const [isCheckingPermission, setIsCheckingPermission] = useState(false)
@@ -102,7 +104,8 @@ export default function ImagePickerModal({
         name: `file.${uri.split('.').pop()}`,
         type: getMimeType(uri),
       } as any
-
+      showLocalPreview?.(uri)
+      onClose()
       if (!optimasticUpload) {
         onUploadComplete?.(fileData)
         return
@@ -111,7 +114,7 @@ export default function ImagePickerModal({
       formData.append(finalKey, fileData)
       const res = await uploadFileMutation(formData).unwrap()
       onUploadComplete?.(res)
-      onClose()
+      // onClose()
     } catch (error) {
       console.error('Upload error:', error)
       Alert.alert('Upload Failed', 'Something went wrong while uploading.')

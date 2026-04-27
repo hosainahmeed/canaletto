@@ -136,7 +136,13 @@
     "beach_waterfront": "Beach & Waterfront",
     "dining_cafes": "Dining & Cafés",
     "shopping_entertainment": "Shopping & Entertainment",
-    "city_guides": "City Guides"
+    "city_guides": "City Guides",
+    "market_news": "Market News",
+    "property_price_updates": "Property Price Updates",
+    "regulatory_legal_changes": "Regulatory & Legal Changes",
+    "investment_trends_data": "Investment Trends & Data",
+    "economic_updates": "Economic Updates",
+    "all": "All"
   },
   "help_section": {
     "title": "Need help or have a question?",

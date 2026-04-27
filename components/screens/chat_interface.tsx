@@ -30,13 +30,15 @@ interface MessageItemProps {
   senderProfileImage: string,
   isSeen: boolean,
   seenAt: null | Date,
-  createdAt: Date
+  createdAt: Date,
+  isOptimistic?: boolean
 }
 
 const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
   const isMine = message?.senderRole?.toUpperCase() === 'CLIENT'
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(8)).current
+  const isOptimistic = message.isOptimistic || false
 
   useEffect(() => {
     Animated.parallel([
@@ -46,7 +48,6 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
   }, [])
 
   const time = message?.createdAt ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
-  const isOptimistic = false
 
   const statusIcon = () => {
     if (!isMine) return null
@@ -56,7 +57,6 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
     }
     return <Ionicons name="checkmark" size={12} color="#FFFFFF88" style={styles.statusIcon} />
   }
-
   return (
     <Animated.View
       style={[
@@ -72,12 +72,15 @@ const MessageItem = React.memo(({ message }: { message: MessageItemProps }) => {
           isOptimistic && styles.optimisticBubble,
         ]}
       >
-        {message.attachments && message.attachments.length > 0 && (
-          <RNImage
-            source={{ uri: message?.attachments[0] }}
-            style={[styles.messageImage, isOptimistic && { opacity: 0.7 }]}
-            resizeMode="cover"
-          />
+        {message?.attachments && message?.attachments?.length > 0 && (
+          message?.attachments?.map((item) => (
+            <RNImage
+              key={item}
+              source={{ uri: item }}
+              style={[styles.messageImage, isOptimistic && { opacity: 1 }]}
+              resizeMode="cover"
+            />
+          ))
         )}
         {message.message ? (
           <Text style={[styles.text, isMine && styles.myText]}>{message.message}</Text>
@@ -98,17 +101,31 @@ export default function ChatInterface() {
   const { data: chatDataFromApi, isLoading, refetch } = useSupportMessageQuery({ id: id as string }, { skip: !id })
   const { data: profileData } = useGetMyProfileQuery(undefined)
   const [message, setMessage] = useState('')
+  const [attachments, setAttachments] = useState<string[]>([])
   const [inputHeight, setInputHeight] = useState(40)
-  const { sendMessage, onNewMessage } = useChatContext()
+  const { sendMessage, onNewMessage, joinTicketRoom, isConnected } = useChatContext()
   const [imageModalVisible, setImageModalVisible] = useState(false)
+  const [localPreviewUri, setLocalPreviewUri] = useState<string[]>([])
   const [imageUri, setImageUri] = useState<string | null>(null)
   const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [hasFetched, setHasFetched] = useState(false)
 
   useEffect(() => {
-    if (id) {
+    if (id && !hasFetched) {
       refetch()
+      setHasFetched(true)
     }
-  }, [id])
+  }, [id, hasFetched])
+
+  useEffect(() => {
+    console.log('Socket state check - ID:', id, 'IsConnected:', isConnected)
+    if (id && isConnected) {
+      console.log('Joining ticket room:', id)
+      joinTicketRoom(id as string)
+    } else if (id && !isConnected) {
+      console.log('Cannot join room - socket not connected yet')
+    }
+  }, [id, isConnected, joinTicketRoom])
 
 
   useEffect(() => {
@@ -125,7 +142,11 @@ export default function ChatInterface() {
 
   useEffect(() => {
     const handleNewMessage = (message: ChatMessage) => {
-      setChatMessages(prev => [message, ...prev])
+      setChatMessages(prev => {
+        // Remove optimistic message if it exists and add the real message
+        const filtered = prev.filter(msg => !msg.isOptimistic || msg.message !== message.message)
+        return [message, ...filtered]
+      })
       listRef.current?.scrollToOffset({ offset: 0, animated: true })
     }
 
@@ -138,25 +159,68 @@ export default function ChatInterface() {
 
   const sendMessageHandler = useCallback(async () => {
     if (!message.trim() && !imageUri) return
+
+    // Create optimistic message
+    const optimisticMessage = {
+      id: `temp-${Date.now()}`,
+      ticketId: id as string,
+      senderId: profileData?.data?.id || '',
+      senderRole: 'CLIENT',
+      message: message.trim(),
+      attachments: localPreviewUri,
+      senderName: profileData?.data?.firstName || 'You',
+      senderProfileImage: profileData?.data?.profileImage || '',
+      isSeen: false,
+      seenAt: null,
+      createdAt: new Date(),
+      isOptimistic: true,
+    }
+
+    // Add optimistic message to local state immediately
+    setChatMessages(prev => [optimisticMessage, ...prev])
+
+    // Clear input
     setMessage('')
     setInputHeight(40)
     setImageUri(null)
+    setLocalPreviewUri([])
+
+    // Scroll to top to show the new message
+    setTimeout(() => {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true })
+    }, 100)
 
     try {
-      await sendMessage(id as string, message.trim(), imageUri ? [imageUri] : [])
-      setMessage('')
-      setInputHeight(40)
-      setImageUri(null)
+      // If there are local previews, wait for upload to complete
+      if (localPreviewUri.length > 0) {
+        // The upload is happening in the background, wait for it to complete
+        // The onUploadComplete callback will update the attachments
+        const checkUpload = () => {
+          return new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Upload timeout'))
+            }, 30000) // 30 second timeout
+
+            const interval = setInterval(() => {
+              if (attachments.length > 0) {
+                clearTimeout(timeout)
+                clearInterval(interval)
+                resolve()
+              }
+            }, 500)
+          })
+        }
+
+        await checkUpload()
+      }
+
+      await sendMessage(id as string, message.trim(), attachments)
     } catch (error) {
       console.error('Failed to send message:', error)
-
+      // Remove optimistic message on error
+      setChatMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id))
     }
-  }, [message, imageUri, id, profileData, sendMessage])
-
-  const handleImageSelected = (uri: string) => {
-    setImageUri(uri)
-    setImageModalVisible(false)
-  }
+  }, [message, attachments, id, profileData, sendMessage])
 
 
 
@@ -190,16 +254,20 @@ export default function ChatInterface() {
       </View>
 
       <View style={styles.inputWrapper}>
-        {imageUri && (
+        {localPreviewUri && (
           <View style={styles.imagePreviewContainer}>
-            <RNImage source={{ uri: imageUri }} style={styles.imagePreview} />
-            <TouchableOpacity
+            {
+              localPreviewUri?.map((attachment, index) => (
+                <RNImage source={{ uri: attachment }} style={styles.imagePreview} key={index} />
+              ))
+            }
+            {/* <TouchableOpacity
               style={styles.removeImageButton}
-              onPress={() => setImageUri(null)}
+              onPress={() => setAttachments([])}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Ionicons name="close-circle" size={22} color="#EF4444" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         )}
 
@@ -237,10 +305,12 @@ export default function ChatInterface() {
         visible={imageModalVisible}
         onClose={() => setImageModalVisible(false)}
         onUploadComplete={(data) => {
-          // Handle the uploaded file data here
-          console.log('Uploaded file data:', data)
+          setAttachments(data?.data?.images)
         }}
         optimasticUpload={true}
+        showLocalPreview={(fileUri) => {
+          setLocalPreviewUri([fileUri])
+        }}
       />
     </View>
   )
@@ -257,7 +327,7 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: '78%', padding: 10, borderRadius: 18 },
   myBubble: { backgroundColor: '#D4B785', borderBottomRightRadius: 4 },
   otherBubble: { backgroundColor: '#EFF0F2', borderBottomLeftRadius: 4 },
-  optimisticBubble: { opacity: 0.75 },
+  optimisticBubble: { opacity: 1 },
   failedBubble: { backgroundColor: '#FEE2E2', borderWidth: 1, borderColor: '#FCA5A5' },
   typingBubble: {
     flexDirection: 'row',

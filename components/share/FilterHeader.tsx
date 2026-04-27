@@ -7,7 +7,7 @@ import FilterModal from './FilterModal'
 const { width: screenWidth } = Dimensions.get('window')
 
 
-export default function FilterHeader({ filterOptions }: { filterOptions: { label: string; value: string }[] }) {
+export default function FilterHeader({ filterOptions, onSearch, setSelected }: { filterOptions: { label: string; value: string }[]; onSearch?: (text: string) => void; setSelected?: (value: string) => void }) {
   const { t } = useTranslation()
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [isVisable, setIsVisable] = useState<boolean>(false)
@@ -17,6 +17,7 @@ export default function FilterHeader({ filterOptions }: { filterOptions: { label
         style={styles.input}
         placeholderTextColor="#9CA3AF"
         placeholder={t('placeholder.search')}
+        onChangeText={(text) => onSearch?.(text)}
       />
       <Pressable style={styles.filterIconContainer} onPress={() => setIsVisable(true)}>
         <Image source={IMAGE.filter_icon} style={styles.filterIcon} />
@@ -26,7 +27,10 @@ export default function FilterHeader({ filterOptions }: { filterOptions: { label
         visible={isVisable}
         onClose={() => setIsVisable(false)}
         selectedValue={selectedValue}
-        setSelectedValue={(value) => setSelectedValue(value)}
+        setSelectedValue={(value) => {
+          setSelectedValue(value)
+          setSelected?.(value)
+        }}
       />
     </View>
   )

@@ -24,12 +24,9 @@ export default function PaymentStaus() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
   const [activeButton, setActiveButton] = React.useState<'Payment Invoices' | 'Payment Plan'>('Payment Invoices')
-
   const { data: invoices, isLoading: isLoadingInvoices, refetch: refetchInvoices } = useGetInvoiceByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Invoices' })
   console.log('invoices', invoices)
   const { data: paymentPlans, isLoading: isLoadingPaymentPlans, refetch: refetchPaymentPlans } = useGetPaymentPlansByPropertyIdQuery(id as string, { skip: !id || activeButton !== 'Payment Plan' })
-
-  // console.log('invoices', invoices)
 
   const { downloadingKey, downloadFile } = useFileDownload()
   const TABS = ['Payment Invoices', 'Payment Plan'] as const

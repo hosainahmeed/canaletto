@@ -136,7 +136,13 @@
     "beach_waterfront": "Strand & Wasserfront",
     "dining_cafes": "Essen & Cafés",
     "shopping_entertainment": "Einkaufen & Unterhaltung",
-    "city_guides": "Stadtführer"
+    "city_guides": "Stadtführer",
+    "market_news": "Marktaktualisierungen",
+    "property_price_updates": "Immobilienpreisaktualisierungen",
+    "regulatory_legal_changes": "Rechtliche Änderungen",
+    "investment_trends_data": "Investment-Trends & Daten",
+    "economic_updates": "Wirtschaftsaktualisierungen",
+    "all": "Alle"
   },
   "help_section": {
     "title": "Benötigen Sie Hilfe oder haben Sie eine Frage?",

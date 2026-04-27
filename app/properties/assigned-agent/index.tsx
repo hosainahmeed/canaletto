@@ -32,7 +32,7 @@ export default function AssignedAgent() {
   }
   const userData = {
     name: propertyData?.data?.manager?.name || 'Roberts Junior',
-    profile_image: propertyData?.data?.manager?.profile_image || 'https://png.pngtree.com/png-clipart/20241125/original/pngtree-cartoon-user-avatar-vector-png-image_17295195.png',
+    profile_image: propertyData?.data?.manager?.profile_image || '',
     phone: propertyData?.data?.manager?.phone || "+ 971 50 XXX XXXX",
     email: propertyData?.data?.manager?.email || "robert @canaletto.com",
   }
@@ -106,7 +106,11 @@ export default function AssignedAgent() {
               style={{ flex: 1, borderRadius: 12 }}
               icon={<Ionicons name="chatbubbles-outline" size={20} color="#fff" />}
               type={ButtonType.PRIMARY}
-              onPress={() => Linking.openURL(`https://mail.google.com/mail/?view=cm&fs=1&to=${userData?.email}`)}
+              // onPress={() => Linking.openURL(`https://mail.google.com/mail/?view=cm&fs=1&to=${userData?.email}`)}
+              // title='Message'
+              onPress={() => {
+                router.push('/(tabs)/Support')
+              }}
               title='Message'
             />
           </View>
@@ -130,9 +134,9 @@ const ProfileHeader = ({ user }: any) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
-        <Image source={{ uri: user.profile_image }} style={styles.avatar} />
+        {user?.profile_image ? <Image source={{ uri: user?.profile_image }} style={styles.avatar} /> : <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#B08D59' }}>{user?.name?.slice(0, 2).toUpperCase()}</Text>}
       </View>
-      <Text style={styles.userName}>{user.name}</Text>
+      <Text style={styles.userName}>{user?.name}</Text>
     </View>
   )
 }

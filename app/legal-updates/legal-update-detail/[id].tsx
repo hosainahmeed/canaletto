@@ -1,31 +1,32 @@
+import { useGetLegalUpdateByIdQuery } from '@/app/redux/services/legalUpdateApis'
 import { IMAGE } from '@/assets/images/image.index'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import InsightsDownSection from '@/components/share/InsightsDownSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { LegalUpdateType } from '@/types/legalUpdateType'
+import { formatDate } from '@/utils/dateUtils'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import React, { useRef, useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
+import RenderHTML from 'react-native-render-html'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
-export default function LegalUpdateDetail({ id }: { id: string }) {
+export default function LegalUpdateDetail() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { id } = useLocalSearchParams() as { id: string }
+  const { data: legalUpdate, isLoading: isLegalUpdateLoading } = useGetLegalUpdateByIdQuery(id, { skip: !id })
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
 
-  const propertyData = {
-    name: 'Dubai Property Market Shows Strong Q1 Growth',
-    image: [
-      'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg',
-      'https://dubaiproperties.org.in/wp-content/uploads/2023/01/luxury-property-in-dubai-scaled.jpg',
-    ],
-    description: "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum",
+  const legalUpdateData: LegalUpdateType = useMemo(() => legalUpdate?.data, [legalUpdate])
+
+  if (isLegalUpdateLoading) {
+    return <ActivityIndicator size="large" />
   }
-
-
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x
@@ -64,7 +65,7 @@ export default function LegalUpdateDetail({ id }: { id: string }) {
         <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData.image}
+            data={legalUpdateData?.images}
             renderItem={renderImageItem}
             keyExtractor={(item, index) => `image-${index}`}
             horizontal
@@ -78,9 +79,9 @@ export default function LegalUpdateDetail({ id }: { id: string }) {
           />
 
           {/* Pagination Dots */}
-          {propertyData.image.length > 1 && (
+          {legalUpdateData?.images?.length > 1 && (
             <View style={styles.paginationContainer}>
-              {propertyData.image.map((_, index) => (
+              {legalUpdateData?.images?.map((_, index) => (
                 <View
                   key={`dot-${index}`}
                   style={[
@@ -95,12 +96,12 @@ export default function LegalUpdateDetail({ id }: { id: string }) {
 
         {/* Title */}
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.title}>{propertyData.name}</Text>
+          <Text numberOfLines={2} style={styles.title}>{legalUpdateData?.title}</Text>
         </View>
         <View style={styles.descriptionWrapper}>
-          <Text numberOfLines={2} style={styles.descriptionStyle}>{propertyData.description}</Text>
+          <RenderHTML source={{ html: legalUpdateData?.description }} />
         </View>
-        <InsightsDownSection icon={IMAGE.legal_icon} title="Legal Updates" description="Posted on 14 January 2028" onPress={() => { }} titleColor="#4ADE80" />
+        <InsightsDownSection icon={IMAGE.legal_icon} title="Legal Updates" description={`Posted on ${formatDate(legalUpdateData?.createdAt)}`} onPress={() => { }} titleColor="#4ADE80" />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>

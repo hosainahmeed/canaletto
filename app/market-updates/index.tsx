@@ -1,90 +1,61 @@
+import { IMAGE } from '@/assets/images/image.index'
 import GradientCard from '@/components/cards/GradientCard'
 import SafeAreaViewWithSpacing, { SafeAreaEdge } from '@/components/safe-area/SafeAreaViewWithSpacing'
+import EmptyCard from '@/components/share/EmptyCard'
 import FilterHeader from '@/components/share/FilterHeader'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { MarketUpdateType } from '@/types/marketUpdateType'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet, Text, View } from 'react-native'
-
-const DATA = [
-  {
-    id: '1',
-    title: 'Dubai Housing Market Rebounds to Q1 Growth',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '2',
-    title: 'UAE Property Market Expects Strong Q2 Growth',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '3',
-    title: 'Dubai Property Market Sees Strong Q3 Performance',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '4',
-    title: 'Dubai Property Prices Slip in June',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '5',
-    title: 'Dubai Property Market to Rebound in Q4',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '6',
-    title: 'UAE Property Market Remains Resilient in Q1',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '7',
-    title: 'Dubai Property Market Gains Momentum in Q2',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '8',
-    title: 'Dubai Property Market Hits Record Highs in Q3',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '9',
-    title: 'Dubai Property Prices Slip in Q4',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '10',
-    title: 'UAE Property Market Remains Strong in Q1 2023',
-    subTitle: 'Latest Insights',
-  },
-]
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
+import { useGetMarketUpdateQuery } from '../redux/services/marketUpdateApis'
 
 export default function MarketUpdates() {
   const router = useRouter()
   const { t } = useTranslation()
-  const renderItem = ({ item }: any) => (
+  const [searchText, setSearchText] = useState('')
+  const [selectedFilter, setSelectedFilter] = useState('')
+  const [limit, setLimit] = useState(8);
+  const { data: marketUpdate, isLoading, refetch } = useGetMarketUpdateQuery({ searchTerm: searchText, type: selectedFilter, limit })
+
+  const marketUpdateData: MarketUpdateType[] = useMemo(() => marketUpdate?.data || [], [marketUpdate])
+
+
+  const renderItem = ({ item }: { item: MarketUpdateType }) => (
     <GradientCard
       iconType='blue'
       color={['#3B82F680', '#FAFAFA', '#FAFAFA']}
-      title={item.title}
-      subTitle={item.subTitle}
-      onPress={() => router.push(`/market-updates/market-update-detail/${item.id}`)}
+      title={item?.title}
+      subTitle={t('page_title.latest_insights')}
+      onPress={() => router.push({
+        pathname: '/market-updates/market-update-detail/[id]',
+        params: { id: item?.id }
+      })}
     />
   )
 
   const renderHeader = () => (
-    <FilterHeader filterOptions={[
-      { label: t('filter.last_24_hours'), value: '1d' },
-      { label: t('filter.last_3_days'), value: '3d' },
-      { label: t('filter.last_week'), value: '1w' },
-      { label: t('filter.last_month'), value: '1m' },
-    ]} />
+    <FilterHeader
+      onSearch={(text) => setSearchText(text)}
+      setSelected={(value) => setSelectedFilter(value)}
+      filterOptions={[
+        { label: t('filter.market_news'), value: 'MARKET_NEWS' },
+        { label: t('filter.property_price_updates'), value: 'PROPERTY_PRICE_UPDATES' },
+        { label: t('filter.regulatory_legal_changes'), value: 'REGULATORY_AND_LEGAL_CHANGES' },
+        { label: t('filter.investment_trends_data'), value: 'INVESTMENT_TRENDS_AND_DATA' },
+        { label: t('filter.economic_updates'), value: 'ECONOMIC_UPDATES' },
+        { label: t('filter.all'), value: '' },
+      ]} />
   )
 
   const renderEmpty = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>{t('message.no_data_found')}</Text>
+      <EmptyCard
+        title={t('message.no_data_found')}
+        icon={IMAGE.empty}
+        color='#B0B0B0'
+      />
     </View>
   )
 
@@ -101,19 +72,21 @@ export default function MarketUpdates() {
         }
       />
       <FlatList
-        data={DATA}
+        data={marketUpdateData}
         renderItem={renderItem}
         ListHeaderComponent={renderHeader}
         ListHeaderComponentStyle={{ marginBottom: 12 }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item?.id || ''}
         showsVerticalScrollIndicator={false}
         bounces
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={renderEmpty}
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         windowSize={7}
+        onEndReached={() => setLimit(limit + 8)}
       />
     </SafeAreaViewWithSpacing>
   )

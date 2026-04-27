@@ -55,14 +55,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       });
 
       newSocket.on('connect', () => {
+        console.log('Socket connected successfully');
         setIsConnected(true);
       });
 
       newSocket.on('disconnect', () => {
+        console.log('Socket disconnected');
         setIsConnected(false);
       });
 
       newSocket.on('connect_error', (error: any) => {
+        console.log('Socket connection error:', error);
         setIsConnected(false);
       });
 
@@ -73,8 +76,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   };
 
   const joinTicketRoom = (ticketId: string) => {
+    console.log('joinTicketRoom called:', ticketId, 'socket exists:', !!socket, 'isConnected:', isConnected);
     if (socket && isConnected) {
+      console.log('Emitting join-ticket event for ticket:', ticketId);
       socket.emit('join-ticket', { ticketId });
+
+      // Listen for acknowledgment
+      socket.once('join-ticket-ack', (response) => {
+        console.log('Join ticket acknowledgment:', response);
+      });
+    } else {
+      console.log('Cannot join room - socket not connected');
     }
   };
 
@@ -91,10 +103,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   };
 
   const sendMessage = async (ticketId: string, message: string, attachments?: string[]): Promise<void> => {
+
     if (!socket) {
       throw new Error('Socket not initialized');
     }
-
     if (!isConnected) {
       throw new Error('Socket not connected');
     }
@@ -110,11 +122,23 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const onNewMessage = (callback: (message: any) => void) => {
     if (socket) {
-      socket.on('receive-message', callback);
+      console.log('Setting up receive-message listener');
+      socket.on('receive-message', (message) => {
+        console.log('Socket received message:', message);
+        callback(message);
+      });
+
+      // Also listen for all socket events for debugging
+      socket.onAny((eventName, ...args) => {
+        console.log('Socket event received:', eventName, args);
+      });
+
       return () => {
+        console.log('Removing receive-message listener');
         socket.off('receive-message', callback);
       };
     }
+    console.log('Socket not available for message listener');
     return () => { };
   };
 

@@ -28,13 +28,7 @@ export default function Support() {
   const [pageSize, setPageSize] = useState(8)
   const { data: myTickets, isLoading: isMyTicketsLoading, refetch, isFetching } = useMyTicketsQuery({ limit: pageSize })
   useEffect(() => {
-    if (onTicketUpdated) {
-      onTicketUpdated(() => {
-        if (refetch) {
-          refetch()
-        }
-      })
-    }
+    refetch()
   }, [onTicketUpdated])
 
   const handlerCreateTicketForSupport = async () => {
