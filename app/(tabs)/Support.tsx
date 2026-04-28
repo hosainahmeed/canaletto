@@ -1,6 +1,7 @@
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import EmptyCard from '@/components/share/EmptyCard'
 import SectionHeader from '@/components/share/SectionHeader'
 import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
@@ -24,12 +25,13 @@ export default function Support() {
   const [issue, setIssue] = useState<string>("")
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const toast = useToast()
-  const { isConnected, joinTicketRoom, onTicketUpdated } = useChatContext()
+  const { isConnected, joinTicketRoom, onTicketUpdated, ticketData, setTickData } = useChatContext()
   const [pageSize, setPageSize] = useState(8)
   const { data: myTickets, isLoading: isMyTicketsLoading, refetch, isFetching } = useMyTicketsQuery({ limit: pageSize })
+
   useEffect(() => {
-    refetch()
-  }, [onTicketUpdated])
+    setTickData(myTickets?.data?.data || [])
+  }, [])
 
   const handlerCreateTicketForSupport = async () => {
     if (!issue.trim()) {
@@ -114,7 +116,7 @@ export default function Support() {
             </View>
           </>
         )}
-        data={myTickets?.data?.data as MyTicket[]}
+        data={ticketData as MyTicket[]}
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.8}
@@ -150,9 +152,7 @@ export default function Support() {
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-            <Text style={styles.subtitle}>No support tickets found</Text>
-          </View>
+          <EmptyCard color='#cdcdcd' title='No support tickets found.' />
         }
         onEndReached={() => {
           if (myTickets?.data?.meta?.total && myTickets?.data?.meta?.total > pageSize) {

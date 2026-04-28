@@ -3,46 +3,50 @@ import SafeAreaViewWithSpacing, { SafeAreaEdge } from '@/components/safe-area/Sa
 import EmptyCard from '@/components/share/EmptyCard'
 import FilterHeader from '@/components/share/FilterHeader'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { lifestyleTypes } from '@/types/lifestyleTypes'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
+import { useGetLifestyleQuery } from '../redux/services/lifestyleApis'
 
-const DATA: any[] = [
-  {
-    id: '1',
-    title: 'Dubai Housing Market Rebounds to Q1 Growth',
-    subTitle: 'Latest Insights',
-  },
-  {
-    id: '2',
-    title: 'UAE Property Market Expects Strong Q2 Growth',
-    subTitle: 'Latest Insights',
-  },
-]
 
 export default function Lifestyle() {
   const router = useRouter()
   const { t } = useTranslation()
-  const renderItem = ({ item }: any) => (
+  const [selectedFilter, setSelectedFilter] = React.useState<string>('')
+  const [searchTerm, setSearchTerm] = React.useState<string>('')
+  const { data: lifestyleData, isLoading, refetch } = useGetLifestyleQuery({ type: selectedFilter, searchTerm })
+  const lifestyleItems: lifestyleTypes[] = useMemo(() => lifestyleData?.data || [], [lifestyleData])
+
+  const renderItem = ({ item }: { item: lifestyleTypes }) => (
     <GradientCard
       iconType='brand'
       color={['#B08D5980', '#FAFAFA', '#FAFAFA']}
-      title={item.title}
+      title={item?.title}
       subTitle={t('page_title.lifestyle')}
-      onPress={() => router.push(`/lifestyle/lifestyle-detail/${item.id}` as any)}
+      onPress={() => router.push(
+        {
+          pathname: '/lifestyle/lifestyle-detail/[id]',
+          params: { id: item?.id } as { id: string }
+        }
+      )}
     />
   )
 
   const renderHeader = () => (
-    <FilterHeader filterOptions={[
-      { label: t('filter.hotels'), value: 'hotels' },
-      { label: t('filter.resorts'), value: 'resorts' },
-      { label: t('filter.beach_waterfront'), value: 'beach' },
-      { label: t('filter.dining_cafes'), value: 'dining' },
-      { label: t('filter.shopping_entertainment'), value: 'shopping' },
-      { label: t('filter.city_guides'), value: 'guides' },
-    ]} />
+    <FilterHeader
+      setSelected={(value) => setSelectedFilter(value)}
+      onSearch={(v) => setSearchTerm(v)}
+      filterOptions={[
+        { label: t('filter.hotels'), value: 'HOTELS' },
+        { label: t('filter.resorts'), value: 'RESORTS' },
+        { label: t('filter.beach_waterfront'), value: 'BEACH_AND_WATERFRONT' },
+        { label: t('filter.dining_cafes'), value: 'DINING_AND_CAFES' },
+        { label: t('filter.shopping_entertainment'), value: 'SHOPPING_AND_ENTERTAINMENT' },
+        { label: t('filter.city_guides'), value: 'CITY_GUIDES' },
+        { label: t('filter.all'), value: '' },
+      ]} />
   )
 
   return (
@@ -57,11 +61,11 @@ export default function Lifestyle() {
         }
       />
       <FlatList
-        data={DATA}
+        data={lifestyleItems}
         renderItem={renderItem}
         ListHeaderComponent={renderHeader}
         ListHeaderComponentStyle={{ marginBottom: 12 }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item?.id}
         showsVerticalScrollIndicator={false}
         bounces
         contentContainerStyle={styles.listContent}
@@ -70,6 +74,7 @@ export default function Lifestyle() {
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         windowSize={7}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => refetch()} />}
       />
     </SafeAreaViewWithSpacing>
   )

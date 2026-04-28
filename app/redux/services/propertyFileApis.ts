@@ -10,7 +10,7 @@ const propertyFileApis = baseApis.injectEndpoints({
       }),
       providesTags: ["propertyFile"]
     }),
-    grtSinglePropertyFile: builder.query({
+    getSinglePropertyFile: builder.query({
       query: (id: string) => ({
         url: `/property-file/get-single/${id}`,
         method: 'GET',
@@ -20,6 +20,6 @@ const propertyFileApis = baseApis.injectEndpoints({
   })
 })
 
-export const { useGetMyPropertyFilesQuery, useLazyGrtSinglePropertyFileQuery } = propertyFileApis
+export const { useGetMyPropertyFilesQuery, useGetSinglePropertyFileQuery } = propertyFileApis
 
 export default propertyFileApis

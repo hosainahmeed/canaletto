@@ -1,28 +1,32 @@
+import { useGetSinglePropertyImagesQuery } from '@/app/redux/services/siteUpdateApis'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { IconSymbol } from '@/components/ui/icon-symbol'
+import { SiteUpdateType } from '@/types/siteUpdateType'
+import { formatDate } from '@/utils/dateUtils'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
-import { Dimensions, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useMemo, useState } from 'react'
+import { Dimensions, FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
 const { width } = Dimensions.get('window')
 
-const imageCategories = [
-  { id: '1', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '2', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '3', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '4', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '5', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '6', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '7', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-  { id: '8', image: 'https://5.imimg.com/data5/SELLER/Default/2024/10/460058113/FT/OP/CN/8782269/tiles-work-service.jpg' },
-]
 
 export default function ConstructionImages() {
   const router = useRouter()
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const { id } = useLocalSearchParams() as { id: string }
+  const { data: imagesData, isLoading: imagesLoading, refetch } = useGetSinglePropertyImagesQuery(id, { skip: !id })
+
+  const siteUpdateData: SiteUpdateType | null = useMemo(() => imagesData?.data || null, [imagesData])
+  const images = useMemo(() => {
+    if (siteUpdateData?.image) {
+      return [{ id: siteUpdateData.id, image: siteUpdateData.image }]
+    }
+    return []
+  }, [siteUpdateData])
+
 
   const openImageModal = (index: number) => {
     setSelectedImageIndex(index)
@@ -33,18 +37,17 @@ export default function ConstructionImages() {
     setModalVisible(false)
   }
 
-  const renderGridItem = ({ item, index }: { item: typeof imageCategories[0]; index: number }) => (
+  const renderGridItem = useCallback(({ item, index }: { item: { id: string; image: string }; index: number }) => (
     <Pressable style={styles.imageContainer} onPress={() => openImageModal(index)}>
       <Image source={{ uri: item.image }} style={styles.image} />
-      {/* <View style={styles.overlay} /> */}
     </Pressable>
-  )
+  ), [])
 
-  const renderModalItem = ({ item }: { item: typeof imageCategories[0] }) => (
+  const renderModalItem = useCallback(({ item }: { item: { id: string; image: string } }) => (
     <View style={styles.modalImageContainer}>
       <Image source={{ uri: item.image }} style={styles.modalImage} />
     </View>
-  )
+  ), [])
 
   return (
     <SafeAreaViewWithSpacing>
@@ -58,14 +61,37 @@ export default function ConstructionImages() {
           else router.replace('/')
         }}
       />
+
+      {/* Site Update Details */}
+      {siteUpdateData && (
+        <View style={styles.detailsContainer}>
+          <Text style={styles.detailsTitle}>{siteUpdateData.name || 'Site Update'}</Text>
+          <Text style={styles.detailsLocation}>Location : {siteUpdateData.location}</Text>
+          <Text style={styles.detailsDate}>Date: {formatDate(siteUpdateData.createdAt)}</Text>
+        </View>
+      )}
+
       <FlatList
-        data={imageCategories}
+        data={images}
         renderItem={renderGridItem}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={imagesLoading}
+            onRefresh={refetch}
+            tintColor="#A855F7"
+            colors={["#A855F7"]}
+          />
+        }
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No images found</Text>
+          </View>
+        )}
       />
 
       <Modal
@@ -82,7 +108,7 @@ export default function ConstructionImages() {
             </View>
           </Pressable>
           <FlatList
-            data={imageCategories}
+            data={images}
             renderItem={renderModalItem}
             keyExtractor={(item) => item.id}
             horizontal
@@ -120,7 +146,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: "#dadada",
+    borderColor: "#E5E7EB",
   },
   image: {
     width: '100%',
@@ -178,5 +204,47 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  detailsContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f8f9fa',
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB"
+  },
+  detailsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111',
+    fontFamily: 'Montserrat-SemiBoldItalic',
+    fontStyle: 'italic',
+    marginBottom: 4,
+  },
+  detailsLocation: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 2,
+    fontStyle: 'italic',
+  },
+  detailsDate: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 })

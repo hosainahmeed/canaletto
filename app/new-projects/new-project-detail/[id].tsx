@@ -9,10 +9,11 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dimensions, FlatList, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import RenderHTML from 'react-native-render-html'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
@@ -25,44 +26,48 @@ export default function NewProjectDetail() {
   const flatListRef = useRef<FlatList>(null)
   const { t } = useTranslation()
 
-  const propertyData = {
-    id: '1',
+  const projectData = useMemo(() => ({
+    id: data?.data?.id,
     name: data?.data?.title,
-    size: '1000 sqft',
+    description: data?.data?.description,
+    size: data?.data?.propertySize ? `${data.data.propertySize} sqft` : 'N/A',
     rooms: data?.data?.totalRooms,
     type_of_use: data?.data?.typeOfUse,
     property_type: data?.data?.propertyType,
     total_units: data?.data?.totalUnit,
     status: 'New Launch',
-    payment_plan: '10 Years',
-    location: 'Abu Dhabi, Yas Island',
+    location: data?.data?.location,
     image: data?.data?.images,
-    lat: 24.4941,
-    lng: 54.6077,
-  }
+    lat: data?.data?.latitude || 24.4941,
+    lng: data?.data?.longitude || 54.6077,
+    startingPrice: data?.data?.startingPrice,
+    paymentPlan: data?.data?.paymentPlan,
+    investmentOption: data?.data?.investmentOption,
+    handoverYear: data?.data?.handoverYear,
+  }), [data])
 
-  const DETAILS = [
-    { icon: propertyDetailsIcon.size, label: 'Size', value: propertyData?.size },
-    { icon: propertyDetailsIcon.rooms, label: 'Rooms', value: propertyData?.rooms },
-    { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: propertyData?.type_of_use },
-    { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: propertyData?.property_type },
-    { icon: propertyDetailsIcon.units, label: 'Total Units', value: propertyData?.total_units },
-  ]
+  const DETAILS = useMemo(() => [
+    { icon: propertyDetailsIcon.size, label: 'Size', value: projectData?.size },
+    { icon: propertyDetailsIcon.rooms, label: 'Rooms', value: projectData?.rooms || 'N/A' },
+    { icon: propertyDetailsIcon.type_of_use, label: 'Type of Use', value: projectData?.type_of_use || 'N/A' },
+    { icon: propertyDetailsIcon.property_type, label: 'Property Type', value: projectData?.property_type || 'N/A' },
+    { icon: propertyDetailsIcon.units, label: 'Total Units', value: projectData?.total_units || 'N/A' },
+  ].filter(item => item.value !== 'N/A' && item.value !== undefined && item.value !== null), [projectData])
 
-  const PROPERTY_INFO = [
-    { label: 'Starting Price', value: 'AED 2,500,000' },
-    { label: 'Payment Plan', value: '65 / 35' },
-    { label: 'Investment Options', value: 'Installments' },
-    { label: 'Handover Year', value: 'Jan 2028' },
-  ]
+  const PROPERTY_INFO = useMemo(() => [
+    { label: 'Starting Price', value: projectData?.startingPrice ? `AED ${projectData.startingPrice}` : 'N/A' },
+    { label: 'Payment Plan', value: projectData?.paymentPlan || 'N/A' },
+    { label: 'Investment Options', value: projectData?.investmentOption || 'N/A' },
+    { label: 'Handover Year', value: projectData?.handoverYear || 'N/A' },
+  ].filter(item => item.value !== 'N/A' && item.value !== undefined && item.value !== null), [projectData])
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x
     const currentIndex = Math.round(contentOffsetX / width)
     setActiveImageIndex(currentIndex)
-  }
+  }, [width])
 
-  const renderImageItem = ({ item }: { item: string }) => (
+  const renderImageItem = useCallback(({ item }: { item: string }) => (
     <View style={styles.imageContainer} >
       <Image
         source={{ uri: item || "" }}
@@ -71,7 +76,7 @@ export default function NewProjectDetail() {
         transition={300}
       />
     </View >
-  )
+  ), [])
 
   return (
     <SafeAreaViewWithSpacing>
@@ -90,10 +95,10 @@ export default function NewProjectDetail() {
         />
 
         {/* Image Carousel */}
-        {propertyData?.image?.length > 0 ? <View style={styles.carouselWrapper}>
+        {projectData?.image?.length > 0 ? <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData?.image || []}
+            data={projectData?.image || []}
             renderItem={renderImageItem}
             keyExtractor={(_, index) => `image-${index}`}
             horizontal
@@ -107,9 +112,9 @@ export default function NewProjectDetail() {
           />
 
           {/* Pagination Dots */}
-          {propertyData?.image.length > 1 && (
+          {projectData?.image.length > 1 && (
             <View style={styles.paginationContainer}>
-              {propertyData?.image.map((_: undefined, index: number) => (
+              {projectData?.image.map((_: undefined, index: number) => (
                 <View
                   key={`dot-${index}`}
                   style={[
@@ -122,11 +127,12 @@ export default function NewProjectDetail() {
           )}
         </View> : <EmptyCard color='rgba(168, 85, 247, 0.4)' title='No Image Available' />}
         <View style={{ backgroundColor: "rgba(168, 85, 247, 0.4)", padding: 8, borderRadius: 8, marginBottom: 16, width: "30%", justifyContent: "center", alignContent: "center", marginTop: 12, marginLeft: 12 }}>
-          <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{propertyData?.status}</Text>
+          <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#A855F7", textAlign: "center" }}>{projectData?.status}</Text>
         </View>
         {/* Title */}
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>{propertyData?.name}</Text>
+          <Text style={styles.propertyName}>{projectData?.name}</Text>
+          <RenderHTML source={{ html: projectData?.description || '' }} />
         </View>
         {/* Details Card */}
         <Card style={[styles.card, { width: width - 20 }]}>
@@ -164,11 +170,11 @@ export default function NewProjectDetail() {
             item={{
               icon: propertyDetailsIcon.location,
               label: 'Location',
-              value: propertyData?.location,
+              value: projectData?.location,
             }}
             isLast
           />
-          <MapModal propertyData={propertyData} setShowLargerMap={setShowLargerMap} />
+          <MapModal projectData={projectData} setShowLargerMap={setShowLargerMap} />
         </Card>
         <Button
           title={t('action.get_insights')}
@@ -180,9 +186,12 @@ export default function NewProjectDetail() {
           }}
           icon={<Image source={IMAGE.thumb} style={{ width: 16, height: 16 }} />}
           iconPosition='right'
-          onPress={() => {
-            router.push(`/new-projects/express-interest/${propertyData?.id}` as any)
-          }}
+          onPress={useCallback(() => {
+            router.push({
+              pathname: "/new-projects/express-interest/[id]",
+              params: { id: projectData?.id }
+            })
+          }, [router, projectData?.id])}
         />
         <InsightsDownSection titleColor='#A855F7' icon={IMAGE.newProject} title="New Projects" description="Posted on 14 January 2026" />
         <View style={styles.bottomSpacing} />
@@ -195,7 +204,7 @@ export default function NewProjectDetail() {
         presentationStyle="fullScreen"
         onRequestClose={() => setShowLargerMap(false)}
       >
-        {propertyData?.lat && propertyData?.lng && <View style={styles.modalContainer}>
+        {projectData?.lat && projectData?.lng && <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -210,8 +219,8 @@ export default function NewProjectDetail() {
             provider={PROVIDER_GOOGLE}
             style={styles.fullScreenMap}
             initialRegion={{
-              latitude: propertyData?.lat || 0,
-              longitude: propertyData?.lng || 0,
+              latitude: projectData?.lat || 0,
+              longitude: projectData?.lng || 0,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -222,11 +231,11 @@ export default function NewProjectDetail() {
           >
             <Marker
               coordinate={{
-                latitude: propertyData?.lat,
-                longitude: propertyData?.lng,
+                latitude: projectData?.lat,
+                longitude: projectData?.lng,
               }}
-              title={propertyData?.name}
-              description={propertyData?.location}
+              title={projectData?.name}
+              description={projectData?.location}
             />
           </MapView>
         </View>}
@@ -235,7 +244,7 @@ export default function NewProjectDetail() {
   )
 }
 
-const DetailRow = ({ item, isLast }: any) => (
+const DetailRow = React.memo(({ item, isLast }: any) => (
   <View style={[styles.row, !isLast && styles.rowDivider]}>
     <Image source={item.icon} style={styles.rowIcon} />
     <View style={styles.rowText}>
@@ -243,7 +252,7 @@ const DetailRow = ({ item, isLast }: any) => (
       <Text style={styles.rowValue}>{item.value}</Text>
     </View>
   </View>
-)
+))
 
 /* ---------- Styles ---------- */
 
@@ -309,6 +318,7 @@ const styles = StyleSheet.create({
     color: '#111',
     fontFamily: 'Montserrat-SemiBoldItalic',
     fontStyle: 'italic',
+    marginBottom: 4
   },
 
   card: {

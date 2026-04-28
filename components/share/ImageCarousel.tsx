@@ -1,6 +1,7 @@
 import { Image } from 'expo-image'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from 'react-native'
+import EmptyCard from './EmptyCard'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
@@ -44,7 +45,7 @@ export default React.memo(function ImageCarousel({ images }: { images: string[] 
         ref={flatListRef}
         data={images}
         renderItem={renderImageItem}
-        keyExtractor={(item, index) => `image-${index}`}
+        keyExtractor={(_, index) => `image-${index}`}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -53,6 +54,13 @@ export default React.memo(function ImageCarousel({ images }: { images: string[] 
         snapToInterval={width}
         decelerationRate="fast"
         bounces={false}
+        ListEmptyComponent={() => {
+          return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <EmptyCard color='#cdcdcd' title='Image Not Found!' />
+            </View>
+          )
+        }}
       />
       {/* Pagination Dots */}
       {images.length > 1 && (

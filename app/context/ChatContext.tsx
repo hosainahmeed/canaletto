@@ -13,6 +13,8 @@ interface ChatContextType {
   onNewMessage: (callback: (message: ChatMessage) => void) => () => void;
   onTicketUpdated: (callback: (ticket: SupportTicket) => void) => () => void;
   markSeen: (ticketId: string) => Promise<void>;
+  ticketData: any,
+  setTickData: any
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -32,6 +34,7 @@ interface ChatProviderProps {
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [ticketData, setTickData] = useState([])
 
   const initializeSocket = async () => {
     try {
@@ -176,7 +179,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     sendMessage,
     onNewMessage,
     onTicketUpdated,
-    markSeen
+    markSeen,
+    ticketData,
+    setTickData
   };
 
   return (

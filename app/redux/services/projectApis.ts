@@ -17,9 +17,17 @@ const projectApis = baseApis.injectEndpoints({
       }),
       providesTags: ["project"]
     }),
+    createInterestedClient: builder.mutation({
+      query: (data) => ({
+        url: "/interested-client/create",
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
   })
 })
 
-export const { useGetAlProjectQuery, useGetSingleProjectQuery } = projectApis
+export const { useGetAlProjectQuery, useGetSingleProjectQuery, useCreateInterestedClientMutation } = projectApis
 
 export default projectApis

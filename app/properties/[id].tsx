@@ -1,6 +1,7 @@
 import { propertyDetailsIcon } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
+import EmptyCard from '@/components/share/EmptyCard'
 import HelpSection from '@/components/share/HelpSection'
 import ImageCarousel from '@/components/share/ImageCarousel'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
@@ -190,7 +191,6 @@ export default function PropertyByID() {
       </SafeAreaViewWithSpacing>
     )
   }
-
   return (
     <ErrorBoundary>
       <SafeAreaViewWithSpacing>
@@ -204,9 +204,9 @@ export default function PropertyByID() {
           />
 
           {/* Only render carousel if images exist */}
-          {Array.isArray(data?.data?.images) && data?.data?.images.length > 0 && (
+          {Array.isArray(data?.data?.images) && data?.data?.images.length > 0 ? (
             <ImageCarousel images={data?.data?.images} />
-          )}
+          ) : <EmptyCard color='#cdcdcd' title='Image not found' />}
 
           <View style={styles.titleWrapper}>
             <Text style={styles.propertyName}>{propertyData.name}</Text>

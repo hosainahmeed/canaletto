@@ -1,19 +1,69 @@
 
+import { useGetMyPropertyImageQuery } from '@/app/redux/services/siteUpdateApis'
 import { IMAGE } from '@/assets/images/image.index'
 import Card from '@/components/cards/Card'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import FilterHeader from '@/components/share/FilterHeader'
 import HelpSection from '@/components/share/HelpSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
+import { SiteUpdateType } from '@/types/siteUpdateType'
+import { formatDate } from '@/utils/dateUtils'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import React from 'react'
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useMemo } from 'react'
+import { Dimensions, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
 const { width } = Dimensions.get('window')
 
 export default function SiteUpdates() {
   const router = useRouter()
+  const { id } = useLocalSearchParams() as { id: string }
+  const { data: siteUpdateData, isLoading, refetch } = useGetMyPropertyImageQuery(id, { skip: !id })
+  const siteUpdates: SiteUpdateType[] = useMemo(() => siteUpdateData?.data?.data || [], [siteUpdateData])
+  const renderHeader = () => {
+    return (
+      <FilterHeader
+        filterOptions={[
+          { label: 'Last 24 Hours', value: '1d' },
+          { label: 'Last 3 Days', value: '3d' },
+          { label: 'Last Week', value: '1w' },
+          { label: 'Last Month', value: '1m' },
+        ]}
+      />
+    )
+  }
+  const renderSiteUpdateItem = useCallback(({ item }: { item: SiteUpdateType }) => {
+    const handleViewImages = () => {
+      router.push({
+        pathname: "/properties/site-updates/construction-images/[id]",
+        params: { id: item?.id }
+      })
+    }
+
+    return (
+      <Card style={styles.fileCard}>
+        <View style={styles.fileLeft}>
+          <Image source={item?.image ? { uri: item.image } : IMAGE.image_placeholder} style={styles.pdfIcon} />
+          <View>
+            <Text style={styles.fileTitle}>
+              {item?.location || 'Site Update'}
+            </Text>
+            <Text style={styles.fileDate}>
+              {formatDate(item?.createdAt)}
+            </Text>
+            {/* <Text style={styles.propertyName}>
+              {item?.property?.name}
+            </Text> */}
+          </View>
+        </View>
+        <View style={styles.fileActions}>
+          <Pressable onPress={handleViewImages}>
+            <Image source={IMAGE.eye} style={styles.actionIcon} />
+          </Pressable>
+        </View>
+      </Card>
+    )
+  }, [router])
   return (
     <SafeAreaViewWithSpacing>
       <BackHeaderButton
@@ -26,33 +76,29 @@ export default function SiteUpdates() {
         }
       />
 
-      <FilterHeader
-        filterOptions={[
-          { label: 'Last 24 Hours', value: '1d' },
-          { label: 'Last 3 Days', value: '3d' },
-          { label: 'Last Week', value: '1w' },
-          { label: 'Last Month', value: '1m' },
-        ]}
-      />
-      <Card style={styles.fileCard}>
-        <View style={styles.fileLeft}>
-          <Image source={IMAGE.image_placeholder} style={styles.pdfIcon} />
-          <View>
-            <Text style={styles.fileTitle}>
-              Outdoor Tiling
-            </Text>
-            <Text style={styles.fileDate}>
-              08:14 AM 25 Jan 2025
-            </Text>
-          </View>
-        </View>
 
-        <View style={styles.fileActions}>
-          <Pressable onPress={() => router.push("/properties/site-updates/construction-images/[id]")}>
-            <Image source={IMAGE.eye} style={styles.actionIcon} />
-          </Pressable>
-        </View>
-      </Card>
+      <FlatList
+        data={siteUpdates}
+        keyExtractor={(item) => item?.id}
+        renderItem={renderSiteUpdateItem}
+        ListHeaderComponent={renderHeader}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
+            tintColor="#A855F7"
+            colors={["#A855F7"]}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+            <Text style={styles.emptyText}>No site updates found</Text>
+          </View>
+        )}
+      />
+
       <HelpSection />
     </SafeAreaViewWithSpacing>
   )
@@ -84,6 +130,7 @@ const styles = StyleSheet.create({
   fileTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontStyle: "italic"
   },
 
   fileDate: {
@@ -98,7 +145,17 @@ const styles = StyleSheet.create({
   },
 
   actionIcon: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
+  },
+  propertyName: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 })

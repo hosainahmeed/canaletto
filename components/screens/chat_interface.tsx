@@ -109,6 +109,11 @@ export default function ChatInterface() {
   const [imageUri, setImageUri] = useState<string | null>(null)
   const [chatMessages, setChatMessages] = useState<any[]>([])
   const [hasFetched, setHasFetched] = useState(false)
+  // we have to remove this unoptimise code before going live
+  useEffect(() => {
+    refetch()
+  }, [onNewMessage])
+
 
   useEffect(() => {
     if (id && !hasFetched) {
@@ -143,7 +148,6 @@ export default function ChatInterface() {
   useEffect(() => {
     const handleNewMessage = (message: ChatMessage) => {
       setChatMessages(prev => {
-        // Remove optimistic message if it exists and add the real message
         const filtered = prev.filter(msg => !msg.isOptimistic || msg.message !== message.message)
         return [message, ...filtered]
       })
@@ -158,7 +162,6 @@ export default function ChatInterface() {
   }, [id, onNewMessage]);
 
   const sendMessageHandler = useCallback(async () => {
-    if (!message.trim() && !imageUri) return
 
     // Create optimistic message
     const optimisticMessage = {
@@ -166,8 +169,8 @@ export default function ChatInterface() {
       ticketId: id as string,
       senderId: profileData?.data?.id || '',
       senderRole: 'CLIENT',
-      message: message.trim(),
-      attachments: localPreviewUri,
+      ...message.trim() && { message: message.trim() },
+      ...localPreviewUri && { attachments: localPreviewUri },
       senderName: profileData?.data?.firstName || 'You',
       senderProfileImage: profileData?.data?.profileImage || '',
       isSeen: false,
@@ -230,7 +233,7 @@ export default function ChatInterface() {
     )
   )
 
-  const canSend = message.trim().length > 0 || !!imageUri
+  const canSend = localPreviewUri ? message.trim().length > 0 : !!imageUri
   if (isLoading) {
     return <ActivityIndicator />
   }
@@ -291,7 +294,7 @@ export default function ChatInterface() {
 
           <TouchableOpacity
             onPress={sendMessageHandler}
-            disabled={!canSend}
+            // disabled={!canSend}
             style={[styles.sendButton, canSend && styles.sendButtonActive]}
             hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >

@@ -1,13 +1,15 @@
+import { useCreateInterestedClientMutation } from '@/app/redux/services/projectApis'
 import { IMAGE, modalIcon } from '@/assets/images/image.index'
 import CustomInput from '@/components/CustomInput'
 import KeyboardAvoider from '@/components/safe-area/KeyboardAvoider'
 import SafeAreaViewWithSpacing, { SafeAreaEdge } from '@/components/safe-area/SafeAreaViewWithSpacing'
 import InsightsDownSection from '@/components/share/InsightsDownSection'
 import MessageModal from '@/components/share/MessageModal'
+import { useToast } from '@/components/toast/useToast'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import Button from '@/components/ui/button'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import {
   ScrollView,
@@ -27,21 +29,23 @@ const createModalMessage = (
   confirmText,
 })
 
-export default function ExpressInterest({ id }: { id: string }) {
+export default function ExpressInterest() {
   const router = useRouter()
   const [isVisible, setIsVisible] = useState(false)
+  const [createInterest] = useCreateInterestedClientMutation()
   const [modalMessage, setModalMessage] = useState<{
     icon: React.ReactNode
     title: string
     message: string
     confirmText: string
   } | null>(null)
+  const toast = useToast()
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [message, setMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { id } = useLocalSearchParams() as { id: string }
 
   const validateForm = () => {
     if (!fullName.trim()) {
@@ -68,40 +72,50 @@ export default function ExpressInterest({ id }: { id: string }) {
     return null
   }
 
-  const handleSubmit = () => {
-    if (isSubmitting) return
+  const handleSubmit = async () => {
+    try {
+      const error = validateForm()
 
-    const error = validateForm()
+      if (error) {
+        setModalMessage(
+          createModalMessage('Form Incomplete', error)
+        )
+        setIsVisible(true)
+        return
+      }
 
-    if (error) {
+      const data = {
+        projectId: id,
+        name: fullName,
+        email: email,
+        phone: phone,
+        message: message,
+      }
+      const response = await createInterest(data).unwrap()
+
+      if (!response?.success) {
+        throw new Error(response?.message || "")
+      }
+
+
+      toast.success(response?.message)
       setModalMessage(
-        createModalMessage('Form Incomplete', error)
+        createModalMessage(
+          'Thank you for your interest!',
+          'Please allow 24 - 48 hours for your report to be prepared. You’ll be redirected to your profile shortly.',
+          'Back to Projects'
+        )
       )
+      setEmail("")
+      setFullName("")
+      setPhone("")
+      setMessage("")
+
       setIsVisible(true)
-      return
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || "Something went wrong while submit interest"
+      toast.error(errorMessage)
     }
-
-    setIsSubmitting(true)
-
-    // For now — console log only
-    console.log('Express Interest Data 👉', {
-      id,
-      fullName: fullName.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      message: message.trim(),
-    })
-
-    setModalMessage(
-      createModalMessage(
-        'Thank you for your interest!',
-        'Please allow 24 - 48 hours for your report to be prepared. You’ll be redirected to your profile shortly.',
-        'Back to Projects'
-      )
-    )
-
-    setIsVisible(true)
-    setIsSubmitting(false)
   }
   return (
     <SafeAreaViewWithSpacing edges={[SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]}>
@@ -175,6 +189,7 @@ export default function ExpressInterest({ id }: { id: string }) {
           visible={isVisible}
           onClose={() => setIsVisible(false)}
           onConfirm={() => setIsVisible(false)}
+          actionType="success"
           message={{
             // icon: modalMessage?.icon || <Image source={modalIcon.success} style={{ width: 60, height: 60 }} />,
             title: modalMessage?.title || '',

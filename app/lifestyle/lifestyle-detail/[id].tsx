@@ -1,50 +1,29 @@
+import { useGetLifestyleByIdQuery } from '@/app/redux/services/lifestyleApis'
 import { IMAGE } from '@/assets/images/image.index'
 import SafeAreaViewWithSpacing from '@/components/safe-area/SafeAreaViewWithSpacing'
 import HelpSection from '@/components/share/HelpSection'
 import InsightsDownSection from '@/components/share/InsightsDownSection'
 import BackHeaderButton from '@/components/ui/BackHeaderButton'
-import { Ionicons } from '@expo/vector-icons'
+import { lifestyleTypes } from '@/types/lifestyleTypes'
+import { formatDate } from '@/utils/dateUtils'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import React, { useRef, useState } from 'react'
-import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Dimensions, FlatList, Linking, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native'
+import RenderHTML from 'react-native-render-html'
 
 const { width, height } = Dimensions.get('window')
 const IMAGE_HEIGHT = Math.min(height * 0.3, 250)
-export default function LifestyleDetail({ id }: { id: string }) {
+export default function LifestyleDetail() {
   const router = useRouter()
+  const { id } = useLocalSearchParams() as { id: string }
+  const { data: lifestyleData } = useGetLifestyleByIdQuery(id, { skip: !id })
+  const lifestyleDetails: lifestyleTypes = useMemo(() => lifestyleData?.data, [])
+  const { t } = useTranslation()
+
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
-
-  const propertyData = {
-    id: '1',
-    name: 'Azure Beach Club & Resort',
-    size: '1000 sqft',
-    rooms: 3,
-    type_of_use: 'Residential',
-    property_type: 'Villa',
-    total_units: 5,
-    status: 'Resorts',
-    payment_plan: '10 Years',
-    location: 'Abu Dhabi, Yas Island',
-    rating: 4.5,
-    to_know: [
-      'Best Time to Visit',
-      'Smart casual / Beachwear at pool area',
-      'Yes, advance booking recommended',
-    ],
-    about: `
-    Experience the epitome of luxury at Azure Beach Club & Resort, where pristine white sands meet crystal-clear waters. This exclusive beachfront destination offers world-class amenities, from infinity pools overlooking the Arabian Gulf to private cabanas with personalized service.
-
-    Indulge in Mediterranean-inspired cuisine at our award-winning restaurant, unwind at the spa, or simply relax on our sun-drenched terraces. Whether you're seeking a romantic escape or a day of ultimate relaxation, Azure provides an unforgettable experience.
-    `,
-    image: [
-      'https://www.dp.ae/pictures/a0c427ee-528d-4611-818a-9c12b76d5e45Image07_Banner_1920x800-min.jpg',
-      'https://dubaiproperties.org.in/wp-content/uploads/2023/01/luxury-property-in-dubai-scaled.jpg',
-    ],
-    lat: 24.4941,
-    lng: 54.6077,
-  }
 
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -71,7 +50,7 @@ export default function LifestyleDetail({ id }: { id: string }) {
         contentContainerStyle={styles.scrollContent}
       >
         <BackHeaderButton
-          title="New Projects"
+          title={t('page_title.lifestyle')}
           titleFontWeight={800}
           titleFontFamily="Montserrat-Italic"
           titleStyle={{ fontStyle: 'italic' }}
@@ -84,7 +63,7 @@ export default function LifestyleDetail({ id }: { id: string }) {
         <View style={styles.carouselWrapper}>
           <FlatList
             ref={flatListRef}
-            data={propertyData.image}
+            data={lifestyleDetails?.images || []}
             renderItem={renderImageItem}
             keyExtractor={(item, index) => `image-${index}`}
             horizontal
@@ -98,9 +77,9 @@ export default function LifestyleDetail({ id }: { id: string }) {
           />
 
           {/* Pagination Dots */}
-          {propertyData.image.length > 1 && (
+          {lifestyleDetails?.images?.length > 1 && (
             <View style={styles.paginationContainer}>
-              {propertyData.image.map((_, index) => (
+              {lifestyleDetails?.images?.map((_, index) => (
                 <View
                   key={`dot-${index}`}
                   style={[
@@ -114,25 +93,25 @@ export default function LifestyleDetail({ id }: { id: string }) {
         </View>
         <View style={{ paddingHorizontal: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ backgroundColor: "rgba(212, 183, 133, 0.4)", padding: 8, borderRadius: 8, marginBottom: 16, width: "30%", justifyContent: "center", alignContent: "center", marginTop: 12 }}>
-            <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#d4b785ff", textAlign: "center" }}>{propertyData.status}</Text>
+            <Text style={{ fontSize: 12, fontFamily: "Montserrat-SemiBoldItalic", fontWeight: '600', color: "#d4b785ff", textAlign: "center" }}>{lifestyleDetails?.type}</Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 }}>
+          {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 }}>
             <Ionicons name='star' size={20} color="#FE9A00" />
-            <Text style={{ fontSize: 16, fontFamily: "Montserrat-SemiBold", fontWeight: '600', color: "#FE9A00" }}>{propertyData.rating}</Text>
-          </View>
+            <Text style={{ fontSize: 16, fontFamily: "Montserrat-SemiBold", fontWeight: '600', color: "#FE9A00" }}>{lifestyleDetails?.id}</Text>
+          </View> */}
         </View>
 
         {/* Title */}
         <View style={styles.titleWrapper}>
-          <Text numberOfLines={2} style={styles.propertyName}>{propertyData.name}</Text>
-          <Text numberOfLines={2} style={styles.rowValue}>{propertyData.location}</Text>
+          <Text numberOfLines={2} style={styles.propertyName}>{lifestyleDetails?.title}</Text>
+          <Text numberOfLines={2} style={styles.rowValue}>{lifestyleDetails?.location}</Text>
         </View>
 
         <View style={styles.titleWrapper}>
           <Text numberOfLines={2} style={styles.propertyName}>About</Text>
         </View>
         <View style={styles.titleWrapper}>
-          <Text style={styles.propertyDescription}>{propertyData?.about}</Text>
+          <RenderHTML source={{ html: lifestyleDetails?.description || '' }} />
         </View>
         <View style={styles.titleWrapper}>
           <Text numberOfLines={2} style={styles.propertyName}>Good to Know</Text>
@@ -140,7 +119,7 @@ export default function LifestyleDetail({ id }: { id: string }) {
 
         <View style={{ paddingHorizontal: 16 }}>
           {
-            propertyData?.to_know?.map((item: string, index: number) => (
+            lifestyleDetails?.goodToKnow?.map((item: string, index: number) => (
               <View key={index} style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                 <Image source={IMAGE.check} style={{ width: 20, height: 20, marginRight: 8 }} />
                 <Text style={styles.propertyDescription}>{item}</Text>
@@ -148,8 +127,8 @@ export default function LifestyleDetail({ id }: { id: string }) {
             ))
           }
         </View>
-        <HelpSection title="Interested in visiting or booking?" description="Visit their official Site for more details." icon={IMAGE.share_icon} onPress={() => { }} />
-        <InsightsDownSection titleColor='#B08D59' icon={IMAGE.lifestyle_icon} title="Lifestyle" description="Posted on 14 January 2026" onPress={() => { }} />
+        <HelpSection title="Interested in visiting or booking?" description="Visit their official Site for more details." icon={IMAGE.share_icon} onPress={() => Linking.openURL(lifestyleDetails?.website || '')} />
+        <InsightsDownSection titleColor='#B08D59' icon={IMAGE.lifestyle_icon} title={t('page_title.lifestyle')} description={`Posted on ${formatDate(lifestyleDetails?.createdAt)}`} onPress={() => { }} />
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>

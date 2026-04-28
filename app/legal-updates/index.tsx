@@ -5,7 +5,7 @@ import BackHeaderButton from '@/components/ui/BackHeaderButton'
 import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet, Text, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { useGetLegalUpdateQuery } from '../redux/services/legalUpdateApis'
 
 export default function LegalUpdates() {
@@ -13,7 +13,7 @@ export default function LegalUpdates() {
   const { t } = useTranslation()
   const [filter, setFilter] = useState('')
   const [searchText, setSearchText] = useState('')
-  const { data: legalUpdates, isLoading: isLegalUpdatesLoading } = useGetLegalUpdateQuery({ frame: filter, searchTerm: searchText })
+  const { data: legalUpdates, isLoading: isLegalUpdatesLoading, refetch } = useGetLegalUpdateQuery({ frame: filter, searchTerm: searchText })
 
   const legalUpdatesData = useMemo(() => legalUpdates?.data || [], [legalUpdates])
 
@@ -80,6 +80,7 @@ export default function LegalUpdates() {
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         windowSize={7}
+        refreshControl={<RefreshControl refreshing={isLegalUpdatesLoading} onRefresh={refetch} />}
       />
     </SafeAreaViewWithSpacing>
   )
